@@ -140,10 +140,9 @@ class MyApplication : Application() {
                         Log.d(TAG, "loadPdfFromUrlSinglePage: Loaded ${bytes.size} bytes")
 
                         pdfView.fromBytes(bytes)
-                            .pages(0)
                             .spacing(0)
                             .swipeHorizontal(false)
-                            .enableSwipe(false)
+                            .enableSwipe(false) // Không cho vuốt sang trang khác
                             .onError { t ->
                                 progressBar.visibility = View.INVISIBLE
                                 Log.e(TAG, "loadPdfFromUrlSinglePage: ${t.message}")
@@ -154,9 +153,15 @@ class MyApplication : Application() {
                             }
                             .onLoad { nbPages ->
                                 progressBar.visibility = View.INVISIBLE
+
+                                // Hiển thị tổng số trang đúng
                                 pagesTv?.text = "$nbPages"
+
+                                // Chỉ hiển thị trang đầu tiên (sau khi đã load xong)
+                                pdfView.jumpTo(0, true)
                             }
                             .load()
+
                     }
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) {
