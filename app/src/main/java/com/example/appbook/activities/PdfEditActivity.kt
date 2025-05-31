@@ -1,15 +1,11 @@
-package com.example.appbook
+package com.example.appbook.activities
 
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.os.Bundle
-import android.renderscript.Sampler
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.appbook.databinding.ActivityPdfEditBinding
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -74,7 +70,7 @@ class PdfEditActivity : AppCompatActivity() {
 
         val ref = FirebaseDatabase.getInstance().getReference("Books")
         ref.child(bookId)
-            .addListenerForSingleValueEvent(object : ValueEventListener{
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     //get book info
                     selectedCategoryId = snapshot.child("categoryId").value.toString()
@@ -89,7 +85,7 @@ class PdfEditActivity : AppCompatActivity() {
                     Log.d(TAG, "onDataChange: Loading book category info")
                     val refBookCategory = FirebaseDatabase.getInstance().getReference("Categories")
                     refBookCategory.child(selectedCategoryId)
-                        .addListenerForSingleValueEvent(object : ValueEventListener{
+                        .addListenerForSingleValueEvent(object : ValueEventListener {
                             override fun onDataChange(snapshot: DataSnapshot) {
                                 //get category
                                 val category = snapshot.child("category").value
@@ -194,7 +190,7 @@ class PdfEditActivity : AppCompatActivity() {
         categoryIdArrayList = ArrayList()
 
         val ref = FirebaseDatabase.getInstance().getReference("Categories")
-        ref.addListenerForSingleValueEvent(object : ValueEventListener{
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 //clear list before starting adding data into them
                 categoryIdArrayList.clear()

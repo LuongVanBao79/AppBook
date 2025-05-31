@@ -1,15 +1,11 @@
-package com.example.appbook
+package com.example.appbook.activities
 
 import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
-import androidx.activity.ComponentDialog
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.appbook.databinding.ActivityRegisterBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -17,7 +13,7 @@ import com.google.firebase.database.FirebaseDatabase
 class RegisterActivity : AppCompatActivity() {
 
     // view binding
-    private lateinit var binding:ActivityRegisterBinding
+    private lateinit var binding: ActivityRegisterBinding
 
     // firebase auth
     private lateinit var firebaseAuth: FirebaseAuth
@@ -110,7 +106,7 @@ class RegisterActivity : AppCompatActivity() {
 
         val hashMap: HashMap<String, Any?> = HashMap()
         hashMap["uid"] = uid
-        hashMap["email"] = null
+        hashMap["email"] = email
         hashMap["name"] = name
         hashMap["profileImage"] = ""
         hashMap["userType"] = "user"

@@ -1,12 +1,19 @@
-package com.example.appbook
+package com.example.appbook.activities
 
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.appbook.databinding.ActivityPdfViewBinding
-import com.google.firebase.database.*
-import okhttp3.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import java.io.IOException
 
 class PdfViewActivity : AppCompatActivity() {

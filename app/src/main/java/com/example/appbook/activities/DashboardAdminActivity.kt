@@ -1,13 +1,14 @@
-package com.example.appbook
+package com.example.appbook.activities
 
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.example.appbook.activities.MainActivity
+import com.example.appbook.models.ModelCategory
+import com.example.appbook.activities.PdfAddActivity
+import com.example.appbook.adapters.AdapterCategory
 import com.example.appbook.databinding.ActivityDashboardAdminBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -40,7 +41,7 @@ class DashboardAdminActivity : AppCompatActivity() {
         loadCategories()
 
         //search
-        binding.searchEt.addTextChangedListener(object : TextWatcher{
+        binding.searchEt.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
             }
@@ -77,6 +78,11 @@ class DashboardAdminActivity : AppCompatActivity() {
             startActivity(Intent(this, PdfAddActivity::class.java))
         }
 
+        //handle click, open profile
+        binding.profileBtn.setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
+
     }
 
     private fun loadCategories() {
@@ -85,7 +91,7 @@ class DashboardAdminActivity : AppCompatActivity() {
 
         //get all categories from firebase database ... Firebase DB > Categories
         val ref = FirebaseDatabase.getInstance().getReference("Categories")
-        ref.addValueEventListener(object : ValueEventListener{
+        ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 //clear list before starting adding data into it
                 categoryArrayList.clear()

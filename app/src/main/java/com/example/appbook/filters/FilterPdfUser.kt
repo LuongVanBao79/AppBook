@@ -1,8 +1,8 @@
-package com.example.appbook
-
+package com.example.appbook.filters
 
 import android.widget.Filter
-import okhttp3.internal.notify
+import com.example.appbook.adapters.AdapterPdfUser
+import com.example.appbook.models.ModelPdf
 
 class FilterPdfUser: Filter {
     //arraylist in which we want to search

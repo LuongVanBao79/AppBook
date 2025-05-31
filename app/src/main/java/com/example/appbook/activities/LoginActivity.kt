@@ -1,14 +1,12 @@
-package com.example.appbook
+package com.example.appbook.activities
 
 import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.example.appbook.activities.RegisterActivity
 import com.example.appbook.databinding.ActivityLoginBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -110,7 +108,7 @@ class LoginActivity : AppCompatActivity() {
 
         var ref = FirebaseDatabase.getInstance().getReference("Users")
         ref.child(firebaseUser.uid)
-            .addListenerForSingleValueEvent(object : ValueEventListener{
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     progressDialog.dismiss()
                     // get user type user or admin
@@ -120,7 +118,12 @@ class LoginActivity : AppCompatActivity() {
                         finish()
                     }
                     else if(userType == "admin"){
-                        startActivity(Intent(this@LoginActivity, DashboardAdminActivity::class.java))
+                        startActivity(
+                            Intent(
+                                this@LoginActivity,
+                                DashboardAdminActivity::class.java
+                            )
+                        )
                         finish()
                     }
                 }

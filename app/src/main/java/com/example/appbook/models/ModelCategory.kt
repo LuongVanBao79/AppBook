@@ -1,4 +1,4 @@
-package com.example.appbook
+package com.example.appbook.models
 
 class ModelCategory {
 

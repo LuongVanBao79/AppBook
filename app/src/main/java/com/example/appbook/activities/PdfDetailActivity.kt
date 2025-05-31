@@ -1,4 +1,4 @@
-package com.example.appbook
+package com.example.appbook.activities
 
 import android.Manifest
 import android.app.ProgressDialog
@@ -11,9 +11,16 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.example.appbook.Constants
+import com.example.appbook.MyApplication
+import com.example.appbook.activities.PdfViewActivity
+import com.example.appbook.R
 import com.example.appbook.databinding.ActivityPdfDetailBinding
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import java.io.FileOutputStream
 
@@ -63,7 +70,7 @@ class PdfDetailActivity : AppCompatActivity() {
             checkIsFavorite()
         }
 
-        MyApplication.incrementBookViewCount(bookId)
+        MyApplication.Companion.incrementBookViewCount(bookId)
         loadBookDetails()
 
         //handle back button click, go back
@@ -104,7 +111,7 @@ class PdfDetailActivity : AppCompatActivity() {
             } else {
                 //user is logged in, we can do favorite functionality
                 if (isInMyFavorite) {
-                    removeFromFavorite()
+                    MyApplication.removeFromFavorite(this, bookId)
                 } else {
                     addToFavorite()
                 }
@@ -215,11 +222,11 @@ class PdfDetailActivity : AppCompatActivity() {
                     bookUrl = "${snapshot.child("url").value}"
                     val viewsCount = "${snapshot.child("viewsCount").value}"
 
-                    val date = MyApplication.formatTimeStamp(timestamp.toLong())
+                    val date = MyApplication.Companion.formatTimeStamp(timestamp.toLong())
 
-                    MyApplication.loadCategory(categoryId, binding.categoryTv)
-                    MyApplication.loadPdfFromUrlSinglePage(bookUrl, bookTitle, binding.pdfView, binding.progressBar, binding.pagesTv)
-                    MyApplication.loadPdfSizeFromCloudinary(bookUrl, binding.sizeTv)
+                    MyApplication.Companion.loadCategory(categoryId, binding.categoryTv)
+                    MyApplication.Companion.loadPdfFromUrlSinglePage(bookUrl, bookTitle, binding.pdfView, binding.progressBar, binding.pagesTv)
+                    MyApplication.Companion.loadPdfSizeFromCloudinary(bookUrl, binding.sizeTv)
 
                     binding.titleTv.text = bookTitle
                     binding.descriptionTv.text = description
@@ -280,19 +287,4 @@ class PdfDetailActivity : AppCompatActivity() {
             }
     }
 
-    private fun removeFromFavorite() {
-        Log.d(TAG, "removeFromFavorite: Removing from fav")
-
-        val ref = FirebaseDatabase.getInstance().getReference("Users")
-        ref.child(firebaseAuth.uid!!).child("Favorites").child(bookId)
-            .removeValue()
-            .addOnSuccessListener {
-                Log.d(TAG, "removeFromFavorite: Removed from fav")
-                Toast.makeText(this, "Removed from favorite", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener { e ->
-                Log.d(TAG, "removeFromFavorite: Failed to remove from fav due to ${e.message}")
-                Toast.makeText(this, "Failed to remove from fav due to ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-    }
 }

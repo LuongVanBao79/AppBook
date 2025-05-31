@@ -1,16 +1,23 @@
-package com.example.appbook
+package com.example.appbook.activities
 
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
+import com.example.appbook.BooksUserFragment
+import com.example.appbook.activities.MainActivity
+import com.example.appbook.models.ModelCategory
 import com.example.appbook.databinding.ActivityDashboardUserBinding
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class DashboardUserActivity : AppCompatActivity() {
 
@@ -42,7 +49,13 @@ class DashboardUserActivity : AppCompatActivity() {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
+
+        //handle click, open profile
+        binding.profileBtn.setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
     }
+
 
     private fun setupWithViewPagerAdapter(viewPager: ViewPager) {
         viewPagerAdapter = ViewPagerAdapter(
@@ -56,7 +69,7 @@ class DashboardUserActivity : AppCompatActivity() {
 
         // Các category mặc định
         val modelAll = ModelCategory("All", "01", 1, "")
-        val modelMostViewed = ModelCategory( "Most Viewed","02", 1, "")
+        val modelMostViewed = ModelCategory("Most Viewed", "02", 1, "")
         val modelMostDownloaded = ModelCategory("Most Downloaded", "03", 1, "")
 
         // Thêm vào danh sách
@@ -66,15 +79,15 @@ class DashboardUserActivity : AppCompatActivity() {
 
         // Thêm các fragment mặc định
         viewPagerAdapter.addFragment(
-            BooksUserFragment.newInstance(modelAll.id, modelAll.category, modelAll.uid),
+            BooksUserFragment.Companion.newInstance(modelAll.id, modelAll.category, modelAll.uid),
             modelAll.category
         )
         viewPagerAdapter.addFragment(
-            BooksUserFragment.newInstance(modelMostViewed.id, modelMostViewed.category, modelMostViewed.uid),
+            BooksUserFragment.Companion.newInstance(modelMostViewed.id, modelMostViewed.category, modelMostViewed.uid),
             modelMostViewed.category
         )
         viewPagerAdapter.addFragment(
-            BooksUserFragment.newInstance(modelMostDownloaded.id, modelMostDownloaded.category, modelMostDownloaded.uid),
+            BooksUserFragment.Companion.newInstance(modelMostDownloaded.id, modelMostDownloaded.category, modelMostDownloaded.uid),
             modelMostDownloaded.category
         )
 
@@ -87,7 +100,7 @@ class DashboardUserActivity : AppCompatActivity() {
                     if (model != null) {
                         categoryArrayList.add(model)
                         viewPagerAdapter.addFragment(
-                            BooksUserFragment.newInstance(model.id, model.category, model.uid),
+                            BooksUserFragment.Companion.newInstance(model.id, model.category, model.uid),
                             model.category
                         )
                     }
@@ -103,6 +116,8 @@ class DashboardUserActivity : AppCompatActivity() {
         // Gán adapter cho ViewPager
         viewPager.adapter = viewPagerAdapter
     }
+
+
 
     class ViewPagerAdapter(
         fm: FragmentManager,
@@ -131,12 +146,26 @@ class DashboardUserActivity : AppCompatActivity() {
         }
     }
 
+    //this activity can be opened with or without login, so hide logout and profile button when user not logged in
+
     private fun checkUser() {
         val firebaseUser = firebaseAuth.currentUser
         if (firebaseUser == null) {
+            //not logged in, user can stay in user dashboard without login too
             binding.subTitleTv.text = "Not Logged In"
+
+            //hide profile, logout
+            binding.profileBtn.visibility = View.GONE
+            binding.logoutBtn.visibility = View.GONE
         } else {
-            binding.subTitleTv.text = firebaseUser.email
+            //logged in, get and show user info
+            val email = firebaseUser.email
+            //set to textview of toolbar
+            binding.subTitleTv.text = email
+
+            //show profile, logout
+            binding.profileBtn.visibility = View.VISIBLE
+            binding.logoutBtn.visibility = View.VISIBLE
         }
     }
 }

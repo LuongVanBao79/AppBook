@@ -1,4 +1,4 @@
-package com.example.appbook
+package com.example.appbook.adapters
 
 import android.content.Context
 import android.content.Intent
@@ -12,10 +12,13 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
+import com.example.appbook.filters.FilterCategory
+import com.example.appbook.models.ModelCategory
+import com.example.appbook.activities.PdfListAdminActivity
 import com.example.appbook.databinding.RowCategoryBinding
 import com.google.firebase.database.FirebaseDatabase
 
-class AdapterCategory : RecyclerView.Adapter<AdapterCategory.HolderCategory>, Filterable{
+class AdapterCategory : RecyclerView.Adapter<AdapterCategory.HolderCategory>, Filterable {
     private val context: Context
     public var categoryArrayList: ArrayList<ModelCategory>
     private var filterList: ArrayList<ModelCategory>

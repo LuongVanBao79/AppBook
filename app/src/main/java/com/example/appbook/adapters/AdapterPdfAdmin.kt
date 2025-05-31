@@ -1,4 +1,4 @@
-package com.example.appbook
+package com.example.appbook.adapters
 
 import android.content.Context
 import android.content.Intent
@@ -9,10 +9,14 @@ import android.widget.Filter
 import android.widget.Filterable
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
-import com.example.appbook.databinding.ActivityPdfAddBinding
+import com.example.appbook.filters.FilterPdfAdmin
+import com.example.appbook.models.ModelPdf
+import com.example.appbook.MyApplication
+import com.example.appbook.activities.PdfDetailActivity
+import com.example.appbook.activities.PdfEditActivity
 import com.example.appbook.databinding.RowPdfAdminBinding
 
-class AdapterPdfAdmin : RecyclerView.Adapter<AdapterPdfAdmin.HolderPdfAdmin>, Filterable{
+class AdapterPdfAdmin : RecyclerView.Adapter<AdapterPdfAdmin.HolderPdfAdmin>, Filterable {
 
     //Context
     private var context: Context
@@ -57,7 +61,7 @@ class AdapterPdfAdmin : RecyclerView.Adapter<AdapterPdfAdmin.HolderPdfAdmin>, Fi
         val pdfUrl = model.url
         val timestamp = model.timestamp
         // convert timestamp to dd/MM/yyy format
-        val formattedDate = MyApplication.formatTimeStamp(timestamp)
+        val formattedDate = MyApplication.Companion.formatTimeStamp(timestamp)
 
         //set data
         holder.titleTv.text = title
@@ -67,12 +71,12 @@ class AdapterPdfAdmin : RecyclerView.Adapter<AdapterPdfAdmin.HolderPdfAdmin>, Fi
         //load further details like category, pdf from url, pdf size
 
         //load category
-        MyApplication.loadCategory(categoryId, holder.categoryTv)
+        MyApplication.Companion.loadCategory(categoryId, holder.categoryTv)
         //we don't need page number here, pas null for page number || load pdf thumbnail
-        MyApplication.loadPdfFromUrlSinglePage(pdfUrl, title, holder.pdfView, holder.progressBar, null)
+        MyApplication.Companion.loadPdfFromUrlSinglePage(pdfUrl, title, holder.pdfView, holder.progressBar, null)
 
         //load pdfSize
-        MyApplication.loadPdfSizeFromCloudinary(pdfUrl, holder.sizeTv)
+        MyApplication.Companion.loadPdfSizeFromCloudinary(pdfUrl, holder.sizeTv)
 
         //handle click, show dialog with options 1 edit 2 delete
         holder.moreBtn.setOnClickListener {
@@ -89,8 +93,8 @@ class AdapterPdfAdmin : RecyclerView.Adapter<AdapterPdfAdmin.HolderPdfAdmin>, Fi
     }
 
     private fun moreOptionsDialog(
-        model: com.example.appbook.ModelPdf,
-        holder: com.example.appbook.AdapterPdfAdmin.HolderPdfAdmin
+        model: ModelPdf,
+        holder: HolderPdfAdmin
     ) {
         //get id, url, title of book
         val bookId = model.id
@@ -114,7 +118,7 @@ class AdapterPdfAdmin : RecyclerView.Adapter<AdapterPdfAdmin.HolderPdfAdmin>, Fi
                 else if(position == 1){
                     //delete is clicked
 
-                    MyApplication.deleteBook(context, bookId, bookUrl, bookTitle, "dak4ks7mx", "643815841764554", "bQzV_ZZp3F9eyonEWhnn9vcqQts")
+                    MyApplication.Companion.deleteBook(context, bookId, bookUrl, bookTitle, "dak4ks7mx", "643815841764554", "bQzV_ZZp3F9eyonEWhnn9vcqQts")
                 }
             }
             .show()
@@ -145,6 +149,3 @@ class AdapterPdfAdmin : RecyclerView.Adapter<AdapterPdfAdmin.HolderPdfAdmin>, Fi
         val moreBtn = binding.moreBtn
     }
 }
-
-
-

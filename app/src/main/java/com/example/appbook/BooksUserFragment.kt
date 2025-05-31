@@ -8,8 +8,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.appbook.adapters.AdapterPdfUser
 import com.example.appbook.databinding.FragmentBooksUserBinding
 import com.example.appbook.databinding.RowPdfUserBinding
+import com.example.appbook.models.ModelPdf
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError

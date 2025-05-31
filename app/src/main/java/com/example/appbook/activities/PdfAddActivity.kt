@@ -1,37 +1,28 @@
-package com.example.appbook
+package com.example.appbook.activities
 
-import android.app.Application
 import android.app.ProgressDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.renderscript.Sampler
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.example.appbook.databinding.ActivityPdfAddBinding
-import com.google.android.gms.tasks.Task
+import com.example.appbook.models.ModelCategory
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.storage.FirebaseStorage
-
-import com.cloudinary.android.callback.UploadCallback
-import com.cloudinary.android.callback.ErrorInfo
-import com.cloudinary.utils.ObjectUtils
 import java.io.File
 import java.io.FileOutputStream
-
 
 class PdfAddActivity : AppCompatActivity() {
 
@@ -327,7 +318,7 @@ class PdfAddActivity : AppCompatActivity() {
 
         //db reference to load categories DF > Categories
         val ref = FirebaseDatabase.getInstance().getReference("Categories")
-        ref.addListenerForSingleValueEvent(object : ValueEventListener{
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 //clear list before adding data
                 categoryArrayList.clear()
@@ -386,12 +377,11 @@ class PdfAddActivity : AppCompatActivity() {
 
     val pdfActivityResultLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
-        ActivityResultCallback<ActivityResult>{ result ->
-            if(result.resultCode == RESULT_OK){
+        ActivityResultCallback<ActivityResult> { result ->
+            if (result.resultCode == RESULT_OK) {
                 Log.d(TAG, "PDF Picked ")
                 pdfUri = result.data!!.data
-            }
-            else{
+            } else {
                 Log.d(TAG, "PDF Picked cancelled ")
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show()
             }
@@ -400,7 +390,3 @@ class PdfAddActivity : AppCompatActivity() {
 
 
 }
-
-
-
-

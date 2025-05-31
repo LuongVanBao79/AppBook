@@ -1,15 +1,18 @@
-package com.example.appbook
+package com.example.appbook.adapters
 
-import android.view.View
-import androidx.recyclerview.widget.RecyclerView
-import com.example.appbook.databinding.RowPdfUserBinding
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
-import androidx.constraintlayout.widget.ConstraintSet
+import androidx.recyclerview.widget.RecyclerView
+import com.example.appbook.filters.FilterPdfUser
+import com.example.appbook.models.ModelPdf
+import com.example.appbook.MyApplication
+import com.example.appbook.activities.PdfDetailActivity
+import com.example.appbook.databinding.RowPdfUserBinding
 
 class AdapterPdfUser: RecyclerView.Adapter<AdapterPdfUser.HolderPdfUser>, Filterable {
 
@@ -57,18 +60,18 @@ class AdapterPdfUser: RecyclerView.Adapter<AdapterPdfUser.HolderPdfUser>, Filter
         val timestamp = model.timestamp
 
         //convert time
-        val date = MyApplication.formatTimeStamp(timestamp)
+        val date = MyApplication.Companion.formatTimeStamp(timestamp)
 
         //set data
         holder.titleTv.text = title
         holder.descriptionTv.text = description
         holder.dateTv.text = date
 
-        MyApplication.loadPdfFromUrlSinglePage(url, title, holder.pdfView, holder.progressBar, null) // no need number of pages so pass bull
+        MyApplication.Companion.loadPdfFromUrlSinglePage(url, title, holder.pdfView, holder.progressBar, null) // no need number of pages so pass bull
 
-        MyApplication.loadCategory(categoryId, holder.categoryTv)
+        MyApplication.Companion.loadCategory(categoryId, holder.categoryTv)
 
-        MyApplication.loadPdfSizeFromCloudinary(url, holder.sizeTv)
+        MyApplication.Companion.loadPdfSizeFromCloudinary(url, holder.sizeTv)
 
         //handle click, open pdf details page
         holder.itemView.setOnClickListener {
