@@ -1,36 +1,28 @@
 package com.example.appbook
 
+import android.Manifest
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
-import android.view.LayoutInflater
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.example.appbook.databinding.ActivityPdfAddBinding
 import com.example.appbook.databinding.ActivityPdfDetailBinding
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import java.io.FileOutputStream
-import android.Manifest
-
 
 class PdfDetailActivity : AppCompatActivity() {
 
     //view binding
     private lateinit var binding: ActivityPdfDetailBinding
 
-    private companion object{
+    private companion object {
         //TAG
         const val TAG = "BOOK_DETAILS_TAG"
     }
@@ -42,7 +34,14 @@ class PdfDetailActivity : AppCompatActivity() {
     private var bookTitle = ""
     private var bookUrl = ""
 
+    //firebase auth
+    private lateinit var firebaseAuth: FirebaseAuth
+
+    //progress dialog
     private lateinit var progressDialog: ProgressDialog
+
+    //will hold a boolean value false/true to indicate either is in current user's favorite list or not
+    private var isInMyFavorite = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +56,12 @@ class PdfDetailActivity : AppCompatActivity() {
         progressDialog.setTitle("Please wait...")
         progressDialog.setCanceledOnTouchOutside(false)
 
+        //init firebase auth
+        firebaseAuth = FirebaseAuth.getInstance()
+        if (firebaseAuth.currentUser != null) {
+            //user is logged in, check if book is in fav or not
+            checkIsFavorite()
+        }
 
         MyApplication.incrementBookViewCount(bookId)
         loadBookDetails()
@@ -76,29 +81,50 @@ class PdfDetailActivity : AppCompatActivity() {
         //handle click, download book/pdf
         binding.downloadBookBtn.setOnClickListener {
             //first check storage permission
-            if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
                 Log.d(TAG, "onCreate: STORAGE PERMISSION is already granted")
                 downloadBook()
-            }
-            else{
+            } else {
                 Log.d(TAG, "onCreate: STORAGE PERMISSION was not granted")
+                requestStoragePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }
+
+        //handle click, add/remove favorite
+        binding.favoriteBtn.setOnClickListener {
+            //we can add only if user is logged in
+            //1 check if user is logged in or not
+            if (firebaseAuth.currentUser == null) {
+                //user not logged in, cant do favorite functionality
+                Toast.makeText(this, "You're not logged in", Toast.LENGTH_SHORT).show()
+            } else {
+                //user is logged in, we can do favorite functionality
+                if (isInMyFavorite) {
+                    removeFromFavorite()
+                } else {
+                    addToFavorite()
+                }
             }
         }
     }
 
-    private val requestStoragePermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted:Boolean ->
-        //lets check if granted or not
-        if(isGranted){
-            Log.d(TAG, "onCreate: STORAGE PERMISSION is granted")
-            downloadBook()
+    private val requestStoragePermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            //lets check if granted or not
+            if (isGranted) {
+                Log.d(TAG, "onCreate: STORAGE PERMISSION is granted")
+                downloadBook()
+            } else {
+                Log.d(TAG, "onCreate: STORAGE PERMISSION is denied")
+                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+            }
         }
-        else{
-            Log.d(TAG, "onCreate: STORAGE PERMISSION is denied")
-            Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
-        }
-   }
 
-    private fun downloadBook(){
+    private fun downloadBook() {
         Log.d(TAG, "downloadBook: Downloading Book")
         progressDialog.setMessage("Downloading Book")
         progressDialog.show()
@@ -110,7 +136,7 @@ class PdfDetailActivity : AppCompatActivity() {
                 Log.d(TAG, "downloadBook: Book downloaded...")
                 saveToDownloadsFolder(bytes)
             }
-            .addOnFailureListener { e->
+            .addOnFailureListener { e ->
                 progressDialog.dismiss()
                 Log.d(TAG, "downloadBook: Failed to download book due to ${e.message}")
                 Toast.makeText(this, "Failed to download book due to ${e.message}", Toast.LENGTH_SHORT).show()
@@ -119,14 +145,14 @@ class PdfDetailActivity : AppCompatActivity() {
 
     private fun saveToDownloadsFolder(bytes: ByteArray) {
         Log.d(TAG, "saveToDownloadsFolder: saving download book")
-
         val nameWithExtension = "${System.currentTimeMillis()}.pdf"
+
         try {
-            val downloadFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-            downloadFolder.mkdirs() //create folder if not exists
+            val downloadFolder =
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            downloadFolder.mkdirs()
 
-            val filePath = downloadFolder.path + "/" + nameWithExtension
-
+            val filePath = "${downloadFolder.path}/$nameWithExtension"
             val out = FileOutputStream(filePath)
             out.write(bytes)
             out.close()
@@ -135,83 +161,66 @@ class PdfDetailActivity : AppCompatActivity() {
             Log.d(TAG, "saveToDownloadsFolder: Saved to Downloads Folder")
             progressDialog.dismiss()
             incrementDownloadCount()
-        }
-        catch (e: Exception){
+        } catch (e: Exception) {
+            progressDialog.dismiss()
             Log.d(TAG, "saveToDownloadsFolder: failed to save due to ${e.message}")
             Toast.makeText(this, "Failed to save due to ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
-    
-    private fun incrementDownloadCount(){
-        // increment downloads count to firebase db
+
+    private fun incrementDownloadCount() {
         Log.d(TAG, "incrementDownloadCount: ")
-        
-        //1 Get previous downloads count
+
         val ref = FirebaseDatabase.getInstance().getReference("Books")
         ref.child(bookId)
-            .addListenerForSingleValueEvent(object : ValueEventListener{
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    //get downloads count
                     var downloadsCount = "${snapshot.child("downloadsCount").value}"
                     Log.d(TAG, "onDataChange: Current Downloads Count: $downloadsCount")
 
-                    if(downloadsCount == "" || downloadsCount == "null"){
-                        downloadsCount = "0"
-                    }
+                    if (downloadsCount == "" || downloadsCount == "null") downloadsCount = "0"
 
-                    //convert to long and increment 1
-                    val newDownloadCount = downloadsCount + 1
+                    val newDownloadCount = downloadsCount.toLong() + 1
                     Log.d(TAG, "onDataChange: New Downloads Count: $newDownloadCount")
 
-                    //setup data to update to db
-                    val hashMap: HashMap<String, Any> = HashMap()
+                    val hashMap = HashMap<String, Any>()
                     hashMap["downloadsCount"] = newDownloadCount
 
-                    //step 2 Update new incremented downloads count to db
                     val dbRef = FirebaseDatabase.getInstance().getReference("Books")
                     dbRef.child(bookId)
                         .updateChildren(hashMap)
                         .addOnSuccessListener {
                             Log.d(TAG, "onDataChange: Downloads count incremented")
                         }
-                        .addOnFailureListener { e->
+                        .addOnFailureListener { e ->
                             Log.d(TAG, "onDataChange: FAILED to increment due to ${e.message}")
                         }
                 }
 
-                override fun onCancelled(error: DatabaseError) {
-
-                }
+                override fun onCancelled(error: DatabaseError) {}
             })
     }
-    
+
     private fun loadBookDetails() {
-        //Book > bookId > Details
         val ref = FirebaseDatabase.getInstance().getReference("Books")
         ref.child(bookId)
-            .addListenerForSingleValueEvent(object : ValueEventListener{
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    //get data
                     val categoryId = "${snapshot.child("categoryId").value}"
                     val description = "${snapshot.child("description").value}"
                     val downloadsCount = "${snapshot.child("downloadsCount").value}"
                     val timestamp = "${snapshot.child("timestamp").value}"
                     bookTitle = "${snapshot.child("title").value}"
-                    var uid = "${snapshot.child("uid").value}"
+                    val uid = "${snapshot.child("uid").value}"
                     bookUrl = "${snapshot.child("url").value}"
                     val viewsCount = "${snapshot.child("viewsCount").value}"
 
-                    //format date
                     val date = MyApplication.formatTimeStamp(timestamp.toLong())
 
-                    //load pdf category
                     MyApplication.loadCategory(categoryId, binding.categoryTv)
-                    //load pdf thumbnail, pages count
-                    MyApplication.loadPdfFromUrlSinglePage("$bookUrl", "$bookTitle", binding.pdfView, binding.progressBar, binding.pagesTv)
-                    //load pdf size
-                    MyApplication.loadPdfSizeFromCloudinary("$bookUrl", binding.sizeTv)
+                    MyApplication.loadPdfFromUrlSinglePage(bookUrl, bookTitle, binding.pdfView, binding.progressBar, binding.pagesTv)
+                    MyApplication.loadPdfSizeFromCloudinary(bookUrl, binding.sizeTv)
 
-                    //set data
                     binding.titleTv.text = bookTitle
                     binding.descriptionTv.text = description
                     binding.viewsTv.text = viewsCount
@@ -219,9 +228,71 @@ class PdfDetailActivity : AppCompatActivity() {
                     binding.dateTv.text = date
                 }
 
-                override fun onCancelled(error: DatabaseError) {
-
-                }
+                override fun onCancelled(error: DatabaseError) {}
             })
+    }
+
+    private fun checkIsFavorite() {
+        Log.d(TAG, "checkIsFavorite: Checking if book is in fav or not")
+
+        val ref = FirebaseDatabase.getInstance().getReference("Users")
+        ref.child(firebaseAuth.uid!!).child("Favorites").child(bookId)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    isInMyFavorite = snapshot.exists()
+                    if (isInMyFavorite) {
+                        Log.d(TAG, "onDataChange: available in favorite")
+                        binding.favoriteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                            0, R.drawable.ic_favorite_filled_white, 0, 0
+                        )
+                        binding.favoriteBtn.text = "Remove Favorite"
+                    } else {
+                        Log.d(TAG, "onDataChange: not available in favorite")
+                        binding.favoriteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                            0, R.drawable.ic_favorite_white, 0, 0
+                        )
+                        binding.favoriteBtn.text = "Add Favorite"
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {}
+            })
+    }
+
+    private fun addToFavorite() {
+        Log.d(TAG, "addToFavorite: Adding to fav")
+        val timestamp = System.currentTimeMillis()
+
+        val hashMap = HashMap<String, Any>()
+        hashMap["bookId"] = bookId
+        hashMap["timeStamp"] = timestamp
+
+        val ref = FirebaseDatabase.getInstance().getReference("Users")
+        ref.child(firebaseAuth.uid!!).child("Favorites").child(bookId)
+            .setValue(hashMap)
+            .addOnSuccessListener {
+                Log.d(TAG, "addToFavorite: Added to fav")
+                Toast.makeText(this, "Added to favorite", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Log.d(TAG, "addToFavorite: Failed to add to fav due to ${e.message}")
+                Toast.makeText(this, "Failed to add to fav due to ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun removeFromFavorite() {
+        Log.d(TAG, "removeFromFavorite: Removing from fav")
+
+        val ref = FirebaseDatabase.getInstance().getReference("Users")
+        ref.child(firebaseAuth.uid!!).child("Favorites").child(bookId)
+            .removeValue()
+            .addOnSuccessListener {
+                Log.d(TAG, "removeFromFavorite: Removed from fav")
+                Toast.makeText(this, "Removed from favorite", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Log.d(TAG, "removeFromFavorite: Failed to remove from fav due to ${e.message}")
+                Toast.makeText(this, "Failed to remove from fav due to ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 }

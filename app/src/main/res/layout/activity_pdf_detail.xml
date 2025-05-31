@@ -246,6 +246,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Read"
+            android:textSize="10sp"
             android:drawableTop="@drawable/ic_book_white"
             android:layout_weight="1"/>
 
@@ -255,7 +256,18 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Download"
+            android:textSize="10sp"
             android:drawableTop="@drawable/ic_download_white"
+            android:layout_weight="1"/>
+
+        <!--Button: Add/Remove favorite-->
+        <Button
+            android:id="@+id/favoriteBtn"
+            android:layout_width="0dp"
+            android:drawableTop="@drawable/ic_favorite_white"
+            android:layout_height="wrap_content"
+            android:text="Add To Favorite"
+            android:textSize="10sp"
             android:layout_weight="1"/>
     </LinearLayout>
 
