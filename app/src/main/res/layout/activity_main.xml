@@ -46,6 +46,6 @@
         android:text="Continue without login"
         android:textColor="@color/purple_500"
         android:background="@drawable/shape_button02"/>
-
+    
 
 </RelativeLayout>

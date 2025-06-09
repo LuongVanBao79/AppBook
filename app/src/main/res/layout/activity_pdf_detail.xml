@@ -225,10 +225,48 @@
                 android:text="The description of the book"
                 android:textColor="@color/black"/>
 
+            <!--View: to Seprate-->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/gray03"
+                android:layout_marginTop="5dp"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!--TextView: Comments Label-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Comments"
+                    android:padding="5dp"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"/>
+
+                <!--ImageButton: Show dialog to add new comment-->
+                <ImageButton
+                    android:id="@+id/addCommentBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_comment_add_black"
+                    android:layout_alignParentEnd="true"/>
+
+                <!--RecyclerView:: Show comments-->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/commentsRv"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/addCommentBtn"
+                    tools:listitem="@layout/row_comment"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+            </RelativeLayout>
+
 
         </LinearLayout>
-
-
     </ScrollView>
 
     <!--Bottom buttons for book options-->
