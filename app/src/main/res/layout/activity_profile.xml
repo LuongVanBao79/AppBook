@@ -11,7 +11,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="165dp"
-        android:background="@drawable/gojo"
+        android:background="@drawable/refund"
         android:layout_marginTop="40dp"/>
 
     <!--Toolbar-->
@@ -33,7 +33,7 @@
         <!--Title-->
         <TextView
             android:id="@+id/toolbarTitleTv"
-            android:text="Profile"
+            android:text="Thông tin cá nhân"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
@@ -57,7 +57,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="180dp"
+        android:layout_marginTop="200dp"
         android:background="@drawable/shape_rect01"/>
 
     <!--Shapeable ImageView with rounded corners-->
@@ -115,7 +115,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Account"
+                android:text="Tài khoản"
                 android:textColor="@color/black"
                 android:textStyle="bold"
                 android:textSize="12sp"
@@ -142,7 +142,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Member"
+                android:text="Thành viên"
                 android:textColor="@color/black"
                 android:textStyle="bold"
                 android:textSize="12sp"
@@ -169,7 +169,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Favorite Books"
+                android:text="Sách yêu thích"
                 android:textColor="@color/black"
                 android:textStyle="bold"
                 android:textSize="12sp"
@@ -195,7 +195,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Account Status"
+                android:text="Trạng thái tài khoản"
                 android:textColor="@color/black"
                 android:textStyle="bold"
                 android:textSize="12sp"
@@ -226,7 +226,7 @@
         android:id="@+id/favoritesLabelTv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Favorite Books"
+        android:text="Danh sách yêu thích"
         android:layout_below="@id/view1"
         android:textStyle="bold"
         android:textColor="@color/black"

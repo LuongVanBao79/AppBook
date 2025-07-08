@@ -8,15 +8,14 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.bumptech.glide.disklrucache.DiskLruCache
-import com.example.appbook.Constants
+import androidx.core.content.FileProvider
 import com.example.appbook.MyApplication
-import com.example.appbook.activities.PdfViewActivity
 import com.example.appbook.R
 import com.example.appbook.adapters.AdapterComment
 import com.example.appbook.databinding.ActivityPdfDetailBinding
@@ -27,8 +26,10 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.storage.FirebaseStorage
+import java.io.File
 import java.io.FileOutputStream
+import java.net.URL
+import javax.net.ssl.HttpsURLConnection
 
 class PdfDetailActivity : AppCompatActivity() {
 
@@ -119,7 +120,7 @@ class PdfDetailActivity : AppCompatActivity() {
             //1 check if user is logged in or not
             if (firebaseAuth.currentUser == null) {
                 //user not logged in, cant do favorite functionality
-                Toast.makeText(this, "You're not logged in", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show()
             } else {
                 //user is logged in, we can do favorite functionality
                 if (isInMyFavorite) {
@@ -135,12 +136,17 @@ class PdfDetailActivity : AppCompatActivity() {
             /*To add a comment, user must be logged in, if not just show a message you're not logged in*/
             if(firebaseAuth.currentUser == null){
                 //user not logged in, dont allow adding comment
-                Toast.makeText(this, "You're not logged in", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show()
             }
             else{
                 //user logged in, allow adding comment
                 addCommentDialog()
             }
+        }
+
+        //fix lỗi cuộn
+        binding.mainScrollView.post {
+            binding.mainScrollView.fullScroll(View.FOCUS_UP)
         }
     }
 
@@ -197,7 +203,7 @@ class PdfDetailActivity : AppCompatActivity() {
             comment = commentAddBinding.commentEt.text.toString().trim()
             //validate Data
             if(comment.isEmpty()){
-                Toast.makeText(this, "Enter comment...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Nhập bình luận...", Toast.LENGTH_SHORT).show()
             }
             else{
                 alertDialog.dismiss()
@@ -208,7 +214,7 @@ class PdfDetailActivity : AppCompatActivity() {
 
     private fun addComment() {
         // show progress
-        progressDialog.setMessage("Adding Comment")
+        progressDialog.setMessage("Đang thêm bình luận")
         progressDialog.show()
 
         //timestamp for comment id, comment timestamp etc
@@ -229,11 +235,11 @@ class PdfDetailActivity : AppCompatActivity() {
             .setValue(hashMap)
             .addOnSuccessListener {
                 progressDialog.dismiss()
-                Toast.makeText(this, "Comment added...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Bình luận đã được thêm...", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e->
                 progressDialog.dismiss()
-                Toast.makeText(this, "Failed to add comment due to ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Thêm bình luận thất bại do ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -245,52 +251,79 @@ class PdfDetailActivity : AppCompatActivity() {
                 downloadBook()
             } else {
                 Log.d(TAG, "onCreate: STORAGE PERMISSION is denied")
-                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Không có quyền truy cập", Toast.LENGTH_SHORT).show()
             }
         }
 
     private fun downloadBook() {
-        Log.d(TAG, "downloadBook: Downloading Book")
-        progressDialog.setMessage("Downloading Book")
+        Log.d(TAG, "downloadBook: Đang tải sách")
+        progressDialog.setMessage("Đang tải sách")
         progressDialog.show()
 
-        //lets download book from firebase storage using url
-        val storageReference = FirebaseStorage.getInstance().getReferenceFromUrl(bookUrl)
-        storageReference.getBytes(Constants.MAX_BYTES_PDF)
-            .addOnSuccessListener { bytes ->
-                Log.d(TAG, "downloadBook: Book downloaded...")
-                saveToDownloadsFolder(bytes)
+        val fileName = "downloaded_${System.currentTimeMillis()}.pdf"
+        val file = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
+
+        Thread {
+            try {
+                Log.d(TAG, "Starting download from: $bookUrl to ${file.absolutePath}")
+                val urlConnection = URL(bookUrl).openConnection() as HttpsURLConnection
+                urlConnection.connectTimeout = 10000
+                urlConnection.readTimeout = 10000
+                urlConnection.requestMethod = "GET"
+                urlConnection.setRequestProperty("Accept", "application/pdf")
+                urlConnection.connect()
+
+                val responseCode = urlConnection.responseCode
+                if (responseCode != HttpsURLConnection.HTTP_OK) {
+                    throw Exception("Server returned code: $responseCode")
+                }
+
+                val inputStream = urlConnection.inputStream
+                val outputStream = FileOutputStream(file)
+                val buffer = ByteArray(1024)
+                var bytesRead: Int
+
+                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                    outputStream.write(buffer, 0, bytesRead)
+                }
+
+                outputStream.flush()
+                outputStream.close()
+                inputStream.close()
+                urlConnection.disconnect()
+
+                runOnUiThread {
+                    if (file.exists() && file.length() > 0) {
+                        val fileUri = FileProvider.getUriForFile(
+                            this@PdfDetailActivity,
+                            "com.example.appbook.fileprovider", // Cập nhật authorities
+                            file
+                        )
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.setDataAndType(fileUri, "application/pdf")
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        try {
+                            startActivity(intent)
+                            Log.d(TAG, "downloadBook: Mở file thành công với URI: $fileUri")
+                            Toast.makeText(this, "Tải và mở file thành công", Toast.LENGTH_SHORT).show()
+                            incrementDownloadCount()
+                        } catch (e: Exception) {
+                            Log.e(TAG, "downloadBook: Lỗi khi mở file: ${e.message}")
+                            Toast.makeText(this, "Lỗi khi mở file: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
+                    } else {
+                        throw Exception("File not created or empty, size: ${file.length()} bytes")
+                    }
+                    progressDialog.dismiss()
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    Log.e(TAG, "downloadBook: Lỗi khi tải: ${e.message}")
+                    Toast.makeText(this, "Tải thất bại: ${e.message}", Toast.LENGTH_LONG).show()
+                    progressDialog.dismiss()
+                }
             }
-            .addOnFailureListener { e ->
-                progressDialog.dismiss()
-                Log.d(TAG, "downloadBook: Failed to download book due to ${e.message}")
-                Toast.makeText(this, "Failed to download book due to ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-    }
-
-    private fun saveToDownloadsFolder(bytes: ByteArray) {
-        Log.d(TAG, "saveToDownloadsFolder: saving download book")
-        val nameWithExtension = "${System.currentTimeMillis()}.pdf"
-
-        try {
-            val downloadFolder =
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-            downloadFolder.mkdirs()
-
-            val filePath = "${downloadFolder.path}/$nameWithExtension"
-            val out = FileOutputStream(filePath)
-            out.write(bytes)
-            out.close()
-
-            Toast.makeText(this, "Saved to Downloads Folder", Toast.LENGTH_SHORT).show()
-            Log.d(TAG, "saveToDownloadsFolder: Saved to Downloads Folder")
-            progressDialog.dismiss()
-            incrementDownloadCount()
-        } catch (e: Exception) {
-            progressDialog.dismiss()
-            Log.d(TAG, "saveToDownloadsFolder: failed to save due to ${e.message}")
-            Toast.makeText(this, "Failed to save due to ${e.message}", Toast.LENGTH_SHORT).show()
-        }
+        }.start()
     }
 
     private fun incrementDownloadCount() {
@@ -370,13 +403,13 @@ class PdfDetailActivity : AppCompatActivity() {
                         binding.favoriteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(
                             0, R.drawable.ic_favorite_filled_white, 0, 0
                         )
-                        binding.favoriteBtn.text = "Remove Favorite"
+                        binding.favoriteBtn.text = "Xóa khỏi mục yêu thích"
                     } else {
                         Log.d(TAG, "onDataChange: not available in favorite")
                         binding.favoriteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(
                             0, R.drawable.ic_favorite_white, 0, 0
                         )
-                        binding.favoriteBtn.text = "Add Favorite"
+                        binding.favoriteBtn.text = "Thêm vào mục yêu thích"
                     }
                 }
 
@@ -397,11 +430,11 @@ class PdfDetailActivity : AppCompatActivity() {
             .setValue(hashMap)
             .addOnSuccessListener {
                 Log.d(TAG, "addToFavorite: Added to fav")
-                Toast.makeText(this, "Added to favorite", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Đã thêm vào mục yêu thích", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e ->
                 Log.d(TAG, "addToFavorite: Failed to add to fav due to ${e.message}")
-                Toast.makeText(this, "Failed to add to fav due to ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Thêm vào mục yêu thích thất bại do ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 

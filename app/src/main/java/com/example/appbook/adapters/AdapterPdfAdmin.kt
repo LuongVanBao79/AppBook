@@ -102,11 +102,11 @@ class AdapterPdfAdmin : RecyclerView.Adapter<AdapterPdfAdmin.HolderPdfAdmin>, Fi
         val bookTitle = model.title
 
         //options to show in dialog
-        val options = arrayOf("Edit", "Delete")
+        val options = arrayOf("Chỉnh Sửa", "Xoá")
 
         //alert dialog
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("Choose Option")
+        builder.setTitle("Chọn Tuỳ Chọn")
             .setItems(options){ dialog, position ->
                 //hand item click
                 if(position == 0){
@@ -118,7 +118,8 @@ class AdapterPdfAdmin : RecyclerView.Adapter<AdapterPdfAdmin.HolderPdfAdmin>, Fi
                 else if(position == 1){
                     //delete is clicked
 
-                    MyApplication.Companion.deleteBook(context, bookId, bookUrl, bookTitle, "dak4ks7mx", "643815841764554", "bQzV_ZZp3F9eyonEWhnn9vcqQts")
+                    MyApplication.deleteBook(context, bookId, bookTitle)
+
                 }
             }
             .show()

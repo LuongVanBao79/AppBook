@@ -141,6 +141,7 @@ class BooksUserFragment : Fragment() {
                     //add to list
                     pdfArrayList.add(model!!)
                 }
+                pdfArrayList.reverse()
                 //setup adapter
                 adapterPdfUser = AdapterPdfUser(context!!, pdfArrayList)
                 //set adapter to recyclerview

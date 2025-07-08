@@ -8,6 +8,8 @@
     tools:context=".activities.PdfViewActivity">
 
     <!--Toolbar-->
+
+    <!--PDFView-->
     <RelativeLayout
         android:id="@+id/toolbarRl"
         android:layout_width="match_parent"
@@ -18,12 +20,12 @@
         <ImageButton
             android:id="@+id/backBtn"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginStart="10dp"
-            android:padding="5dp"
             android:background="@android:color/transparent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_back_white"/>
+            android:padding="5dp"
+            android:src="@drawable/ic_back_white" />
 
         <!--TextView: Title-->
         <TextView
@@ -32,31 +34,49 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="8dp"
-            android:text="Read Book"
+            android:text="Đọc sách"
             android:textColor="@color/white"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
-        <!--TextView: subtitle page number-->
-        <TextView
-            android:id="@+id/toolbarSubtitleTv"
+        <LinearLayout
+            android:id="@+id/toolbarInfoLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/toolbarTitleTv"
             android:layout_centerHorizontal="true"
-            android:text="N/N"
-            android:textColor="@color/white"
-            android:textSize="12sp"/>
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="2dp">
+
+            <TextView
+                android:id="@+id/toolbarSubtitleTv1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Trang 1/1"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/toolbarSubtitleTv2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="35dp"
+                android:text="• Còn lại 12 phút"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
 
     </RelativeLayout>
 
-    <!--PDFView-->
+    <!--ProgressBar: show while book is loading-->
     <com.github.barteksc.pdfviewer.PDFView
         android:id="@+id/pdfView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbarRl"/>
+        android:layout_below="@id/toolbarRl"
+        android:layout_marginTop="0dp" />
 
-    <!--ProgressBar: show while book is loading-->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"

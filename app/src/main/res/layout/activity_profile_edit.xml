@@ -29,7 +29,7 @@
             android:id="@+id/toolbarTitleTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Edit Profile"
+            android:text="Chỉnh sửa hồ sơ"
             android:layout_marginTop="10dp"
             android:textColor="@color/white"
             android:textStyle="bold"
@@ -83,7 +83,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/nameTil"
             android:textColor="@color/white"
-            android:text="Update"
+            android:text="Cập nhật"
             android:background="@drawable/shape_button01"
             android:layout_marginTop="20dp"/>
     </RelativeLayout>

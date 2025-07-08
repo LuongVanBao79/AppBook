@@ -7,7 +7,7 @@ import com.example.appbook.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    // view binding
+    // View Binding để truy cập các thành phần giao diện người dùng
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,17 +15,21 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // handle click, login
+        // Xử lý sự kiện click vào nút "Đăng nhập"
         binding.loginBtn.setOnClickListener {
+            // Mở màn hình đăng nhập (LoginActivity)
             startActivity(Intent(this, LoginActivity::class.java))
         }
 
-        //hand click, skip and continue to main screen
+        // Xử lý sự kiện click vào nút "Bỏ qua" và tiếp tục đến màn hình chính
         binding.skipBtn.setOnClickListener {
+            // Mở màn hình Dashboard dành cho người dùng (DashboardUserActivity)
             startActivity(Intent(this, DashboardUserActivity::class.java))
         }
 
-        // now lets connect with firebase
+        // Bây giờ, hãy kết nối với Firebase
+        // (Phần này có thể sẽ được triển khai ở các Activity khác,
+        //  hoặc có thể thêm code kết nối Firebase ở đây nếu cần)
 
     }
 }

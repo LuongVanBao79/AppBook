@@ -14,57 +14,57 @@ import com.google.firebase.database.ValueEventListener
 
 class PdfEditActivity : AppCompatActivity() {
 
-    //view binding
+    // View Binding để truy cập các thành phần giao diện người dùng
     private lateinit var binding: ActivityPdfEditBinding
 
     private companion object {
         private const val TAG = "PDF_EDIT_TAG"
     }
 
-    //book id get from intent started from AdapterPdfAdmin
+    // Book id nhận từ intent để chỉnh sửa thông tin sách
     private var bookId = ""
 
-    //progress dialog
+    // Progress dialog để hiển thị thông báo trong quá trình xử lý
     private lateinit var progressDialog: ProgressDialog
 
-    //arraylist to hold category titles
+    // ArrayList để lưu trữ danh sách tiêu đề các category
     private lateinit var categoryTitleArrayList: ArrayList<String>
 
-    //arraylist to hold category ids
+    // ArrayList để lưu trữ danh sách id các category
     private lateinit var categoryIdArrayList: ArrayList<String>
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPdfEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //get book id to edit the book info
+        // Nhận book id từ intent để chỉnh sửa thông tin sách
         bookId = intent.getStringExtra("bookId")!!
 
-        //setup progress dialog
-        progressDialog = ProgressDialog(this)
-        progressDialog.setTitle("Please wait")
-        progressDialog.setCanceledOnTouchOutside(false)
+        // Thiết lập progress dialog
+        progressDialog = ProgressDialog(this).apply {
+            setTitle("Vui lòng đợi")
+            setCanceledOnTouchOutside(false)
+        }
 
-        loadCategories()
-        loadBookInfo()
+        loadCategories() // Tải danh sách category
+        loadBookInfo() // Tải thông tin sách
 
-        //handle click, go back
+        // Xử lý sự kiện click, quay lại
         binding.backBtn.setOnClickListener {
             onBackPressed()
         }
-        //handle click, pick category
+        // Xử lý sự kiện click, chọn category
         binding.categoryTv.setOnClickListener {
             categoryDialog()
         }
-        //handle click, begin update
+        // Xử lý sự kiện click, bắt đầu cập nhật
         binding.submitBtn.setOnClickListener {
             validateData()
         }
-
     }
 
+    // Hàm tải thông tin sách
     private fun loadBookInfo() {
         Log.d(TAG, "loadBookInfo: Loading book info")
 
@@ -72,118 +72,120 @@ class PdfEditActivity : AppCompatActivity() {
         ref.child(bookId)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    //get book info
+                    // Lấy thông tin sách
                     selectedCategoryId = snapshot.child("categoryId").value.toString()
                     val description = snapshot.child("description").value.toString()
                     val title = snapshot.child("title").value.toString()
 
-                    //set to view
+                    // Set thông tin lên view
                     binding.titleEt.setText(title)
                     binding.descriptionEt.setText(description)
 
-                    //load book category info using categoryId
+                    // Tải thông tin category của sách sử dụng categoryId
                     Log.d(TAG, "onDataChange: Loading book category info")
                     val refBookCategory = FirebaseDatabase.getInstance().getReference("Categories")
                     refBookCategory.child(selectedCategoryId)
                         .addListenerForSingleValueEvent(object : ValueEventListener {
                             override fun onDataChange(snapshot: DataSnapshot) {
-                                //get category
+                                // Lấy category
                                 val category = snapshot.child("category").value
-                                //set to textview
-                                binding.categoryTv.text= category.toString()
+                                // Set lên textview
+                                binding.categoryTv.text = category.toString()
                             }
 
                             override fun onCancelled(error: DatabaseError) {
-
+                                // Xử lý khi có lỗi xảy ra
+                                Log.e(TAG, "onCancelled: Lỗi khi tải thông tin category của sách", error.toException())
+                                Toast.makeText(this@PdfEditActivity, "Lỗi khi tải thông tin category", Toast.LENGTH_SHORT).show()
                             }
                         })
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-
+                    // Xử lý khi có lỗi xảy ra
+                    Log.e(TAG, "onCancelled: Lỗi khi tải thông tin sách", error.toException())
+                    Toast.makeText(this@PdfEditActivity, "Lỗi khi tải thông tin sách", Toast.LENGTH_SHORT).show()
                 }
             })
     }
 
     private var title = ""
     private var description = ""
+
+    // Hàm kiểm tra dữ liệu
     private fun validateData() {
-        //get data
+        // Lấy dữ liệu
         title = binding.titleEt.text.toString().trim()
         description = binding.descriptionEt.text.toString().trim()
 
-        //validate data
-        if(title.isEmpty()){
-            Toast.makeText(this, "Enter title", Toast.LENGTH_SHORT).show()
-        }
-        else if(description.isEmpty()){
-            Toast.makeText(this, "Enter description", Toast.LENGTH_SHORT).show()
-        }
-        else if(selectedCategoryId.isEmpty()){
-            Toast.makeText(this, "Pick category", Toast.LENGTH_SHORT).show()
-        }
-        else{
-            updatePdf()
+        // Kiểm tra dữ liệu
+        if (title.isEmpty()) {
+            Toast.makeText(this, "Nhập tiêu đề", Toast.LENGTH_SHORT).show()
+        } else if (description.isEmpty()) {
+            Toast.makeText(this, "Nhập mô tả", Toast.LENGTH_SHORT).show()
+        } else if (selectedCategoryId.isEmpty()) {
+            Toast.makeText(this, "Chọn category", Toast.LENGTH_SHORT).show()
+        } else {
+            updatePdf() // Cập nhật thông tin sách
         }
     }
 
+    // Hàm cập nhật thông tin sách
     private fun updatePdf() {
         Log.d(TAG, "updatePdf: Starting updating pdf info ...")
 
-        //show progress
-        progressDialog.setMessage("Updating book info")
+        // Hiển thị progress
+        progressDialog.setMessage("Đang cập nhật thông tin sách")
         progressDialog.show()
 
-        //setup data to update to db, spellings of keys must be same as in firebase
-        val hashMap = HashMap<String, Any>()
-        hashMap["title"] = "$title"
-        hashMap["description"] = "$description"
-        hashMap["categoryId"] = "$selectedCategoryId"
+        // Thiết lập dữ liệu để cập nhật lên db, spelling của các key phải giống như trong firebase
+        val hashMap = HashMap<String, Any>().apply {
+            put("title", title)
+            put("description", description)
+            put("categoryId", selectedCategoryId)
+        }
 
-        //start updating
+        // Bắt đầu cập nhật
         val ref = FirebaseDatabase.getInstance().getReference("Books")
         ref.child(bookId)
             .updateChildren(hashMap)
             .addOnSuccessListener {
                 progressDialog.dismiss()
                 Log.d(TAG, "updatePdf: Updated successfully...")
-                Toast.makeText(this, "Updated successfully...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Cập nhật thành công...", Toast.LENGTH_SHORT).show()
             }
-            .addOnFailureListener { e->
-                Log.d(TAG, "updatePdf: Failed to update due to ${e.message}")
+            .addOnFailureListener { e ->
+                Log.e(TAG, "updatePdf: Failed to update due to ${e.message}", e)
                 progressDialog.dismiss()
-                Toast.makeText(this, "Failed to update due to ${e.message}", Toast.LENGTH_SHORT).show()
-
+                Toast.makeText(this, "Cập nhật thất bại do ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
     private var selectedCategoryId = ""
     private var selectedCategoryTitle = ""
+
+    // Hàm hiển thị dialog chọn category
     private fun categoryDialog() {
-        // show dialog to pick the category of pdf/book we already got the categories
+        // Hiển thị dialog để chọn category của pdf/book, chúng ta đã có danh sách category rồi
 
-        //make string array from arraylost of string
-        val categoriesArray = arrayOfNulls<String>(categoryTitleArrayList.size)
-        for(i in categoryTitleArrayList.indices){
-            categoriesArray[i] = categoryTitleArrayList[i]
-        }
+        // Tạo string array từ arraylist string
+        val categoriesArray = categoryTitleArrayList.toTypedArray()
 
-        //alert dialog
+        // Alert dialog
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Choose Category")
-            .setItems(categoriesArray){dialog, position ->
-                //handle click, save clickes category id and title
+        builder.setTitle("Chọn Category")
+            .setItems(categoriesArray) { dialog, position ->
+                // Xử lý click, lưu category id và title đã click
                 selectedCategoryId = categoryIdArrayList[position]
                 selectedCategoryTitle = categoryTitleArrayList[position]
 
-                //set to textView
+                // Set lên textView
                 binding.categoryTv.text = selectedCategoryTitle
             }
             .show()
-
-
     }
 
+    // Hàm tải danh sách category
     private fun loadCategories() {
         Log.d(TAG, "loadCategories: loading categories ...")
         categoryTitleArrayList = ArrayList()
@@ -192,13 +194,13 @@ class PdfEditActivity : AppCompatActivity() {
         val ref = FirebaseDatabase.getInstance().getReference("Categories")
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                //clear list before starting adding data into them
+                // Xóa list trước khi bắt đầu thêm dữ liệu vào
                 categoryIdArrayList.clear()
                 categoryTitleArrayList.clear()
 
-                for(ds in snapshot.children){
-                    val id = "${ds.child("id").value}"
-                    val category = "${ds.child("category").value}"
+                for (ds in snapshot.children) {
+                    val id = ds.child("id").value.toString()
+                    val category = ds.child("category").value.toString()
 
                     categoryIdArrayList.add(id)
                     categoryTitleArrayList.add(category)
@@ -209,7 +211,9 @@ class PdfEditActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                // Xử lý khi có lỗi xảy ra
+                Log.e(TAG, "onCancelled: Lỗi khi tải danh sách category", error.toException())
+                Toast.makeText(this@PdfEditActivity, "Lỗi khi tải danh sách category", Toast.LENGTH_SHORT).show()
             }
         })
     }

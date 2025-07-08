@@ -12,13 +12,13 @@ import com.google.firebase.database.FirebaseDatabase
 
 class RegisterActivity : AppCompatActivity() {
 
-    // view binding
+    // View Binding để truy cập các thành phần giao diện người dùng
     private lateinit var binding: ActivityRegisterBinding
 
-    // firebase auth
+    // Firebase Authentication
     private lateinit var firebaseAuth: FirebaseAuth
 
-    // progress dialog
+    // Progress dialog để hiển thị thông báo trong quá trình xử lý
     private lateinit var progressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,105 +26,121 @@ class RegisterActivity : AppCompatActivity() {
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //init firebase auth
+        // Khởi tạo Firebase Authentication
         firebaseAuth = FirebaseAuth.getInstance()
 
-        //init progress dialog, will show while creating account
-        progressDialog = ProgressDialog(this)
-        progressDialog.setTitle("Please wait")
-        progressDialog.setCanceledOnTouchOutside(false)
+        // Khởi tạo progress dialog, sẽ hiển thị trong quá trình tạo tài khoản
+        progressDialog = ProgressDialog(this).apply {
+            setTitle("Vui lòng đợi")
+            setCanceledOnTouchOutside(false)
+        }
 
-        //handle back button click, goto previous screen
+        // Xử lý sự kiện click vào nút "Quay lại", quay lại màn hình trước
         binding.backBtn.setOnClickListener {
             onBackPressed()
         }
 
-        //handle click, begin register
-        binding.registerBtn.setOnClickListener{
-            /* Steps
-            1 Input data
-            2 Validate data
-            3 Create Account - Firebase Auth
-            4 Save User Info - Firebase Realtime Database
+        // Xử lý sự kiện click, bắt đầu đăng ký
+        binding.registerBtn.setOnClickListener {
+            /* Các bước:
+            1 Nhập dữ liệu
+            2 Kiểm tra dữ liệu
+            3 Tạo tài khoản - Firebase Auth
+            4 Lưu thông tin người dùng - Firebase Realtime Database
              */
             validateData()
         }
-
     }
 
     private var name = ""
     private var email = ""
     private var password = ""
 
-    private fun validateData(){
-        // Input value
+    // Hàm kiểm tra dữ liệu
+    private fun validateData() {
+        // Nhập giá trị
         name = binding.nameEt.text.toString().trim()
         email = binding.emailEt.text.toString().trim()
         password = binding.passwordEt.text.toString().trim()
         val cPassword = binding.cPasswordEt.text.toString().trim()
 
-        // Validate Data
-        if(name.isEmpty()){
-            Toast.makeText(this, "Enter your name...", Toast.LENGTH_SHORT).show()
-        }
-        else if(!Patterns.EMAIL_ADDRESS.matcher(email).matches()){
-            Toast.makeText(this, "Invalid Email Pattern", Toast.LENGTH_SHORT).show()
-        }
-        else if(password.isEmpty()){
-            Toast.makeText(this, "Enter password", Toast.LENGTH_SHORT).show()
-        }
-        else if(cPassword.isEmpty()){
-            Toast.makeText(this, "Confirm password", Toast.LENGTH_SHORT).show()
-        }
-        else if(password != cPassword){
-            Toast.makeText(this, "Password doesn't math", Toast.LENGTH_SHORT).show()
-        }
-        else{
-            createUsrAccount()
+        // Kiểm tra dữ liệu
+        if (name.isEmpty()) {
+            Toast.makeText(this, "Vui lòng nhập tên...", Toast.LENGTH_SHORT).show()
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "Email không hợp lệ", Toast.LENGTH_SHORT).show()
+        } else if (password.isEmpty()) {
+            Toast.makeText(this, "Vui lòng nhập mật khẩu", Toast.LENGTH_SHORT).show()
+        } else if (cPassword.isEmpty()) {
+            Toast.makeText(this, "Vui lòng xác nhận mật khẩu", Toast.LENGTH_SHORT).show()
+        } else if (password != cPassword) {
+            Toast.makeText(this, "Mật khẩu không khớp", Toast.LENGTH_SHORT).show()
+        } else {
+            createUserAccount() // Tạo tài khoản người dùng
         }
     }
 
-    private fun createUsrAccount() {
-        progressDialog.setMessage("Creating Account")
+    // Hàm tạo tài khoản người dùng
+    private fun createUserAccount() {
+        progressDialog.setMessage("Đang tạo tài khoản")
         progressDialog.show()
 
         firebaseAuth.createUserWithEmailAndPassword(email, password)
             .addOnSuccessListener {
-                updateUserInfo()
+                // Nếu tạo tài khoản thành công
+                updateUserInfo() // Cập nhật thông tin người dùng
             }
-            .addOnFailureListener { e->
+            .addOnFailureListener { e ->
+                // Nếu tạo tài khoản thất bại
                 progressDialog.dismiss()
-                Toast.makeText(this, "Failed creating account due to ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "Tạo tài khoản thất bại do ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
     }
 
+    // Hàm cập nhật thông tin người dùng
     private fun updateUserInfo() {
-        progressDialog.setMessage("Saving user info...")
+        progressDialog.setMessage("Đang lưu thông tin người dùng...")
 
         val timestamp = System.currentTimeMillis()
         val uid = firebaseAuth.uid
 
+        // Thiết lập dữ liệu để lưu vào database
         val hashMap: HashMap<String, Any?> = HashMap()
         hashMap["uid"] = uid
         hashMap["email"] = email
         hashMap["name"] = name
-        hashMap["profileImage"] = ""
-        hashMap["userType"] = "user"
+        hashMap["profileImage"] = "" // Giá trị mặc định
+        hashMap["userType"] = "user" // Giá trị mặc định
         hashMap["timestamp"] = timestamp
 
-        //set data to db
+        // Lưu dữ liệu vào database
         val ref = FirebaseDatabase.getInstance().getReference("Users")
         ref.child(uid!!)
             .setValue(hashMap)
             .addOnSuccessListener {
+                // Nếu lưu thành công
                 progressDialog.dismiss()
-                Toast.makeText(this, "Account created", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this@RegisterActivity, DashboardUserActivity::class.java))
-                finish()
+                Toast.makeText(this, "Tài khoản đã được tạo", Toast.LENGTH_SHORT).show()
+                startActivity(
+                    Intent(
+                        this@RegisterActivity,
+                        DashboardUserActivity::class.java
+                    )
+                ) // Mở DashboardUserActivity
+                finish() // Kết thúc RegisterActivity
             }
-            .addOnFailureListener {  e->
+            .addOnFailureListener { e ->
+                // Nếu lưu thất bại
                 progressDialog.dismiss()
-                Toast.makeText(this, "Failed saving user info due to ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "Lưu thông tin người dùng thất bại do ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
     }
 }

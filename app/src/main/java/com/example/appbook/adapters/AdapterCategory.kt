@@ -64,12 +64,12 @@ class AdapterCategory : RecyclerView.Adapter<AdapterCategory.HolderCategory>, Fi
             //confirm before delete
             val builder = AlertDialog.Builder(context)
             builder.setTitle("Delete")
-                .setMessage("Are sure you want to delete this category?")
-                .setPositiveButton("Confirm") { a, d ->
-                    Toast.makeText(context, "Deleting...", Toast.LENGTH_SHORT).show()
+                .setMessage("Bạn có chắc chắn muốn xóa danh mục này không?")
+                .setPositiveButton("Xác nhận") { a, d ->
+                    Toast.makeText(context, "Đang xoá...", Toast.LENGTH_SHORT).show()
                     deleteCategory(model, holder)
                 }
-                .setNegativeButton("Cancel") { a, d ->
+                .setNegativeButton("Huỷ") { a, d ->
                     a.dismiss()
                 }
                 .show()
@@ -92,10 +92,10 @@ class AdapterCategory : RecyclerView.Adapter<AdapterCategory.HolderCategory>, Fi
         ref.child(id)
             .removeValue()
             .addOnSuccessListener {
-                Toast.makeText(context, "Deleted...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Đã xoá", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e->
-                Toast.makeText(context, "unable to delete due to ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Không thể xóa do ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 

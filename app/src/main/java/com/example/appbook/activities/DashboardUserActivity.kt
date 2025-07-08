@@ -8,9 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import androidx.viewpager.widget.ViewPager
 import com.example.appbook.BooksUserFragment
-import com.example.appbook.activities.MainActivity
 import com.example.appbook.models.ModelCategory
 import com.example.appbook.databinding.ActivityDashboardUserBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -21,14 +19,16 @@ import com.google.firebase.database.ValueEventListener
 
 class DashboardUserActivity : AppCompatActivity() {
 
-    // ViewBinding
+    // View Binding
     private lateinit var binding: ActivityDashboardUserBinding
 
-    // Firebase
+    // Firebase Authentication
     private lateinit var firebaseAuth: FirebaseAuth
 
-    // Danh sách Category
+    // Danh sách các danh mục
     private lateinit var categoryArrayList: ArrayList<ModelCategory>
+
+    // Adapter cho ViewPager
     private lateinit var viewPagerAdapter: ViewPagerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,134 +36,152 @@ class DashboardUserActivity : AppCompatActivity() {
         binding = ActivityDashboardUserBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Init Firebase Auth
+        // Khởi tạo Firebase Auth
         firebaseAuth = FirebaseAuth.getInstance()
+
+        // Kiểm tra trạng thái đăng nhập
         checkUser()
 
-        setupWithViewPagerAdapter(binding.viewPager)
-        binding.tabLayout.setupWithViewPager(binding.viewPager)
+        // Thiết lập ViewPager và TabLayout
+        setupViewPager()
 
-        // Logout
-        binding.logoutBtn.setOnClickListener {
-            firebaseAuth.signOut()
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }
-
-        //handle click, open profile
-        binding.profileBtn.setOnClickListener {
-            startActivity(Intent(this, ProfileActivity::class.java))
-        }
+        // Xử lý sự kiện click
+        setupClickListeners()
     }
 
-
-    private fun setupWithViewPagerAdapter(viewPager: ViewPager) {
+    /**
+     * Thiết lập ViewPager và TabLayout
+     */
+    private fun setupViewPager() {
+        // Khởi tạo adapter cho ViewPager
         viewPagerAdapter = ViewPagerAdapter(
             supportFragmentManager,
             FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT,
             this
         )
 
-        // Init danh sách
+        // Khởi tạo danh sách danh mục
         categoryArrayList = ArrayList()
 
-        // Các category mặc định
-        val modelAll = ModelCategory("All", "01", 1, "")
-        val modelMostViewed = ModelCategory("Most Viewed", "02", 1, "")
-        val modelMostDownloaded = ModelCategory("Most Downloaded", "03", 1, "")
+        // Thêm các danh mục mặc định
+        addDefaultCategories()
 
-        // Thêm vào danh sách
-        categoryArrayList.add(modelAll)
-        categoryArrayList.add(modelMostViewed)
-        categoryArrayList.add(modelMostDownloaded)
+        // Load danh sách danh mục từ Firebase
+        loadCategoriesFromFirebase()
 
-        // Thêm các fragment mặc định
-        viewPagerAdapter.addFragment(
-            BooksUserFragment.Companion.newInstance(modelAll.id, modelAll.category, modelAll.uid),
-            modelAll.category
-        )
-        viewPagerAdapter.addFragment(
-            BooksUserFragment.Companion.newInstance(modelMostViewed.id, modelMostViewed.category, modelMostViewed.uid),
-            modelMostViewed.category
-        )
-        viewPagerAdapter.addFragment(
-            BooksUserFragment.Companion.newInstance(modelMostDownloaded.id, modelMostDownloaded.category, modelMostDownloaded.uid),
-            modelMostDownloaded.category
+        // Liên kết ViewPager với TabLayout
+        binding.viewPager.adapter = viewPagerAdapter
+        binding.tabLayout.setupWithViewPager(binding.viewPager)
+    }
+
+    /**
+     * Thêm các danh mục mặc định
+     */
+    private fun addDefaultCategories() {
+        val defaultCategories = listOf(
+            ModelCategory("All", "01", 1, ""),
+            ModelCategory("Most Viewed", "02", 1, ""),
+            ModelCategory("Most Downloaded", "03", 1, "")
         )
 
-        // Load từ Firebase
+        defaultCategories.forEach { model ->
+            categoryArrayList.add(model)
+            viewPagerAdapter.addFragment(
+                BooksUserFragment.newInstance(model.id, model.category, model.uid),
+                model.category
+            )
+        }
+    }
+
+    /**
+     * Load danh sách danh mục từ Firebase
+     */
+    private fun loadCategoriesFromFirebase() {
         val ref = FirebaseDatabase.getInstance().getReference("Categories")
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                for (ds in snapshot.children) {
-                    val model = ds.getValue(ModelCategory::class.java)
-                    if (model != null) {
+                snapshot.children.forEach { ds ->
+                    ds.getValue(ModelCategory::class.java)?.let { model ->
+                        // Thêm danh mục vào danh sách
                         categoryArrayList.add(model)
+
+                        // Thêm fragment tương ứng
                         viewPagerAdapter.addFragment(
-                            BooksUserFragment.Companion.newInstance(model.id, model.category, model.uid),
+                            BooksUserFragment.newInstance(model.id, model.category, model.uid),
                             model.category
                         )
                     }
                 }
+                // Cập nhật giao diện
                 viewPagerAdapter.notifyDataSetChanged()
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Xử lý lỗi nếu cần
+                // TODO: Xử lý lỗi khi cần thiết
             }
         })
-
-        // Gán adapter cho ViewPager
-        viewPager.adapter = viewPagerAdapter
     }
 
+    /**
+     * Xử lý sự kiện click
+     */
+    private fun setupClickListeners() {
+        // Đăng xuất
+        binding.logoutBtn.setOnClickListener {
+            firebaseAuth.signOut()
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
 
+        // Mở trang profile
+        binding.profileBtn.setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
+    }
 
+    /**
+     * Adapter cho ViewPager
+     */
     class ViewPagerAdapter(
         fm: FragmentManager,
         behavior: Int,
         private val context: Context
     ) : FragmentPagerAdapter(fm, behavior) {
 
-        private val fragmentsList: ArrayList<Fragment> = ArrayList()
-        private val fragmentTitleList: ArrayList<String> = ArrayList()
+        private val fragmentsList = ArrayList<Fragment>()
+        private val fragmentTitleList = ArrayList<String>()
 
-        override fun getCount(): Int {
-            return fragmentsList.size
-        }
+        override fun getCount(): Int = fragmentsList.size
 
-        override fun getItem(position: Int): Fragment {
-            return fragmentsList[position]
-        }
+        override fun getItem(position: Int): Fragment = fragmentsList[position]
 
-        override fun getPageTitle(position: Int): CharSequence {
-            return fragmentTitleList[position]
-        }
+        override fun getPageTitle(position: Int): CharSequence = fragmentTitleList[position]
 
+        /**
+         * Thêm fragment vào adapter
+         * @param fragment Fragment cần thêm
+         * @param title Tiêu đề hiển thị trên TabLayout
+         */
         fun addFragment(fragment: Fragment, title: String) {
             fragmentsList.add(fragment)
             fragmentTitleList.add(title)
         }
     }
 
-    //this activity can be opened with or without login, so hide logout and profile button when user not logged in
-
+    /**
+     * Kiểm tra trạng thái đăng nhập và cập nhật giao diện
+     */
     private fun checkUser() {
         val firebaseUser = firebaseAuth.currentUser
-        if (firebaseUser == null) {
-            //not logged in, user can stay in user dashboard without login too
-            binding.subTitleTv.text = "Not Logged In"
 
-            //hide profile, logout
+        if (firebaseUser == null) {
+            // Chưa đăng nhập
+            binding.subTitleTv.text = "Bạn chưa đăng nhập"
             binding.profileBtn.visibility = View.GONE
             binding.logoutBtn.visibility = View.GONE
         } else {
-            //logged in, get and show user info
-            val email = firebaseUser.email
-            //set to textview of toolbar
-            binding.subTitleTv.text = email
-
-            //show profile, logout
+            // Đã đăng nhập
+            binding.subTitleTv.text = firebaseUser.email
             binding.profileBtn.visibility = View.VISIBLE
             binding.logoutBtn.visibility = View.VISIBLE
         }

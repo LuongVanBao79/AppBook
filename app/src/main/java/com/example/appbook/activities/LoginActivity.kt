@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.appbook.activities.RegisterActivity
 import com.example.appbook.databinding.ActivityLoginBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -16,125 +15,135 @@ import com.google.firebase.database.ValueEventListener
 
 class LoginActivity : AppCompatActivity() {
 
-    // view binding
-
+    // View Binding để truy cập các thành phần giao diện người dùng
     private lateinit var binding: ActivityLoginBinding
 
-    // firebase auth
+    // Firebase Authentication để xác thực người dùng
     private lateinit var firebaseAuth: FirebaseAuth
 
-    //progress dialog
+    // ProgressDialog để hiển thị thông báo trong khi thực hiện các tác vụ
     private lateinit var progressDialog: ProgressDialog
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //init firebase auth
-
+        // Khởi tạo Firebase Authentication
         firebaseAuth = FirebaseAuth.getInstance()
 
-        //init progress dialog
+        // Khởi tạo ProgressDialog
         progressDialog = ProgressDialog(this)
-        progressDialog.setTitle("Please wait")
-        progressDialog.setCanceledOnTouchOutside(false)
+        progressDialog.setTitle("Vui lòng đợi") // Thiết lập tiêu đề
+        progressDialog.setCanceledOnTouchOutside(false) // Ngăn người dùng tắt bằng cách chạm ra ngoài
 
-        //handle click, not have account, goto register screen
+        // Xử lý sự kiện click vào TextView "Chưa có tài khoản? Đăng ký"
         binding.noAccountTv.setOnClickListener {
+            // Mở màn hình đăng ký (RegisterActivity)
             startActivity(Intent(this, RegisterActivity::class.java))
         }
 
-        //handle click, begin login
-
-        /*Steps
-        1 Input Data
-        2 Validate Data
-        3 Login - Firebase Auth
-        4 Check user type - Firebase Auth
-        if User - Move to user dashboard
-        if admin - Move to admin dashboard
+        /*
+        Các bước thực hiện đăng nhập:
+        1. Nhập dữ liệu (email, password)
+        2. Kiểm tra dữ liệu (validate)
+        3. Đăng nhập bằng Firebase Authentication
+        4. Kiểm tra loại người dùng (user/admin) trong Firebase Realtime Database
+            - Nếu là user: Chuyển đến màn hình DashboardUserActivity
+            - Nếu là admin: Chuyển đến màn hình DashboardAdminActivity
          */
 
+        // Xử lý sự kiện click vào nút "Đăng nhập"
         binding.loginBtn.setOnClickListener {
-            validateData()
+            validateData() // Kiểm tra dữ liệu trước khi đăng nhập
         }
 
+        // Xử lý sự kiện click vào TextView "Quên mật khẩu?"
         binding.forgotTv.setOnClickListener {
+            // Mở màn hình Quên mật khẩu (ForgotPasswordActivity)
             startActivity(Intent(this, ForgotPasswordActivity::class.java))
         }
     }
 
-    private var email = ""
-    private var password = ""
+    private var email = "" // Biến lưu trữ email
+    private var password = "" // Biến lưu trữ mật khẩu
 
+    // Hàm kiểm tra tính hợp lệ của dữ liệu nhập vào
     private fun validateData() {
-        // 1 Input Data
-        email = binding.emailEt.text.toString().trim()
-        password = binding.passwordEt.text.toString().trim()
+        // 1. Nhập dữ liệu
+        email = binding.emailEt.text.toString().trim() // Lấy email từ EditText và loại bỏ khoảng trắng
+        password = binding.passwordEt.text.toString().trim() // Lấy mật khẩu từ EditText và loại bỏ khoảng trắng
 
-        // 2 Validate Data
-        if(!Patterns.EMAIL_ADDRESS.matcher(email).matches()){
-            Toast.makeText(this, "Invalid email format ...", Toast.LENGTH_SHORT).show()
-        }
-        else if(password.isEmpty()){
-            Toast.makeText(this, "Enter password ...", Toast.LENGTH_SHORT).show()
-        }
-        else{
+        // 2. Kiểm tra dữ liệu
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            // Nếu email không đúng định dạng
+            Toast.makeText(this, "Định dạng email không hợp lệ...", Toast.LENGTH_SHORT).show()
+        } else if (password.isEmpty()) {
+            // Nếu mật khẩu trống
+            Toast.makeText(this, "Vui lòng nhập mật khẩu...", Toast.LENGTH_SHORT).show()
+        } else {
+            // Nếu dữ liệu hợp lệ, tiến hành đăng nhập
             loginUser()
         }
     }
 
+    // Hàm thực hiện đăng nhập
     private fun loginUser() {
-        // 3 Login - Firebase Auth
+        // 3. Đăng nhập bằng Firebase Authentication
 
-        // show progress
-        progressDialog.setMessage("Logging In ...")
-        progressDialog.show()
+        // Hiển thị ProgressDialog
+        progressDialog.setMessage("Đang đăng nhập...") // Thiết lập thông báo
+        progressDialog.show() // Hiển thị ProgressDialog
 
+        // Sử dụng Firebase Authentication để đăng nhập bằng email và mật khẩu
         firebaseAuth.signInWithEmailAndPassword(email, password)
             .addOnSuccessListener {
-                checkUser()
+                // Nếu đăng nhập thành công
+                checkUser() // Kiểm tra loại người dùng
             }
-            .addOnFailureListener { e->
-                progressDialog.dismiss()
-                Toast.makeText(this, "Login failed due to ${e.message}", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener { e ->
+                // Nếu đăng nhập thất bại
+                progressDialog.dismiss() // Ẩn ProgressDialog
+                Toast.makeText(this, "Đăng nhập thất bại do ${e.message}", Toast.LENGTH_SHORT).show() // Hiển thị thông báo lỗi
             }
     }
 
+    // Hàm kiểm tra loại người dùng (user/admin)
     private fun checkUser() {
-        progressDialog.setMessage("Checking User...")
+        progressDialog.setMessage("Đang kiểm tra người dùng...") // Thiết lập thông báo
 
-        val firebaseUser = firebaseAuth.currentUser!!
+        val firebaseUser = firebaseAuth.currentUser!! // Lấy thông tin người dùng hiện tại
 
-        var ref = FirebaseDatabase.getInstance().getReference("Users")
+        // Lấy tham chiếu đến node "Users" trong Firebase Realtime Database
+        val ref = FirebaseDatabase.getInstance().getReference("Users")
+        // Truy vấn thông tin người dùng dựa trên UID
         ref.child(firebaseUser.uid)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    progressDialog.dismiss()
-                    // get user type user or admin
+                    // Dữ liệu đã được truy xuất thành công
+                    progressDialog.dismiss() // Ẩn ProgressDialog
+
+                    // Lấy loại người dùng (user/admin) từ snapshot
                     val userType = snapshot.child("userType").value
-                    if(userType == "user"){
+                    if (userType == "user") {
+                        // Nếu là user, chuyển đến màn hình DashboardUserActivity
                         startActivity(Intent(this@LoginActivity, DashboardUserActivity::class.java))
-                        finish()
-                    }
-                    else if(userType == "admin"){
+                        finish() // Đóng Activity hiện tại
+                    } else if (userType == "admin") {
+                        // Nếu là admin, chuyển đến màn hình DashboardAdminActivity
                         startActivity(
                             Intent(
                                 this@LoginActivity,
                                 DashboardAdminActivity::class.java
                             )
                         )
-                        finish()
+                        finish() // Đóng Activity hiện tại
                     }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-
+                    // Xảy ra lỗi trong quá trình truy xuất dữ liệu
                 }
-
             })
     }
 }

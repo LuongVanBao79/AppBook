@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.view.menu.ListMenuItemView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.appbook.MyApplication
@@ -18,7 +17,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import kotlin.concurrent.fixedRateTimer
 
 class AdapterComment: RecyclerView.Adapter<AdapterComment.HolderComment> {
     //context
@@ -71,22 +69,47 @@ class AdapterComment: RecyclerView.Adapter<AdapterComment.HolderComment> {
         loadUserDetails(model, holder)
 
         //handle click, show dialog to delete comment
-        holder.itemView.setOnClickListener {
-            /*Requirements to delete a comment
+        /*holder.itemView.setOnClickListener {
+            *//*Requirements to delete a comment
             * 1 User must be logged in
-            * 2 uid in comment (to be deleted) must be same as uid of current user i.e. user can delete only his own comment*/
+            * 2 uid in comment (to be deleted) must be same as uid of current user i.e. user can delete only his own comment*//*
             if(firebaseAuth.currentUser !=null && firebaseAuth.uid == uid){
                 deleteCommmentDialog(model, holder)
             }
+        }*/
+        holder.itemView.setOnClickListener {
+            if (firebaseAuth.currentUser != null) {
+                val currentUid = firebaseAuth.uid
+
+                val userRef = FirebaseDatabase.getInstance().getReference("Users")
+                userRef.child(currentUid!!)
+                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            val userType = snapshot.child("userType").value.toString()
+
+                            // Nếu là admin hoặc là chủ comment thì được phép xóa
+                            if (userType == "admin" || currentUid == uid) {
+                                deleteCommmentDialog(model, holder)
+                            } else {
+                                Toast.makeText(context, "Bạn không có quyền xóa bình luận này", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            Toast.makeText(context, "Lỗi: ${error.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    })
+            }
         }
+
     }
 
     private fun deleteCommmentDialog(model: ModelComment, holder: HolderComment) {
         //alert dialog
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Delete Comment")
-            .setMessage("Are you sure you want to delete this comment?")
-            .setPositiveButton("DELETE") { d, e ->
+            .setMessage("Bạn có chắc chắn muốn xóa bình luận này không?")
+            .setPositiveButton("Xoá") { d, e ->
                 val bookId = model.bookId
                 val commentId = model.id
 
@@ -95,14 +118,14 @@ class AdapterComment: RecyclerView.Adapter<AdapterComment.HolderComment> {
                 ref.child(bookId).child("Comments").child(commentId)
                     .removeValue()
                     .addOnSuccessListener {
-                        Toast.makeText(context, "Comment deleted...", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Bình luận đã được xóa...", Toast.LENGTH_SHORT).show()
                     }
                     .addOnFailureListener { e->
                         //failed to delete
-                        Toast.makeText(context, "Failed to delete comment due to ${e.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Xóa bình luận thất bại do ${e.message}", Toast.LENGTH_SHORT).show()
                     }
             }
-            .setNegativeButton("CANCEL") { d, e ->
+            .setNegativeButton("Huỷ") { d, e ->
                 d.dismiss()
             }
             .show()

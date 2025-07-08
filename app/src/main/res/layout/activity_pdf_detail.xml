@@ -29,7 +29,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Book Details"
+            android:text="Chi tiết sách"
             android:layout_centerInParent="true"
             android:textColor="@color/white"
             android:textStyle="bold"/>
@@ -38,6 +38,7 @@
 
     <!--All content under scrollview-->
     <ScrollView
+        android:id="@+id/mainScrollView"
         android:layout_above="@id/bookOptionsLl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -240,7 +241,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Comments"
+                    android:text="Các bình luận"
                     android:padding="5dp"
                     android:textColor="@color/black"
                     android:textSize="16sp"/>
@@ -283,7 +284,7 @@
             android:id="@+id/readBookBtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Read"
+            android:text="Đọc sách"
             android:textSize="10sp"
             android:drawableTop="@drawable/ic_book_white"
             android:layout_weight="1"/>
@@ -293,7 +294,7 @@
             android:id="@+id/downloadBookBtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Download"
+            android:text="Tải Sách"
             android:textSize="10sp"
             android:drawableTop="@drawable/ic_download_white"
             android:layout_weight="1"/>
@@ -304,7 +305,7 @@
             android:layout_width="0dp"
             android:drawableTop="@drawable/ic_favorite_white"
             android:layout_height="wrap_content"
-            android:text="Add To Favorite"
+            android:text="Thêm vào yêu thích"
             android:textSize="10sp"
             android:layout_weight="1"/>
     </LinearLayout>

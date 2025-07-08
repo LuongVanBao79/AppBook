@@ -7,49 +7,38 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.view.ContentInfo
 import android.view.Menu
-import androidx.activity.enableEdgeToEdge
+import android.widget.PopupMenu
+import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
+import com.cloudinary.android.MediaManager
+import com.cloudinary.utils.ObjectUtils
 import com.example.appbook.MyApplication
 import com.example.appbook.R
-import com.example.appbook.activities.ProfileActivity
 import com.example.appbook.databinding.ActivityProfileEditBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import android.widget.PopupMenu
-import android.widget.Toast
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.contract.ActivityResultContracts
-import com.cloudinary.android.MediaManager
-import com.cloudinary.utils.ObjectUtils
-import com.google.android.gms.tasks.Task
-import com.google.firebase.storage.FirebaseStorage
-import okhttp3.HttpUrl
-import okhttp3.Interceptor
-import java.util.SimpleTimeZone
 import java.util.UUID
-
 
 class ProfileEditActivity : AppCompatActivity() {
 
-    //view binding
+    // View Binding để truy cập các thành phần giao diện người dùng
     private lateinit var binding: ActivityProfileEditBinding
 
-    //firebase auth
+    // Firebase Authentication
     private lateinit var firebaseAuth: FirebaseAuth
 
-    //image uri (which we will pick)
+    // URI của ảnh (sẽ được chọn từ Camera hoặc Gallery)
     private var imageUri: Uri? = null
 
-    //progress dialog
+    // Progress dialog để hiển thị thông báo trong quá trình xử lý
     private lateinit var progressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,98 +46,81 @@ class ProfileEditActivity : AppCompatActivity() {
         binding = ActivityProfileEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //setup progress dialog
-        progressDialog = ProgressDialog(this)
-        progressDialog.setTitle("Please wait")
-        progressDialog.setCanceledOnTouchOutside(false)
+        // Thiết lập progress dialog
+        progressDialog = ProgressDialog(this).apply {
+            setTitle("Vui lòng đợi")
+            setCanceledOnTouchOutside(false)
+        }
 
+        // Khởi tạo Firebase Authentication
         firebaseAuth = FirebaseAuth.getInstance()
+
+        // Tải thông tin người dùng
         loadUserInfo()
 
-        //handle click, go back
+        // Xử lý sự kiện click, quay lại
         binding.backBtn.setOnClickListener {
             onBackPressed()
         }
 
-        //handle click, pick image from camera/gallery
+        // Xử lý sự kiện click, chọn ảnh từ Camera/Gallery
         binding.profileIv.setOnClickListener {
             showImageAttachMenu()
         }
 
-        //handle click, begin update profile
+        // Xử lý sự kiện click, bắt đầu cập nhật profile
         binding.updateBtn.setOnClickListener {
             validateData()
         }
     }
 
-    private var name= ""
+    private var name = ""
+
+    // Hàm kiểm tra dữ liệu
     private fun validateData() {
-        //get data
+        // Lấy dữ liệu
         name = binding.nameEt.text.toString().trim()
 
-        //validate data
-        if(name.isEmpty()){
-            //name not entered
-            Toast.makeText(this, "Enter name", Toast.LENGTH_SHORT).show()
-        }
-        else{
-            //name is entered
-            if(imageUri == null){
-                //need to update without image
+        // Kiểm tra dữ liệu
+        if (name.isEmpty()) {
+            // Nếu tên không được nhập
+            Toast.makeText(this, "Vui lòng nhập tên", Toast.LENGTH_SHORT).show()
+        } else {
+            // Nếu tên đã được nhập
+            if (imageUri == null) {
+                // Nếu không có ảnh, cập nhật profile mà không cần ảnh
                 updateProfile("")
-            }
-            else{
-                //need to update with image
+            } else {
+                // Nếu có ảnh, tải ảnh lên
                 uploadImage()
             }
         }
     }
 
-    /*private fun uploadImage() {
-        progressDialog.setMessage("Uploading profile image")
-        progressDialog.show()
-
-        //image path and name, use uid to replace previous
-        val filePathAndName = "ProfileImages/" + firebaseAuth.uid
-        //storage reference
-        val reference = FirebaseStorage.getInstance().getReference(filePathAndName)
-        reference.putFile(imageUri!!)
-            .addOnSuccessListener { taskSnapshot ->
-                //image uploaded, get url of uploaded image
-                val uriTask: Task<Uri> = taskSnapshot.storage.downloadUrl
-                while(!uriTask.isSuccessful);
-                val uploadedImageUrl = "${uriTask.result}"
-
-                updateProfile(uploadedImageUrl)
-            }
-            .addOnFailureListener { e->
-                //faild to upload image
-                progressDialog.dismiss()
-                Toast.makeText(this, "Faild to upload image due to ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-    }*/
-
+    // Hàm tải ảnh lên Cloudinary
     private fun uploadImage() {
-        progressDialog.setMessage("Uploading profile image")
+        progressDialog.setMessage("Đang tải ảnh profile")
         progressDialog.show()
 
         val inputStream = contentResolver.openInputStream(imageUri!!)
         if (inputStream == null) {
             progressDialog.dismiss()
-            Toast.makeText(this, "Cannot open image", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Không thể mở ảnh", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val requestId = UUID.randomUUID().toString() // unique ID for the image
+        val requestId = UUID.randomUUID().toString() // Tạo ID duy nhất cho ảnh
 
         Thread {
             try {
                 val cloudinary = MediaManager.get().cloudinary
-                val uploadResult = cloudinary.uploader().upload(inputStream, ObjectUtils.asMap(
-                    "folder", "ProfileImages/",
-                    "public_id", firebaseAuth.uid, // use UID to overwrite previous
-                    "resource_type", "image"
-                ))
+                val uploadResult = cloudinary.uploader().upload(
+                    inputStream, ObjectUtils.asMap(
+                        "folder", "ProfileImages/",
+                        "public_id", firebaseAuth.uid, // Sử dụng UID để ghi đè ảnh cũ
+                        "resource_type", "image"
+                    )
+                )
 
                 val uploadedImageUrl = uploadResult["secure_url"] as String
 
@@ -159,100 +131,107 @@ class ProfileEditActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 runOnUiThread {
                     progressDialog.dismiss()
-                    Toast.makeText(this, "Failed to upload image due to ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Không thể tải ảnh lên do ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }.start()
     }
 
-
+    // Hàm cập nhật profile lên Firebase
     private fun updateProfile(uploadedImageUrl: String) {
-        progressDialog.setMessage("Updating profile...")
+        progressDialog.setMessage("Đang cập nhật profile...")
 
-        //setup info to update to db
+        // Thiết lập thông tin để cập nhật lên database
         val hashmap: HashMap<String, Any> = HashMap()
-        hashmap["name"] = "$name"
-        if(imageUri != null){
+        hashmap["name"] = name
+        if (imageUri != null) {
             hashmap["profileImage"] = uploadedImageUrl
         }
 
-        //update to db
+        // Cập nhật lên database
         val reference = FirebaseDatabase.getInstance().getReference("Users")
         reference.child(firebaseAuth.uid!!)
             .updateChildren(hashmap)
             .addOnSuccessListener {
-                //profile updated
+                // Nếu profile được cập nhật thành công
                 progressDialog.dismiss()
-                Toast.makeText(this, "Profile updated", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Profile đã được cập nhật", Toast.LENGTH_SHORT).show()
+                finish()
             }
-            .addOnFailureListener {e->
-                //failed to upload image
+            .addOnFailureListener { e ->
+                // Nếu cập nhật thất bại
                 progressDialog.dismiss()
-                Toast.makeText(this, "Failed to update profile due to ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "Không thể cập nhật profile do ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
     }
 
+    // Hàm tải thông tin người dùng
     private fun loadUserInfo() {
-        //db reference to load user info
+        // Tham chiếu đến node "Users" trong Firebase
         val ref = FirebaseDatabase.getInstance().getReference("Users")
         ref.child(firebaseAuth.uid!!)
-            .addValueEventListener(object : ValueEventListener{
+            .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    //get user info
-                    val name = "${snapshot.child("name").value}"
-                    val profileImage = "${snapshot.child("profileImage").value}"
-                    val timestamp = "${snapshot.child("timestamp").value}"
+                    // Lấy thông tin người dùng
+                    val name = snapshot.child("name").value.toString()
+                    val profileImage = snapshot.child("profileImage").value.toString()
 
-                    //convert timestamp to peroper date format
-                    val formattedDate = MyApplication.formatTimeStamp(timestamp.toLong())
-
-                    //set data
+                    // Set dữ liệu lên view
                     binding.nameEt.setText(name)
 
-                    //set image
-                    try{
+                    // Tải ảnh
+                    try {
                         Glide.with(this@ProfileEditActivity)
                             .load(profileImage)
                             .placeholder(R.drawable.ic_person_gray)
                             .into(binding.profileIv)
-                    }catch (e: Exception){
-
+                    } catch (e: Exception) {
+                        // Xử lý lỗi nếu có
                     }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-
+                    // Xử lý lỗi nếu có
                 }
             })
     }
 
-    private fun showImageAttachMenu(){
-        /*show popup menu with options Camera, Gallery to pick image*/
+    // Hàm hiển thị menu chọn ảnh (Camera/Gallery)
+    private fun showImageAttachMenu() {
+        /* Hiển thị popup menu với các tùy chọn Camera, Gallery để chọn ảnh */
 
-        //setup popup menu
+        // Thiết lập popup menu
         val popupMenu = PopupMenu(this, binding.profileIv)
         popupMenu.menu.add(Menu.NONE, 0, 0, "Camera")
         popupMenu.menu.add(Menu.NONE, 1, 1, "Gallery")
         popupMenu.show()
 
-        //handle popup menu item click
+        // Xử lý sự kiện click vào item trong popup menu
         popupMenu.setOnMenuItemClickListener { item ->
-            //get id of clicked item
+            // Lấy ID của item được click
             val id = item.itemId
-            if(id == 0){
-                //Camera clicked
+            if (id == 0) {
+                // Camera được click
                 pickImageCamera()
-            }
-            else if(id == 1){
-                //Gallery clicked
+            } else if (id == 1) {
+                // Gallery được click
                 pickImageGallery()
             }
             true
         }
     }
 
-    private fun ProfileEditActivity.pickImageCamera() {
-        //intent to pick image from camera
+    // Hàm chọn ảnh từ Camera
+    private fun pickImageCamera() {
+        // Intent để chọn ảnh từ Camera
         val values = ContentValues()
         values.put(MediaStore.Images.Media.TITLE, "Temp_Title")
         values.put(MediaStore.Images.Media.DESCRIPTION, "Temp_Description")
@@ -264,50 +243,46 @@ class ProfileEditActivity : AppCompatActivity() {
         cameraActivityResultLauncher.launch(intent)
     }
 
-    private fun ProfileEditActivity.pickImageGallery() {
-        //intent to pick image from gallery
+    // Hàm chọn ảnh từ Gallery
+    private fun pickImageGallery() {
+        // Intent để chọn ảnh từ Gallery
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         galleryActivityResultLauncher.launch(intent)
     }
 
-    //used to handle result of camera intent (new way in replacement of startactivityforresults)
+    // Xử lý kết quả trả về từ Camera Intent
     private val cameraActivityResultLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
         ActivityResultCallback<ActivityResult> { result ->
-            //get uri of image
-            if(result.resultCode == Activity.RESULT_OK){
+            // Lấy URI của ảnh
+            if (result.resultCode == Activity.RESULT_OK) {
+                // Nếu kết quả là OK
                 val data = result.data
-                //set to imageview
+                // Set ảnh lên imageview
                 binding.profileIv.setImageURI(imageUri)
-            }
-            else{
-                //cancelled
-                Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show()
+            } else {
+                // Nếu bị hủy
+                Toast.makeText(this, "Đã hủy", Toast.LENGTH_SHORT).show()
             }
         }
     )
 
-    //used to handle result of gallery intent (new way in replacement of startactivityforresults)
+    // Xử lý kết quả trả về từ Gallery Intent
     private val galleryActivityResultLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
-        ActivityResultCallback<ActivityResult>{ result ->
-            //get uri of image
-            if(result.resultCode == Activity.RESULT_OK){
+        ActivityResultCallback<ActivityResult> { result ->
+            // Lấy URI của ảnh
+            if (result.resultCode == Activity.RESULT_OK) {
+                // Nếu kết quả là OK
                 val data = result.data
                 imageUri = data!!.data
-                //set to imageview
+                // Set ảnh lên imageview
                 binding.profileIv.setImageURI(imageUri)
-            }
-            else{
-                //cancelled
-                Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show()
+            } else {
+                // Nếu bị hủy
+                Toast.makeText(this, "Đã hủy", Toast.LENGTH_SHORT).show()
             }
         }
     )
 }
-
-
-
-
-

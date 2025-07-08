@@ -4,15 +4,11 @@ import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.example.appbook.MyApplication
 import com.example.appbook.R
-import com.example.appbook.adapters.AdapterCategory
 import com.example.appbook.adapters.AdapterPdfFavorite
 import com.example.appbook.databinding.ActivityProfileBinding
 import com.example.appbook.models.ModelPdf
@@ -25,19 +21,22 @@ import com.google.firebase.database.ValueEventListener
 
 class ProfileActivity : AppCompatActivity() {
 
-    //view binding
+    // View Binding để truy cập các thành phần giao diện người dùng
     private lateinit var binding: ActivityProfileBinding
 
-    //firebase auth
+    // Firebase Authentication
     private lateinit var firebaseAuth: FirebaseAuth
-    //firebase current user
+
+    // Firebase Current User
     private lateinit var firebaseUser: FirebaseUser
 
-    //arraylist to hold books
+    // ArrayList để lưu trữ danh sách các sách yêu thích
     private lateinit var booksArrayList: ArrayList<ModelPdf>
+
+    // Adapter để hiển thị danh sách các sách yêu thích
     private lateinit var adapterPdfFavorite: AdapterPdfFavorite
 
-    //progress dialog
+    // Progress dialog để hiển thị thông báo trong quá trình xử lý
     private lateinit var progressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,158 +44,169 @@ class ProfileActivity : AppCompatActivity() {
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //reset to default values
+        // Reset các text view về giá trị mặc định
         binding.accountTypeTv.text = "N/A"
         binding.memberDateTv.text = "N/A"
         binding.favoriteBookCountTv.text = "N/A"
         binding.accountStatusTv.text = "N/A"
 
+        // Khởi tạo Firebase Authentication
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseUser = firebaseAuth.currentUser!!
 
-        //init /setup progress dialog
-        progressDialog = ProgressDialog(this)
-        progressDialog.setTitle("Please wait...")
-        progressDialog.setCanceledOnTouchOutside(false)
+        // Khởi tạo progress dialog
+        progressDialog = ProgressDialog(this).apply {
+            setTitle("Vui lòng đợi...")
+            setCanceledOnTouchOutside(false)
+        }
 
+        // Tải thông tin người dùng
         loadUserInfo()
+
+        // Tải danh sách các sách yêu thích
         loadFavoriteBooks()
 
-        //handle click, go back
+        // Xử lý sự kiện click, quay lại
         binding.backBtn.setOnClickListener {
             onBackPressed()
         }
 
-        //handle click, open edit profile
+        // Xử lý sự kiện click, mở trang chỉnh sửa profile
         binding.profileEditBtn.setOnClickListener {
             startActivity(Intent(this, ProfileEditActivity::class.java))
         }
 
-        //handle click, verify user if not
+        // Xử lý sự kiện click, xác minh email nếu chưa xác minh
         binding.accountStatusTv.setOnClickListener {
-            if(firebaseUser.isEmailVerified){
-                //user is verified
-                Toast.makeText(this, "Already verified...!", Toast.LENGTH_SHORT).show()
-            }
-            else{
-                //User isn't verified, show confirmation dialog before verification
+            if (firebaseUser.isEmailVerified) {
+                // Nếu email đã được xác minh
+                Toast.makeText(this, "Email đã được xác minh!", Toast.LENGTH_SHORT).show()
+            } else {
+                // Nếu email chưa được xác minh, hiển thị dialog xác nhận
                 emailVerificationDialog()
             }
         }
     }
 
+    // Hàm hiển thị dialog xác nhận gửi email xác minh
     private fun emailVerificationDialog() {
-        //show confirmation dialog
+        // Hiển thị dialog xác nhận
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Verify Email")
-            .setMessage("Are you sure you want to send email verification instructions to your email ${firebaseUser.email}")
-            .setPositiveButton("SEND") { d, e->
-                sendEmailVerification()
+        builder.setTitle("Xác minh Email")
+            .setMessage("Bạn có chắc chắn muốn gửi hướng dẫn xác minh email đến ${firebaseUser.email}?")
+            .setPositiveButton("GỬI") { d, e ->
+                sendEmailVerification() // Gửi email xác minh
             }
-            .setNegativeButton("CANCEL") { d, e ->
-                d.dismiss()
+            .setNegativeButton("HỦY") { d, e ->
+                d.dismiss() // Đóng dialog
             }
             .show()
     }
 
+    // Hàm gửi email xác minh
     private fun sendEmailVerification() {
-        //show progress dialog
-        progressDialog.setMessage("Sending email verification instructions to email ${firebaseUser.email}")
+        // Hiển thị progress dialog
+        progressDialog.setMessage("Đang gửi hướng dẫn xác minh email đến ${firebaseUser.email}")
         progressDialog.show()
 
-        //send instructions
+        // Gửi hướng dẫn xác minh
         firebaseUser.sendEmailVerification()
             .addOnSuccessListener {
+                // Nếu gửi thành công
                 progressDialog.dismiss()
-                Toast.makeText(this, "Instructions sent! check your email ${firebaseUser.email}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "Hướng dẫn đã được gửi! Vui lòng kiểm tra email ${firebaseUser.email}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
-            .addOnFailureListener { e->
+            .addOnFailureListener { e ->
+                // Nếu gửi thất bại
                 progressDialog.dismiss()
-                Toast.makeText(this, "Failed to send due to ${e.message}!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Gửi thất bại do ${e.message}!", Toast.LENGTH_SHORT).show()
             }
     }
 
+    // Hàm tải thông tin người dùng từ Firebase
     private fun loadUserInfo() {
-        //check if user is verified or not, changes may effect after re login when you verify email
-        if(firebaseUser.isEmailVerified){
-            binding.accountStatusTv.text = "Verified"
-        }
-        else{
-            binding.accountStatusTv.text = "Not Verified"
-        }
+        // Kiểm tra xem email đã được xác minh hay chưa
+        binding.accountStatusTv.text =
+            if (firebaseUser.isEmailVerified) "Đã xác minh" else "Chưa xác minh"
 
-
-        //db reference to load user info
+        // Tham chiếu đến node "Users" trong Firebase
         val ref = FirebaseDatabase.getInstance().getReference("Users")
         ref.child(firebaseAuth.uid!!)
-            .addValueEventListener(object : ValueEventListener{
+            .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    //get user info
-                    val email = "${snapshot.child("email").value}"
-                    val name = "${snapshot.child("name").value}"
-                    val profileImage = "${snapshot.child("profileImage").value}"
-                    val timestamp = "${snapshot.child("timestamp").value}"
-                    val uid = "${snapshot.child("uid").value}"
-                    val userType = "${snapshot.child("userType").value}"
+                    // Lấy thông tin người dùng từ snapshot
+                    val email = snapshot.child("email").value.toString()
+                    val name = snapshot.child("name").value.toString()
+                    val profileImage = snapshot.child("profileImage").value.toString()
+                    val timestamp = snapshot.child("timestamp").value.toString()
+                    val userType = snapshot.child("userType").value.toString()
 
-                    //convert timestamp to peroper date format
+                    // Chuyển đổi timestamp sang định dạng ngày tháng
                     val formattedDate = MyApplication.formatTimeStamp(timestamp.toLong())
 
-                    //set data
+                    // Set thông tin lên view
                     binding.nameTv.text = name
                     binding.emailTv.text = email
                     binding.memberDateTv.text = formattedDate
                     binding.accountTypeTv.text = userType
 
-                    //set image
-                    try{
+                    // Tải ảnh profile
+                    try {
                         Glide.with(this@ProfileActivity)
                             .load(profileImage)
                             .placeholder(R.drawable.ic_person_gray)
                             .into(binding.profileIv)
-                    }catch (e: Exception){
-
+                    } catch (e: Exception) {
+                        // Xử lý lỗi nếu có
                     }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-
+                    // Xử lý lỗi nếu có
                 }
             })
     }
 
+    // Hàm tải danh sách các sách yêu thích từ Firebase
     private fun loadFavoriteBooks() {
-        //init arraylist
-        booksArrayList = ArrayList();
+        // Khởi tạo arraylist
+        booksArrayList = ArrayList()
 
+        // Tham chiếu đến node "Favorites" của người dùng trong Firebase
         val ref = FirebaseDatabase.getInstance().getReference("Users")
         ref.child(firebaseAuth.uid!!).child("Favorites")
-            .addValueEventListener(object : ValueEventListener{
+            .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    //clear arraylist, before starting adding data
+                    // Xóa arraylist trước khi thêm dữ liệu mới
                     booksArrayList.clear()
-                    for(ds in snapshot.children){
-                        //get only id of the books, rest of the info we have loaded in adapter class
-                        val bookId = "${ds.child("bookId").value}"
+                    for (ds in snapshot.children) {
+                        // Lấy bookId từ snapshot
+                        val bookId = ds.child("bookId").value.toString()
 
-                        //set to model
+                        // Tạo model
                         val modelPdf = ModelPdf()
-                        modelPdf.id = bookId
+                        modelPdf.id = bookId // Chỉ gán bookId, các thông tin khác sẽ được tải trong Adapter
 
-                        //add model to list
+                        // Thêm model vào list
                         booksArrayList.add(modelPdf)
                     }
-                    //set number of favorite books
+
+                    // Set số lượng sách yêu thích
                     binding.favoriteBookCountTv.text = "${booksArrayList.size}"
 
-                    //setup adapter
+                    // Thiết lập adapter
                     adapterPdfFavorite = AdapterPdfFavorite(this@ProfileActivity, booksArrayList)
-                    //set adapter to recyclerview
+
+                    // Set adapter cho recyclerview
                     binding.favoriteRv.adapter = adapterPdfFavorite
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-
+                    // Xử lý lỗi nếu có
                 }
             })
     }

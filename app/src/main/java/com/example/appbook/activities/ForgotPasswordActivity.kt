@@ -1,83 +1,82 @@
 package com.example.appbook.activities
 
-import android.app.ProgressDialog
 import android.os.Bundle
 import android.util.Patterns
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.example.appbook.R
 import com.example.appbook.databinding.ActivityForgotPasswordBinding
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 
 class ForgotPasswordActivity : AppCompatActivity() {
 
-    //view binding
     private lateinit var binding: ActivityForgotPasswordBinding
-
-    //firebase auth
     private lateinit var firebaseAuth: FirebaseAuth
-    //progress dialog
-    private lateinit var progressDialog: ProgressDialog
+    private lateinit var email: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityForgotPasswordBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //init firebase auth
         firebaseAuth = FirebaseAuth.getInstance()
 
-        //init/setup progress dialog
-        progressDialog = ProgressDialog(this)
-        progressDialog.setTitle("Vui long doi ...")
-        progressDialog.setCanceledOnTouchOutside(false)
+        setupClickListeners()
+    }
 
-        //handle click, go back
+    /**
+     * Gán các sự kiện click cho nút
+     */
+    private fun setupClickListeners() {
         binding.backBtn.setOnClickListener {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
 
-        //handle click, begin password revovery process
         binding.submitBtn.setOnClickListener {
-            validateData()
+            validateEmailInput()
         }
     }
 
-    private var email = ""
-    private fun validateData() {
-        //get data
+    /**
+     * Kiểm tra định dạng email trước khi gửi yêu cầu
+     */
+    private fun validateEmailInput() {
         email = binding.emailEt.text.toString().trim()
 
-        //validate data
-        if(email.isEmpty()){
-            Toast.makeText(this, "Enter email...", Toast.LENGTH_SHORT).show()
-        }
-        else if(!Patterns.EMAIL_ADDRESS.matcher(email).matches()){
-            Toast.makeText(this, "Invalid email pattern...", Toast.LENGTH_SHORT).show()
-        }
-        else{
-            recoverPassword()
+        when {
+            email.isEmpty() -> {
+                showMessage("Vui lòng nhập địa chỉ email.")
+            }
+
+            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+                showMessage("Địa chỉ email không hợp lệ.")
+            }
+
+            else -> {
+                sendPasswordResetEmail()
+            }
         }
     }
 
-    private fun recoverPassword() {
-        //show progress
-        progressDialog.setMessage("Sending password reset instructions to $email")
-        progressDialog.show()
+    /**
+     * Gửi email đặt lại mật khẩu qua Firebase
+     */
+    private fun sendPasswordResetEmail() {
+        // Hiển thị thông báo tạm thời
+        showMessage("Đang gửi hướng dẫn đến $email...")
 
         firebaseAuth.sendPasswordResetEmail(email)
             .addOnSuccessListener {
-                //sent
-                progressDialog.dismiss()
-                Toast.makeText(this, "Instructions sent to \n$email", Toast.LENGTH_SHORT).show()
+                showMessage("Hướng dẫn đã được gửi đến:\n$email")
             }
-            .addOnFailureListener { e->
-                //failed
-                progressDialog.dismiss()
-                Toast.makeText(this, "Failed to send due to ${e.message}", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener { e ->
+                showMessage("Gửi thất bại: ${e.message}")
             }
+    }
+
+    /**
+     * Hiển thị thông báo cho người dùng bằng Snackbar
+     */
+    private fun showMessage(message: String) {
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
     }
 }

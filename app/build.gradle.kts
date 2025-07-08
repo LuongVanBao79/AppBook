@@ -57,12 +57,11 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.storage)
     implementation(libs.cloudinary.android)
-    implementation("com.cloudinary:cloudinary-android:1.29.0")
 
+    implementation("com.cloudinary:cloudinary-android:1.29.0")
     implementation ("com.github.DImuthuUpe:AndroidPdfViewer:3.1.0-beta.1")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-
     implementation ("com.github.bumptech.glide:glide:4.16.0")
 
 

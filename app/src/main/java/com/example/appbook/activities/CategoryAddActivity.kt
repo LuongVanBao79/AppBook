@@ -1,89 +1,92 @@
 package com.example.appbook.activities
 
-import android.app.ProgressDialog
+import android.app.AlertDialog
 import android.os.Bundle
-import android.widget.Toast
+import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import com.example.appbook.databinding.ActivityCategoryAddBinding
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
+/**
+ * Activity dùng để thêm danh mục sách vào Firebase Database
+ */
 class CategoryAddActivity : AppCompatActivity() {
 
-    //view binding
     private lateinit var binding: ActivityCategoryAddBinding
-    //firebase auth
     private lateinit var firebaseAuth: FirebaseAuth
-
-    //progress dialog
-    private lateinit var progressDialog: ProgressDialog
-
+    private lateinit var loadingDialog: AlertDialog
+    private var category: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCategoryAddBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //init //firebase auth
         firebaseAuth = FirebaseAuth.getInstance()
+        initLoadingDialog()
 
-        //configure progress dialog
-        progressDialog = ProgressDialog(this)
-        progressDialog.setTitle("Vui lòng đợi chút ...")
-        progressDialog.setCanceledOnTouchOutside(false)
-
-        //handle click, go back
         binding.backBtn.setOnClickListener {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
-        //handle click, begin upload category
+
         binding.submitBtn.setOnClickListener {
-            validateData()
+            validateCategoryInput()
         }
     }
 
-    private var category = ""
+    /**
+     * Tạo AlertDialog hiện vòng quay loading
+     */
+    private fun initLoadingDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(
+            com.example.appbook.R.layout.dialog_loading,
+            null
+        )
+        loadingDialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+    }
 
-    private fun validateData() {
-        //validate data
-
-        //get data
+    /**
+     * Kiểm tra tên danh mục trước khi thêm
+     */
+    private fun validateCategoryInput() {
         category = binding.categoryEt.text.toString().trim()
 
-        //validate data
-        if(category.isEmpty()){
-            Toast.makeText(this, "Nhập danh mục", Toast.LENGTH_SHORT).show()
+        if (category.isEmpty()) {
+            Snackbar.make(binding.root, "Vui lòng nhập tên danh mục", Snackbar.LENGTH_SHORT).show()
         } else {
-            addCategoryFirebase()
+            addCategoryToFirebase()
         }
     }
 
-    private fun addCategoryFirebase() {
-        //Show progress
-        progressDialog.show()
-        // get timestamp
+    /**
+     * Thêm danh mục vào Firebase
+     */
+    private fun addCategoryToFirebase() {
+        loadingDialog.show()
+
         val timestamp = System.currentTimeMillis()
+        val categoryData = hashMapOf<String, Any>(
+            "id" to "$timestamp",
+            "category" to category,
+            "timestamp" to timestamp,
+            "uid" to (firebaseAuth.uid ?: "")
+        )
 
-        //setup data to add in firebase db
-        val hashMap = HashMap<String, Any>()
-        hashMap["id"] = "$timestamp"
-        hashMap["category"] = category
-        hashMap["timestamp"] = timestamp
-        hashMap["uid"] = "${firebaseAuth.uid}"
-
-        //add to firebase db: Database root > category > categoryid > category infor
-        val ref = FirebaseDatabase.getInstance().getReference("Categories")
-        ref.child("$timestamp")
-            .setValue(hashMap)
+        FirebaseDatabase.getInstance().getReference("Categories")
+            .child("$timestamp")
+            .setValue(categoryData)
             .addOnSuccessListener {
-                progressDialog.dismiss()
-                Toast.makeText(this, "Thêm thành công", Toast.LENGTH_SHORT).show()
+                loadingDialog.dismiss()
+                Snackbar.make(binding.root, "Thêm danh mục thành công", Snackbar.LENGTH_SHORT).show()
             }
-            .addOnFailureListener { e->
-                progressDialog.dismiss()
-                Toast.makeText(this, "Failed to add due to ${e.message}", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener { e ->
+                loadingDialog.dismiss()
+                Snackbar.make(binding.root, "Thêm thất bại: ${e.message}", Snackbar.LENGTH_LONG).show()
             }
     }
-
-
 }

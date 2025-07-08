@@ -23,7 +23,7 @@
         android:layout_below="@id/iconIv"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
-        android:text="Welcome to Book App"
+        android:text="Chào mừng đến với Sách Hay"
         android:textStyle="bold"
         android:textColor="@color/black"
         android:textSize="16sp"/>
@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:background="@drawable/shape_button01"
-        android:text="Login"
+        android:text="Đăng nhập"
         android:layout_above="@id/skipBtn"
         android:textColor="@color/white"/>
 
@@ -43,7 +43,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:text="Continue without login"
+        android:text="Tiếp tục mà không cần đăng nhập"
         android:textColor="@color/purple_500"
         android:background="@drawable/shape_button02"/>
     

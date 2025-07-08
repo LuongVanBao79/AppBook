@@ -2,6 +2,8 @@ package com.example.appbook.activities
 
 import android.os.Bundle
 import android.util.Log
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.appbook.databinding.ActivityPdfViewBinding
@@ -15,15 +17,18 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
+import kotlin.math.roundToInt
 
 class PdfViewActivity : AppCompatActivity() {
 
+    // View Binding để truy cập các thành phần giao diện người dùng
     private lateinit var binding: ActivityPdfViewBinding
 
-    companion object {
+    private companion object {
         private const val TAG = "PDF_VIEW_TAG"
     }
 
+    // Book ID nhận từ Intent
     private var bookId = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,28 +36,79 @@ class PdfViewActivity : AppCompatActivity() {
         binding = ActivityPdfViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Lấy bookId từ Intent, nếu không có thì gán giá trị mặc định là ""
         bookId = intent.getStringExtra("bookId") ?: ""
         Log.d(TAG, "Received bookId: $bookId")
+
+        // Tải thông tin chi tiết của sách (PDF URL)
         loadBookDetails()
 
+
+        // Xử lý sự kiện click vào nút "Quay lại"
         binding.backBtn.setOnClickListener {
             onBackPressed()
         }
+
+        // ẩn thanh hiển thị của điện thoại
+        window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                or View.SYSTEM_UI_FLAG_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        )
     }
 
-    private fun loadBookDetails() {
+    private var totalPages = 0
+    private var currentPage = 0
+    private val averageReadingTimePerPage = 1.5 // phút/trang
+
+    // Hàm tải thông tin chi tiết của sách (PDF URL) từ Firebase
+    /*private fun loadBookDetails() {
         Log.d(TAG, "loadBookDetails: Getting PDF URL from Firebase DB")
         val ref = FirebaseDatabase.getInstance().getReference("Books")
         ref.child(bookId)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
+                    // Lấy PDF URL từ snapshot
                     val pdfUrl = snapshot.child("url").value as? String
+                    if (!pdfUrl.isNullOrEmpty()) {
+                        // Nếu PDF URL không rỗng, tải PDF từ URL
+                        Log.d(TAG, "PDF URL: $pdfUrl")
+                        loadBookFromCloudinaryUrl(pdfUrl)
+                    } else {
+                        // Nếu PDF URL rỗng, log lỗi và ẩn progress bar
+                        Log.e(TAG, "PDF URL is empty or null")
+                        Log.d(TAG, "Received bookId: $bookId")
+                        binding.progressBar.visibility = View.GONE
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Xử lý lỗi nếu có
+                    Log.e(TAG, "loadBookDetails: ${error.message}")
+                    binding.progressBar.visibility = View.GONE
+                }
+            })
+    }*/
+
+    private fun loadBookDetails() {
+        Log.d(TAG, "loadBookDetails: Getting PDF URL and Title from Firebase DB")
+        val ref = FirebaseDatabase.getInstance().getReference("Books")
+        ref.child(bookId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val pdfUrl = snapshot.child("url").value as? String
+                    val title = snapshot.child("title").value as? String
+
+                    binding.toolbarTitleTv.text = title ?: "Không có tiêu đề"
+
                     if (!pdfUrl.isNullOrEmpty()) {
                         Log.d(TAG, "PDF URL: $pdfUrl")
                         loadBookFromCloudinaryUrl(pdfUrl)
                     } else {
                         Log.e(TAG, "PDF URL is empty or null")
-                        Log.d(TAG, "Received bookId: $bookId")
                         binding.progressBar.visibility = View.GONE
                     }
                 }
@@ -64,13 +120,14 @@ class PdfViewActivity : AppCompatActivity() {
             })
     }
 
+
+
+    // Hàm tải PDF từ Cloudinary URL sử dụng OkHttp
     private fun loadBookFromCloudinaryUrl(pdfUrl: String) {
         Log.d(TAG, "Downloading PDF from Cloudinary URL")
 
         val client = OkHttpClient()
-        val request = Request.Builder()
-            .url(pdfUrl)
-            .build()
+        val request = Request.Builder().url(pdfUrl).build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -86,16 +143,19 @@ class PdfViewActivity : AppCompatActivity() {
                     if (pdfBytes != null) {
                         runOnUiThread {
                             binding.pdfView.fromBytes(pdfBytes)
-                                .defaultPage(0)  // hiển thị trang đầu tiên
-                                .enableAnnotationRendering(true) // render annotation nếu có
+                                .defaultPage(0)
+                                .enableAnnotationRendering(true)
                                 .swipeHorizontal(false)
                                 .onLoad { pageCount ->
-                                    binding.toolbarSubtitleTv.text = "1/$pageCount"  // cập nhật tổng trang và trang hiện tại lúc đầu
+                                    totalPages = pageCount
+                                    currentPage = 1
+                                    updateReadingStatus()
                                     binding.progressBar.visibility = View.GONE
                                 }
                                 .onPageChange { page, pageCount ->
-                                    val currentPage = page + 1
-                                    binding.toolbarSubtitleTv.text = "$currentPage/$pageCount"
+                                    totalPages = pageCount
+                                    currentPage = page + 1
+                                    updateReadingStatus()
                                 }
                                 .onError { t ->
                                     Log.e(TAG, "PDF load error: ${t.message}")
@@ -122,5 +182,15 @@ class PdfViewActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun updateReadingStatus() {
+        binding.toolbarSubtitleTv1.text = "Trang $currentPage/$totalPages"
+
+        val pagesLeft = totalPages - currentPage
+        val estimatedMinutes = (pagesLeft * averageReadingTimePerPage).roundToInt()
+
+        binding.toolbarSubtitleTv2.text = "~${estimatedMinutes} phút còn lại"
+    }
+
 
 }

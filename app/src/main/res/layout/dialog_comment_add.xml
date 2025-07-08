@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-condensed"
         android:padding="5dp"
-        android:text="Add Comment"
+        android:text="Thêm bình luận"
         android:textAlignment="center"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/backBtn"
         android:layout_marginTop="20dp"
-        android:hint="Comment"
+        android:hint="Bình luận"
         app:startIconDrawable="@drawable/ic_comment_black">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -54,7 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/commentTil"
         android:layout_marginTop="20dp"
-        android:text="Submit"
+        android:text="Gửi"
         android:background="@drawable/shape_button01"
         android:textColor="@color/white"/>
 

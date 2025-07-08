@@ -2,7 +2,6 @@ package com.example.appbook
 
 import android.app.Activity
 import android.app.Application
-import android.app.ProgressDialog
 import android.content.Context
 import android.icu.util.Calendar
 import android.net.Uri
@@ -13,7 +12,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import com.cloudinary.android.MediaManager
-import com.example.appbook.activities.PdfDetailActivity
 import com.github.barteksc.pdfviewer.PDFView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -189,102 +187,33 @@ class MyApplication : Application() {
                 })
         }
 
-        /*
-         * Hàm deleteBook:
-         *  - context: Context để hiển thị dialog và toast
-         *  - bookId: id cuốn sách trong Firebase Database
-         *  - bookUrl: URL file trên Cloudinary
-         *  - bookTitle: tên sách để hiển thị trên dialog
-         *  - cloudName, apiKey, apiSecret: cấu hình Cloudinary để xóa file
-         */
         fun deleteBook(
             context: Context,
             bookId: String,
-            bookUrl: String,
-            bookTitle: String,
-            cloudName: String,
-            apiKey: String,
-            apiSecret: String
+            bookTitle: String
         ) {
-            val TAG = "DELETE_BOOK_TAG"
+            val progressDialog = android.app.ProgressDialog(context)
+            progressDialog.setCancelable(false)
+            progressDialog.setMessage("Đang xóa sách...")
+            progressDialog.show()
 
-            val progressDialog = ProgressDialog(context).apply {
-                setTitle("Please wait")
-                setMessage("Deleting $bookTitle...")
-                setCanceledOnTouchOutside(false)
-                show()
-            }
-
-            val publicId = getPublicIdFromUrl(bookUrl)
-            Log.d(TAG, "Public ID extracted: $publicId")
-
-            if (publicId.isEmpty()) {
-                progressDialog.dismiss()
-                Toast.makeText(context, "Invalid URL, unable to extract public ID", Toast.LENGTH_SHORT).show()
-                return
-            }
-
-            val encodedPublicId = Uri.encode(publicId, "/") // Include extension if present
-            val deleteUrl = HttpUrl.Builder()
-                .scheme("https")
-                .host("api.cloudinary.com")
-                .addPathSegment("v1_1")
-                .addPathSegment(cloudName)
-                .addPathSegment("resources")
-                .addPathSegment("raw") // raw chứ không phải image
-                .addQueryParameter("public_ids[]", publicId)
-                .addQueryParameter("invalidate", "true")
-                .build()
-
-
-            val credential = Credentials.basic(apiKey, apiSecret)
-
-            val client = OkHttpClient()
-            val request = Request.Builder()
-                .url(deleteUrl)
-                .delete()
-                .addHeader("Authorization", credential)
-                .build()
-
-            client.newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    Log.e(TAG, "Failed to delete from Cloudinary: ${e.message}")
-                    (context as? Activity)?.runOnUiThread {
+            val ref = com.google.firebase.database.FirebaseDatabase.getInstance().getReference("Books")
+            ref.child(bookId).removeValue()
+                .addOnSuccessListener {
+                    (context as? android.app.Activity)?.runOnUiThread {
                         progressDialog.dismiss()
-                        Toast.makeText(context, "Cloudinary deletion failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(context, "Xóa sách thành công: $bookTitle", android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
-
-                override fun onResponse(call: Call, response: Response) {
-                    val body = response.body?.string()
-                    if (response.isSuccessful) {
-                        Log.d(TAG, "Deleted from Cloudinary successfully: $body")
-
-                        // Xóa khỏi Firebase
-                        val ref = FirebaseDatabase.getInstance().getReference("Books")
-                        ref.child(bookId).removeValue()
-                            .addOnSuccessListener {
-                                (context as? Activity)?.runOnUiThread {
-                                    progressDialog.dismiss()
-                                    Toast.makeText(context, "Deleted successfully", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                            .addOnFailureListener { e ->
-                                (context as? Activity)?.runOnUiThread {
-                                    progressDialog.dismiss()
-                                    Toast.makeText(context, "Failed to delete from DB: ${e.message}", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                    } else {
-                        Log.e(TAG, "Cloudinary deletion failed: $body")
-                        (context as? Activity)?.runOnUiThread {
-                            progressDialog.dismiss()
-                            Toast.makeText(context, "Cloudinary deletion failed", Toast.LENGTH_SHORT).show()
-                        }
+                .addOnFailureListener { e ->
+                    (context as? android.app.Activity)?.runOnUiThread {
+                        progressDialog.dismiss()
+                        android.widget.Toast.makeText(context, "Xóa sách trên Firebase thất bại: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
-            })
         }
+
+
 
         // KHÔNG bỏ phần mở rộng .pdf
         private fun getPublicIdFromUrl(url: String): String {
@@ -346,11 +275,11 @@ class MyApplication : Application() {
                 .removeValue()
                 .addOnSuccessListener {
                     Log.d(TAG, "removeFromFavorite: Removed from fav")
-                    Toast.makeText(context, "Removed from favorite", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Đã xóa khỏi mục yêu thích", Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener { e ->
                     Log.d(TAG, "removeFromFavorite: Failed to remove from fav due to ${e.message}")
-                    Toast.makeText(context, "Failed to remove from fav due to ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Xóa khỏi mục yêu thích thất bại do ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         }
     }
