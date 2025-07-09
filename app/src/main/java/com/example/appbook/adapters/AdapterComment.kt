@@ -48,35 +48,25 @@ class AdapterComment: RecyclerView.Adapter<AdapterComment.HolderComment> {
     }
 
     override fun onBindViewHolder(holder: HolderComment, position: Int) {
-        /*Get data, set data, handle click etc ...*/
-        // get data
+        // Lấy dữ liệu từ danh sách
         val model = commentArrayList[position]
-
         val id = model.id
         val bookId = model.bookId
         val comment = model.comment
         val uid = model.uid
         val timestamp = model.timestamp
 
-        //format timestamp
+        // Định dạng ngày từ timestamp
         val date = MyApplication.formatTimeStamp(timestamp.toLong())
 
-        //set data
+        // Hiển thị dữ liệu lên giao diện
         holder.dateTv.text = date
         holder.commentTv.text = comment
 
-        //we don't have user name, profile picture but we have user uid, so we will load using that uid
+        // Tải thông tin người dùng theo uid
         loadUserDetails(model, holder)
 
-        //handle click, show dialog to delete comment
-        /*holder.itemView.setOnClickListener {
-            *//*Requirements to delete a comment
-            * 1 User must be logged in
-            * 2 uid in comment (to be deleted) must be same as uid of current user i.e. user can delete only his own comment*//*
-            if(firebaseAuth.currentUser !=null && firebaseAuth.uid == uid){
-                deleteCommmentDialog(model, holder)
-            }
-        }*/
+        // Xử lý khi click vào comment (xóa nếu có quyền)
         holder.itemView.setOnClickListener {
             if (firebaseAuth.currentUser != null) {
                 val currentUid = firebaseAuth.uid
@@ -87,7 +77,7 @@ class AdapterComment: RecyclerView.Adapter<AdapterComment.HolderComment> {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             val userType = snapshot.child("userType").value.toString()
 
-                            // Nếu là admin hoặc là chủ comment thì được phép xóa
+                            // Nếu là admin hoặc là người đăng bình luận thì cho phép xóa
                             if (userType == "admin" || currentUid == uid) {
                                 deleteCommmentDialog(model, holder)
                             } else {
@@ -101,8 +91,8 @@ class AdapterComment: RecyclerView.Adapter<AdapterComment.HolderComment> {
                     })
             }
         }
-
     }
+
 
     private fun deleteCommmentDialog(model: ModelComment, holder: HolderComment) {
         //alert dialog

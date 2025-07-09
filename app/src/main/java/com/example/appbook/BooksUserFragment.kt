@@ -53,9 +53,9 @@ class BooksUserFragment : Fragment() {
         //get arguments that we passed in newInstance method
         val args = arguments
         if (args != null){
-            categoryId = args.getString("categoryId")!!
-            category = args.getString("category")!!
-            uid = args.getString("uid")!!
+            categoryId = args.getString("categoryId")?: ""
+            category = args.getString("category")?: ""
+            uid = args.getString("uid")?: ""
         }
     }
 

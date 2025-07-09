@@ -109,23 +109,29 @@ class ProfileActivity : AppCompatActivity() {
         progressDialog.setMessage("Đang gửi hướng dẫn xác minh email đến ${firebaseUser.email}")
         progressDialog.show()
 
-        // Gửi hướng dẫn xác minh
         firebaseUser.sendEmailVerification()
             .addOnSuccessListener {
-                // Nếu gửi thành công
                 progressDialog.dismiss()
                 Toast.makeText(
                     this,
                     "Hướng dẫn đã được gửi! Vui lòng kiểm tra email ${firebaseUser.email}",
-                    Toast.LENGTH_SHORT
+                    Toast.LENGTH_LONG
                 ).show()
+
+                // Chuyển về màn hình đăng nhập sau 2 giây
+                binding.root.postDelayed({
+                    FirebaseAuth.getInstance().signOut() // Đăng xuất người dùng
+                    val intent = Intent(this@ProfileActivity, LoginActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                }, 2000)
             }
             .addOnFailureListener { e ->
-                // Nếu gửi thất bại
                 progressDialog.dismiss()
                 Toast.makeText(this, "Gửi thất bại do ${e.message}!", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     // Hàm tải thông tin người dùng từ Firebase
     private fun loadUserInfo() {

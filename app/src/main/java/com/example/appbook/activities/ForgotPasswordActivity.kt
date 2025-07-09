@@ -1,5 +1,6 @@
 package com.example.appbook.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
 import androidx.appcompat.app.AppCompatActivity
@@ -67,10 +68,17 @@ class ForgotPasswordActivity : AppCompatActivity() {
         firebaseAuth.sendPasswordResetEmail(email)
             .addOnSuccessListener {
                 showMessage("Hướng dẫn đã được gửi đến:\n$email")
+
+                // Sau 2 giây, chuyển về màn hình đăng nhập
+                binding.root.postDelayed({
+                    startActivity(Intent(this@ForgotPasswordActivity, LoginActivity::class.java))
+                    finish()
+                }, 2000) // 2 giây delay để người dùng kịp đọc thông báo
             }
             .addOnFailureListener { e ->
                 showMessage("Gửi thất bại: ${e.message}")
             }
+
     }
 
     /**

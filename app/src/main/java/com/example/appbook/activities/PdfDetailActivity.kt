@@ -257,74 +257,101 @@ class PdfDetailActivity : AppCompatActivity() {
 
     private fun downloadBook() {
         Log.d(TAG, "downloadBook: Đang tải sách")
+
+        // Hiển thị hộp thoại tiến trình
         progressDialog.setMessage("Đang tải sách")
         progressDialog.show()
 
+        // Tạo tên file PDF mới (thêm timestamp để tránh trùng)
         val fileName = "downloaded_${System.currentTimeMillis()}.pdf"
+
+        // Tạo file trong thư mục Download riêng của app (bộ nhớ trong)
         val file = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
 
+        // Chạy quá trình tải trong luồng nền để tránh làm đơ giao diện
         Thread {
             try {
                 Log.d(TAG, "Starting download from: $bookUrl to ${file.absolutePath}")
-                val urlConnection = URL(bookUrl).openConnection() as HttpsURLConnection
-                urlConnection.connectTimeout = 10000
-                urlConnection.readTimeout = 10000
-                urlConnection.requestMethod = "GET"
-                urlConnection.setRequestProperty("Accept", "application/pdf")
-                urlConnection.connect()
 
+                // Mở kết nối đến URL
+                val urlConnection = URL(bookUrl).openConnection() as HttpsURLConnection
+                urlConnection.connectTimeout = 10000 // Timeout kết nối (10s)
+                urlConnection.readTimeout = 10000 // Timeout đọc dữ liệu
+                urlConnection.requestMethod = "GET" // Phương thức HTTP GET
+                urlConnection.setRequestProperty("Accept", "application/pdf") // Định dạng mong muốn
+                urlConnection.connect() // Bắt đầu kết nối
+
+                // Kiểm tra phản hồi từ server
                 val responseCode = urlConnection.responseCode
                 if (responseCode != HttpsURLConnection.HTTP_OK) {
                     throw Exception("Server returned code: $responseCode")
                 }
 
+                // Chuẩn bị đọc từ URL và ghi ra file
                 val inputStream = urlConnection.inputStream
                 val outputStream = FileOutputStream(file)
                 val buffer = ByteArray(1024)
                 var bytesRead: Int
 
+                // Đọc từng đoạn dữ liệu (1KB mỗi lần) và ghi vào file
                 while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                     outputStream.write(buffer, 0, bytesRead)
                 }
 
+                // Đóng luồng
                 outputStream.flush()
                 outputStream.close()
                 inputStream.close()
                 urlConnection.disconnect()
 
+                // Sau khi tải xong, quay lại luồng chính để cập nhật giao diện
                 runOnUiThread {
+                    // Kiểm tra nếu file thực sự tồn tại và không rỗng
                     if (file.exists() && file.length() > 0) {
+                        // Tạo URI an toàn để mở file bằng FileProvider
                         val fileUri = FileProvider.getUriForFile(
                             this@PdfDetailActivity,
-                            "com.example.appbook.fileprovider", // Cập nhật authorities
+                            "com.example.appbook.fileprovider", // Authorities phải trùng trong AndroidManifest
                             file
                         )
+
+                        // Tạo intent để mở file PDF bằng app bên ngoài
                         val intent = Intent(Intent.ACTION_VIEW)
                         intent.setDataAndType(fileUri, "application/pdf")
-                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Cấp quyền đọc cho app khác
+
                         try {
+                            // Mở file bằng ứng dụng đọc PDF
                             startActivity(intent)
                             Log.d(TAG, "downloadBook: Mở file thành công với URI: $fileUri")
                             Toast.makeText(this, "Tải và mở file thành công", Toast.LENGTH_SHORT).show()
+
+                            // Cập nhật lượt tải (nếu có chức năng thống kê)
                             incrementDownloadCount()
                         } catch (e: Exception) {
+                            // Nếu thiết bị không có app đọc PDF
                             Log.e(TAG, "downloadBook: Lỗi khi mở file: ${e.message}")
                             Toast.makeText(this, "Lỗi khi mở file: ${e.message}", Toast.LENGTH_LONG).show()
                         }
                     } else {
+                        // File không tồn tại hoặc bị rỗng
                         throw Exception("File not created or empty, size: ${file.length()} bytes")
                     }
+
+                    // Ẩn hộp thoại tiến trình sau khi hoàn thành
                     progressDialog.dismiss()
                 }
             } catch (e: Exception) {
+                // Nếu có lỗi trong quá trình tải, hiển thị lỗi trên giao diện
                 runOnUiThread {
                     Log.e(TAG, "downloadBook: Lỗi khi tải: ${e.message}")
                     Toast.makeText(this, "Tải thất bại: ${e.message}", Toast.LENGTH_LONG).show()
                     progressDialog.dismiss()
                 }
             }
-        }.start()
+        }.start() // Bắt đầu chạy luồng tải
     }
+
 
     private fun incrementDownloadCount() {
         Log.d(TAG, "incrementDownloadCount: ")
@@ -403,13 +430,13 @@ class PdfDetailActivity : AppCompatActivity() {
                         binding.favoriteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(
                             0, R.drawable.ic_favorite_filled_white, 0, 0
                         )
-                        binding.favoriteBtn.text = "Xóa khỏi mục yêu thích"
+                        binding.favoriteBtn.text = "Bỏ yêu thích"
                     } else {
                         Log.d(TAG, "onDataChange: not available in favorite")
                         binding.favoriteBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(
                             0, R.drawable.ic_favorite_white, 0, 0
                         )
-                        binding.favoriteBtn.text = "Thêm vào mục yêu thích"
+                        binding.favoriteBtn.text = "Yêu thích"
                     }
                 }
 

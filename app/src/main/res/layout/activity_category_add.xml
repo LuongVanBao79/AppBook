@@ -42,7 +42,7 @@
             android:fontFamily="sans-serif-condensed"
             android:text="Thêm Một Danh Mục Mới"
             android:textColor="@color/white"
-            android:textSize="28sp"/>
+            android:textSize="20sp"/>
 
     </RelativeLayout>
 

@@ -1,9 +1,6 @@
 package com.example.appbook.models
 
-import com.example.appbook.adapters.AdapterPdfFavorite
-
 class ModelPdf {
-
     //variables
     var uid: String = ""
     var id: String = ""

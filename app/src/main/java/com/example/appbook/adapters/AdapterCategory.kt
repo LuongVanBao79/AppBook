@@ -16,7 +16,11 @@ import com.example.appbook.filters.FilterCategory
 import com.example.appbook.models.ModelCategory
 import com.example.appbook.activities.PdfListAdminActivity
 import com.example.appbook.databinding.RowCategoryBinding
+import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+
+import com.google.firebase.database.DatabaseError
 
 class AdapterCategory : RecyclerView.Adapter<AdapterCategory.HolderCategory>, Filterable {
     private val context: Context
@@ -61,19 +65,36 @@ class AdapterCategory : RecyclerView.Adapter<AdapterCategory.HolderCategory>, Fi
 
         //handle click, delete category
         holder.deleteBtn.setOnClickListener {
-            //confirm before delete
-            val builder = AlertDialog.Builder(context)
-            builder.setTitle("Delete")
-                .setMessage("Bạn có chắc chắn muốn xóa danh mục này không?")
-                .setPositiveButton("Xác nhận") { a, d ->
-                    Toast.makeText(context, "Đang xoá...", Toast.LENGTH_SHORT).show()
-                    deleteCategory(model, holder)
-                }
-                .setNegativeButton("Huỷ") { a, d ->
-                    a.dismiss()
-                }
-                .show()
+            // Kiểm tra xem có sách nào thuộc danh mục này không
+            val ref = FirebaseDatabase.getInstance().getReference("Books")
+            ref.orderByChild("categoryId").equalTo(id)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()) {
+                            // Có sách trong danh mục này → không cho xoá
+                            Toast.makeText(context, "Không thể xoá vì danh mục đang có sách!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            // Không có sách → hiển thị dialog xác nhận xoá
+                            val builder = AlertDialog.Builder(context)
+                            builder.setTitle("Xoá danh mục")
+                                .setMessage("Bạn có chắc chắn muốn xoá danh mục này?")
+                                .setPositiveButton("Xác nhận") { dialog, _ ->
+                                    Toast.makeText(context, "Đang xoá...", Toast.LENGTH_SHORT).show()
+                                    deleteCategory(model, holder)
+                                }
+                                .setNegativeButton("Huỷ") { dialog, _ ->
+                                    dialog.dismiss()
+                                }
+                                .show()
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Toast.makeText(context, "Lỗi khi kiểm tra dữ liệu: ${error.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
         }
+
 
         //handle click, start pdf list admin activity, also pas pdf id, title
         holder.itemView.setOnClickListener {
