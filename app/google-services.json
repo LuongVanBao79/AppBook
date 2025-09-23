@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "421199580843",
+    "project_id": "book-app-kotlin-3d74f",
+    "storage_bucket": "book-app-kotlin-3d74f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:421199580843:android:9803a4e9b6666a9e58f1ee",
+        "android_client_info": {
+          "package_name": "com.example.appbook"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADIVqOesmP5sm9PliT9czlGm0c5uu2-xU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

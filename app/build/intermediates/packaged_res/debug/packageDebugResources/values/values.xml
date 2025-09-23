@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="http://schemas.android.com/tools">
+    <color name="black">#FF000000</color>
+    <color name="gray01">#c5c5c5</color>
+    <color name="gray02">#777777</color>
+    <color name="gray03">#EDEDED</color>
+    <color name="gray04">#FBFBFB</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="white">#FFFFFFFF</color>
+    <string name="app_name">Sách Hay</string>
+    <string name="com.google.firebase.crashlytics.mapping_file_id" ns1:ignore="UnusedResources,TypographyDashes" translatable="false">00000000000000000000000000000000</string>
+    <string name="gcm_defaultSenderId" translatable="false">421199580843</string>
+    <string name="google_api_key" translatable="false">AIzaSyADIVqOesmP5sm9PliT9czlGm0c5uu2-xU</string>
+    <string name="google_app_id" translatable="false">1:421199580843:android:9803a4e9b6666a9e58f1ee</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyADIVqOesmP5sm9PliT9czlGm0c5uu2-xU</string>
+    <string name="google_storage_bucket" translatable="false">book-app-kotlin-3d74f.firebasestorage.app</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="new_user_signup">Người dùng mới? <b>Đăng ký</b></string>
+    <string name="project_id" translatable="false">book-app-kotlin-3d74f</string>
+    <style name="Base.Theme.AppBook" parent="Theme.Material3.DayNight.NoActionBar">
+        
+        
+    </style>
+    <style name="CustomDialog" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+    <style name="Theme.AppBook" parent="Base.Theme.AppBook"/>
+    <style name="styleCircleImage">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+    <style name="styleRoundedCornersImage">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">20%</item>
+    </style>
+</resources>
