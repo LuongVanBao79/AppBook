@@ -106,6 +106,8 @@ id nameEt
 id nameTil
 id nameTv
 id noAccountTv
+id pageContainer
+id pageInput
 id pagesLabelTv
 id pagesTv
 id passwordEt

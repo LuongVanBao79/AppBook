@@ -1,4 +1,5 @@
 package com.example.appbook.activities
+import android.content.Context
 import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.TranslatorOptions
 import com.google.mlkit.nl.translate.Translation
@@ -6,7 +7,10 @@ import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -22,6 +26,8 @@ import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import com.example.appbook.utils.LayoutTextStripper
+import com.github.barteksc.pdfviewer.PDFView
+import com.google.firebase.auth.FirebaseAuth
 
 class PdfViewActivity : AppCompatActivity() {
 
@@ -80,9 +86,10 @@ class PdfViewActivity : AppCompatActivity() {
 
         loadBookDetails()
 
+
         binding.backBtn.setOnClickListener { onBackPressed() }
         binding.playBtn.setOnClickListener { handlePlayPause() }
-
+        initPageJump()
         window.decorView.systemUiVisibility = (
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                         or View.SYSTEM_UI_FLAG_FULLSCREEN
@@ -120,6 +127,74 @@ class PdfViewActivity : AppCompatActivity() {
             }
             .show()
     }
+
+
+    private fun initPageJump() {
+        // Khi bấm vào TextView chuyển sang chế độ nhập
+        binding.toolbarSubtitleTv1.setOnClickListener {
+            enterPageEditMode()
+        }
+
+        // Bắt sự kiện Enter / Done trên EditText
+        binding.pageInput.setOnEditorActionListener { v, actionId, event ->
+            val isEnter = (event?.keyCode == KeyEvent.KEYCODE_ENTER)
+            if (actionId == EditorInfo.IME_ACTION_DONE || isEnter) {
+                exitPageEditModeAndJump()
+                true
+            } else false
+        }
+
+        // Khi mất focus (bấm ra ngoài) cũng xử lý giống Enter
+        binding.pageInput.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus && binding.pageInput.visibility == View.VISIBLE) {
+                exitPageEditModeAndJump()
+            }
+        }
+    }
+
+    private fun enterPageEditMode() {
+        // ẩn TextView, hiện EditText chứa số trang hiện tại
+        binding.toolbarSubtitleTv1.visibility = View.GONE
+        binding.pageInput.visibility = View.VISIBLE
+        binding.pageInput.setText(currentPage.toString())
+        binding.pageInput.setSelection(binding.pageInput.text.length)
+        binding.pageInput.requestFocus()
+        showKeyboard(binding.pageInput)
+    }
+
+    private fun exitPageEditModeAndJump() {
+        val input = binding.pageInput.text.toString()
+        val pageNum = input.toIntOrNull()
+
+        if (pageNum != null && totalPages > 0 && pageNum in 1..totalPages) {
+            // nhảy đến trang (PDFView dùng index từ 0)
+            binding.pdfView.jumpTo(pageNum - 1, true)
+            currentPage = pageNum
+            updateReadingStatus()
+        } else {
+            Toast.makeText(this, "⚠️ Trang không hợp lệ! (1 - $totalPages)", Toast.LENGTH_SHORT).show()
+        }
+
+        // ẩn EditText, hiện lại TextView
+        hideKeyboard()
+        binding.pageInput.visibility = View.GONE
+        binding.toolbarSubtitleTv1.visibility = View.VISIBLE
+        // đảm bảo text hiển thị cập nhật
+        binding.toolbarSubtitleTv1.text = "Trang $currentPage/$totalPages"
+    }
+
+    private fun showKeyboard(view: View) {
+        view.post {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+        }
+    }
+
+    private fun hideKeyboard() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        currentFocus?.let { imm.hideSoftInputFromWindow(it.windowToken, 0) }
+    }
+
 
     // ----------------- HANDLE PLAY/PAUSE -----------------
     private fun handlePlayPause() {
@@ -197,11 +272,13 @@ class PdfViewActivity : AppCompatActivity() {
                             currentPage = 1
                             updateReadingStatus()
                             binding.progressBar.visibility = View.GONE
+                            checkLastReadingPage(bookId, totalPages)
                         }
                         .onPageChange { page, pageCount ->
                             currentPage = page + 1
                             totalPages = pageCount
                             updateReadingStatus()
+                            saveReadingProgress(bookId, currentPage)
                         }
                         .load()
                 }
@@ -214,6 +291,42 @@ class PdfViewActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+    private fun checkLastReadingPage(bookId: String, totalPages: Int) {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+
+        val userId = user.uid
+        val ref = FirebaseDatabase.getInstance().getReference("UserReadingProgress")
+        ref.child(userId).child(bookId).get().addOnSuccessListener { snapshot ->
+            val lastPage = snapshot.getValue(Int::class.java) ?: 1
+
+            // 👉 Chỉ hiện dialog nếu lastPage > 1 và nằm trong totalPages
+            if (lastPage > 1 && lastPage in 1..totalPages) {
+                AlertDialog.Builder(this)
+                    .setTitle("Tiếp tục đọc?")
+                    .setMessage("Bạn đã đọc tới trang $lastPage. Bạn muốn tiếp tục không?")
+                    .setPositiveButton("Tiếp tục") { _, _ ->
+                        binding.pdfView.jumpTo(lastPage - 1, true)
+                    }
+                    .setNegativeButton("Đọc từ đầu") { _, _ ->
+                        binding.pdfView.jumpTo(0, true)
+                    }
+                    .show()
+            }
+        }
+    }
+
+
+    private fun saveReadingProgress(bookId: String, page: Int) {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        if (user == null) {
+            // 🔹 Không đăng nhập thì bỏ qua
+            return
+        }
+
+        val userId = user.uid
+        val ref = FirebaseDatabase.getInstance().getReference("UserReadingProgress")
+        ref.child(userId).child(bookId).setValue(page)
     }
 
     // ----------------- EXTRACT TEXT LAZY -----------------

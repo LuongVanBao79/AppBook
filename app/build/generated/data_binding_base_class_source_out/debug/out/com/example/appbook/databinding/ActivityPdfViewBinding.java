@@ -4,6 +4,7 @@ package com.example.appbook.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -37,6 +38,12 @@ public final class ActivityPdfViewBinding implements ViewBinding {
   public final RelativeLayout main;
 
   @NonNull
+  public final FrameLayout pageContainer;
+
+  @NonNull
+  public final EditText pageInput;
+
+  @NonNull
   public final PDFView pdfView;
 
   @NonNull
@@ -68,16 +75,19 @@ public final class ActivityPdfViewBinding implements ViewBinding {
 
   private ActivityPdfViewBinding(@NonNull RelativeLayout rootView, @NonNull ImageButton backBtn,
       @NonNull ImageButton btnSpeed, @NonNull ImageButton btnTranslate,
-      @NonNull RelativeLayout main, @NonNull PDFView pdfView, @NonNull ImageButton playBtn,
-      @NonNull ProgressBar progressBar, @NonNull FrameLayout speedControlLayout,
-      @NonNull LinearLayout toolbarInfoLayout, @NonNull RelativeLayout toolbarRl,
-      @NonNull TextView toolbarSubtitleTv1, @NonNull TextView toolbarSubtitleTv2,
-      @NonNull TextView toolbarTitleTv, @NonNull TextView txtSpeed) {
+      @NonNull RelativeLayout main, @NonNull FrameLayout pageContainer, @NonNull EditText pageInput,
+      @NonNull PDFView pdfView, @NonNull ImageButton playBtn, @NonNull ProgressBar progressBar,
+      @NonNull FrameLayout speedControlLayout, @NonNull LinearLayout toolbarInfoLayout,
+      @NonNull RelativeLayout toolbarRl, @NonNull TextView toolbarSubtitleTv1,
+      @NonNull TextView toolbarSubtitleTv2, @NonNull TextView toolbarTitleTv,
+      @NonNull TextView txtSpeed) {
     this.rootView = rootView;
     this.backBtn = backBtn;
     this.btnSpeed = btnSpeed;
     this.btnTranslate = btnTranslate;
     this.main = main;
+    this.pageContainer = pageContainer;
+    this.pageInput = pageInput;
     this.pdfView = pdfView;
     this.playBtn = playBtn;
     this.progressBar = progressBar;
@@ -136,6 +146,18 @@ public final class ActivityPdfViewBinding implements ViewBinding {
       }
 
       RelativeLayout main = (RelativeLayout) rootView;
+
+      id = R.id.pageContainer;
+      FrameLayout pageContainer = ViewBindings.findChildViewById(rootView, id);
+      if (pageContainer == null) {
+        break missingId;
+      }
+
+      id = R.id.pageInput;
+      EditText pageInput = ViewBindings.findChildViewById(rootView, id);
+      if (pageInput == null) {
+        break missingId;
+      }
 
       id = R.id.pdfView;
       PDFView pdfView = ViewBindings.findChildViewById(rootView, id);
@@ -198,8 +220,9 @@ public final class ActivityPdfViewBinding implements ViewBinding {
       }
 
       return new ActivityPdfViewBinding((RelativeLayout) rootView, backBtn, btnSpeed, btnTranslate,
-          main, pdfView, playBtn, progressBar, speedControlLayout, toolbarInfoLayout, toolbarRl,
-          toolbarSubtitleTv1, toolbarSubtitleTv2, toolbarTitleTv, txtSpeed);
+          main, pageContainer, pageInput, pdfView, playBtn, progressBar, speedControlLayout,
+          toolbarInfoLayout, toolbarRl, toolbarSubtitleTv1, toolbarSubtitleTv2, toolbarTitleTv,
+          txtSpeed);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

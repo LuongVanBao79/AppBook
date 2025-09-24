@@ -1,9 +1,5 @@
 [
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-56:/layout/fragment_translate.xml",
-        "source": "com.example.appbook.app-main-59:/layout/fragment_translate.xml"
-    },
-    {
         "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-56:\\layout\\activity_pdf_edit.xml",
         "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\layout\\activity_pdf_edit.xml"
     },
@@ -34,6 +30,10 @@
     {
         "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-56:\\layout\\activity_pdf_view.xml",
         "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\layout\\activity_pdf_view.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeDebugResources-56:/layout/activity_pdf_view.xml",
+        "source": "com.example.appbook.app-main-59:/layout/activity_pdf_view.xml"
     },
     {
         "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-56:\\layout\\row_category.xml",

@@ -48,13 +48,41 @@
             android:gravity="center"
             android:layout_marginTop="2dp">
 
-            <TextView
-                android:id="@+id/toolbarSubtitleTv1"
+            <!-- Thay thế TextView hiện có bằng FrameLayout này (giữ nguyên id toolbarSubtitleTv1 cho TextView bên trong) -->
+            <FrameLayout
+                android:id="@+id/pageContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Trang 1/1"
-                android:textColor="@color/white"
-                android:textSize="12sp" />
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="2dp">
+
+                <!-- Text hiển thị số trang (GIỮ NGUYÊN ID cũ để binding không đổi) -->
+                <TextView
+                    android:id="@+id/toolbarSubtitleTv1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Trang 1/1"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:padding="2dp"/>
+
+                <!-- Ô nhập số trang (ẩn mặc định) -->
+                <EditText
+                    android:id="@+id/pageInput"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:ems="3"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:imeOptions="actionDone"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:background="@null"
+                    android:visibility="gone"/>
+            </FrameLayout>
+
+
 
             <TextView
                 android:id="@+id/toolbarSubtitleTv2"
