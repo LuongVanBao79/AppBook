@@ -44,6 +44,10 @@
         "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\drawable\\shape_button01.xml"
     },
     {
+        "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-debug-57:\\layout_fragment_recommend.xml.flat",
+        "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\layout\\fragment_recommend.xml"
+    },
+    {
         "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-debug-57:\\layout_activity_profile.xml.flat",
         "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\layout\\activity_profile.xml"
     },
@@ -216,6 +220,10 @@
         "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\drawable\\ic_email_gray.xml"
     },
     {
+        "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-debug-57:\\layout_row_recommend.xml.flat",
+        "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\layout\\row_recommend.xml"
+    },
+    {
         "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-debug-57:\\drawable_tab_background_selected.xml.flat",
         "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\drawable\\tab_background_selected.xml"
     },
@@ -226,10 +234,6 @@
     {
         "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-debug-57:\\drawable_ic_favorite_filled_white.xml.flat",
         "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\drawable\\ic_favorite_filled_white.xml"
-    },
-    {
-        "merged": "com.example.appbook.app-debug-57:/layout_activity_pdf_view.xml.flat",
-        "source": "com.example.appbook.app-main-59:/layout/activity_pdf_view.xml"
     },
     {
         "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-debug-57:\\layout_activity_profile_edit.xml.flat",

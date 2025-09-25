@@ -220,13 +220,28 @@ class PdfViewActivity : AppCompatActivity() {
 
 
     // ----------------- FIREBASE LOAD -----------------
+    private fun saveLastViewedCategory(categoryId: String) {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        val userId = user.uid
+        val ref = FirebaseDatabase.getInstance().getReference("Users")
+        ref.child(userId).child("lastViewedCategory").setValue(categoryId)
+    }
+
     private fun loadBookDetails() {
         val ref = FirebaseDatabase.getInstance().getReference("Books")
         ref.child(bookId).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val pdfUrl = snapshot.child("url").value as? String
                 val title = snapshot.child("title").value as? String
+                val categoryId = snapshot.child("categoryId").value as? String  // 🔹 Lấy thêm cate
+
                 binding.toolbarTitleTv.text = title ?: "Không có tiêu đề"
+
+                // 🔹 Lưu cate cho Recommend
+                if (!categoryId.isNullOrEmpty()) {
+                    saveBookToHistory(bookId)
+                    saveLastViewedCategory(categoryId)
+                }
 
                 if (!pdfUrl.isNullOrEmpty()) {
                     Log.d(TAG, "PDF URL: $pdfUrl")
@@ -242,6 +257,15 @@ class PdfViewActivity : AppCompatActivity() {
                 binding.progressBar.visibility = View.GONE
             }
         })
+    }
+
+    private fun saveBookToHistory(bookId: String) {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        val ref = FirebaseDatabase.getInstance().getReference("Users")
+            .child(user.uid)
+            .child("history")
+
+        ref.child(bookId).setValue(true)
     }
 
     // ----------------- LOAD PDF -----------------

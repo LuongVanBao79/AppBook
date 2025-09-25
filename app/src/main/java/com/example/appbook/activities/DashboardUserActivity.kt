@@ -81,17 +81,36 @@ class DashboardUserActivity : AppCompatActivity() {
         val defaultCategories = listOf(
             ModelCategory("All", "01", 1, ""),
             ModelCategory("Most Viewed", "02", 1, ""),
-            ModelCategory("Most Downloaded", "03", 1, "")
+            ModelCategory("Most Downloaded", "03", 1, ""),
+            ModelCategory("Có thể bạn thích", "04", 1, "") // 🔹 Recommend
         )
 
         defaultCategories.forEach { model ->
             categoryArrayList.add(model)
-            viewPagerAdapter.addFragment(
-                BooksUserFragment.newInstance(model.id, model.category, model.uid),
-                model.category
-            )
+
+            when (model.id) {
+                "04" -> {
+                    // Tab Recommend: tạo fragment trực tiếp
+                    viewPagerAdapter.addFragment(
+                        RecommendFragment(),
+                        model.category
+                    )
+                }
+                else -> {
+                    // Các tab khác: tạo fragment trực tiếp
+                    val frag = BooksUserFragment().apply {
+                        arguments = Bundle().apply {
+                            putString("categoryId", model.id)
+                            putString("category", model.category)
+                            putString("uid", model.uid)
+                        }
+                    }
+                    viewPagerAdapter.addFragment(frag, model.category)
+                }
+            }
         }
     }
+
 
     /**
      * Load danh sách danh mục từ Firebase
