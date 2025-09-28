@@ -79,9 +79,9 @@ class DashboardUserActivity : AppCompatActivity() {
      */
     private fun addDefaultCategories() {
         val defaultCategories = listOf(
-            ModelCategory("All", "01", 1, ""),
-            ModelCategory("Most Viewed", "02", 1, ""),
-            ModelCategory("Most Downloaded", "03", 1, ""),
+            ModelCategory("Tất cả sách", "01", 1, ""),
+            ModelCategory("Xem nhiều nhất", "02", 1, ""),
+            ModelCategory("Tải nhiều nhất", "03", 1, ""),
             ModelCategory("Có thể bạn thích", "04", 1, "") // 🔹 Recommend
         )
 

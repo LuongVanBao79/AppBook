@@ -65,15 +65,15 @@ class BooksUserFragment : Fragment() {
 
         //load pdf according to category, this fragment will have new instance to load each category pdfs
         Log.d(TAG, "onCreateView: Category: $category")
-        if(category == "All"){
+        if(category == "Tất cả sách"){
             //load all books
             loadAllBooks()
         }
-        else if(category == "Most Viewed"){
+        else if(category == "Xem nhiều nhất"){
             //load most viewed books
             loadMostViewedDownloadedBooks("viewsCount")
         }
-        else if(category == "Most Downloaded"){
+        else if(category == "Tải nhiều nhất"){
             //load most downloaded books
             loadMostViewedDownloadedBooks("downloadsCount")
         }

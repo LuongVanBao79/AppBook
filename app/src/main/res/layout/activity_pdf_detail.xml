@@ -99,7 +99,7 @@
                             style="@style/TextAppearance.MaterialComponents.Caption"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Category"
+                            android:text="Thể loại"
                             android:layout_marginEnd="5dp"/>
 
                         <TextView
@@ -121,7 +121,7 @@
                             style="@style/TextAppearance.MaterialComponents.Caption"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Date"
+                            android:text="Ngày thêm"
                             android:layout_marginEnd="5dp"/>
                         <TextView
                             android:id="@+id/dateTv"
@@ -141,7 +141,7 @@
                             style="@style/TextAppearance.MaterialComponents.Caption"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Size"
+                            android:text="Kích cỡ"
                             android:layout_marginEnd="5dp"/>
                         <TextView
                             android:id="@+id/sizeTv"
@@ -161,7 +161,7 @@
                             style="@style/TextAppearance.MaterialComponents.Caption"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Views"
+                            android:text="Lượt xem"
                             android:layout_marginEnd="5dp"/>
                         <TextView
                             android:id="@+id/viewsTv"
@@ -181,7 +181,7 @@
                             style="@style/TextAppearance.MaterialComponents.Caption"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Downloads"
+                            android:text="Lượt tải"
                             android:layout_marginEnd="5dp"/>
                         <TextView
                             android:id="@+id/downloadsTv"
@@ -201,7 +201,7 @@
                             style="@style/TextAppearance.MaterialComponents.Caption"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Pages"
+                            android:text="Số trang"
                             android:layout_marginEnd="5dp"/>
                         <TextView
                             android:id="@+id/pagesTv"

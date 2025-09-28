@@ -16,6 +16,10 @@
         "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\drawable\\ic_category_gray.xml"
     },
     {
+        "merged": "com.example.appbook.app-debug-57:/layout_activity_dashboard_admin.xml.flat",
+        "source": "com.example.appbook.app-main-59:/layout/activity_dashboard_admin.xml"
+    },
+    {
         "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-debug-57:\\drawable_shape_rect01.xml.flat",
         "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\drawable\\shape_rect01.xml"
     },
@@ -100,12 +104,12 @@
         "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\layout\\row_comment.xml"
     },
     {
-        "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-debug-57:\\layout_dialog_loading.xml.flat",
-        "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\layout\\dialog_loading.xml"
-    },
-    {
         "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-debug-57:\\layout_activity_dashboard_admin.xml.flat",
         "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\layout\\activity_dashboard_admin.xml"
+    },
+    {
+        "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-debug-57:\\layout_dialog_loading.xml.flat",
+        "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\layout\\dialog_loading.xml"
     },
     {
         "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-debug-57:\\drawable_tab_background_unselected.xml.flat",

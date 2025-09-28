@@ -128,7 +128,7 @@ class PdfViewActivity : AppCompatActivity() {
             .show()
     }
 
-
+// nhay trang
     private fun initPageJump() {
         // Khi bấm vào TextView chuyển sang chế độ nhập
         binding.toolbarSubtitleTv1.setOnClickListener {
@@ -161,7 +161,7 @@ class PdfViewActivity : AppCompatActivity() {
         binding.pageInput.requestFocus()
         showKeyboard(binding.pageInput)
     }
-
+// nhay trang
     private fun exitPageEditModeAndJump() {
         val input = binding.pageInput.text.toString()
         val pageNum = input.toIntOrNull()
@@ -196,7 +196,7 @@ class PdfViewActivity : AppCompatActivity() {
     }
 
 
-    // ----------------- HANDLE PLAY/PAUSE -----------------
+    // play pause
     private fun handlePlayPause() {
         if (pdfDocument == null) {
             Log.e(TAG, "⚠️ PDF chưa load xong")
@@ -217,9 +217,16 @@ class PdfViewActivity : AppCompatActivity() {
             binding.playBtn.setImageResource(R.drawable.ic_play) // 🔹 stop → quay lại play
         }
     }
+// kiem tra ngon ngu
+    private fun detectLanguage(text: String): String {
+        val vietnamesePattern = Regex("[ăâđêôơưĂÂĐÊÔƠƯáàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệóòỏõọốồổỗộớờởỡợúùủũụứừửữựíìỉĩịýỳỷỹỵ]")
+        val matches = vietnamesePattern.findAll(text).count()
+        val ratio = matches.toDouble() / text.length.toDouble()
 
+        return if (ratio > 0.02) "vi" else "en"
+    }
 
-    // ----------------- FIREBASE LOAD -----------------
+    // luu the loai cuoi cung nguoi dung doc
     private fun saveLastViewedCategory(categoryId: String) {
         val user = FirebaseAuth.getInstance().currentUser ?: return
         val userId = user.uid
@@ -258,7 +265,7 @@ class PdfViewActivity : AppCompatActivity() {
             }
         })
     }
-
+// luu cac sach nguoi dung da doc
     private fun saveBookToHistory(bookId: String) {
         val user = FirebaseAuth.getInstance().currentUser ?: return
         val ref = FirebaseDatabase.getInstance().getReference("Users")
@@ -316,6 +323,7 @@ class PdfViewActivity : AppCompatActivity() {
             }
         })
     }
+    // kiem tra tang nguoi dung da doc toi va nhay
     private fun checkLastReadingPage(bookId: String, totalPages: Int) {
         val user = FirebaseAuth.getInstance().currentUser ?: return
 
@@ -340,7 +348,7 @@ class PdfViewActivity : AppCompatActivity() {
         }
     }
 
-
+// luu trang nguoi dung da doc toi
     private fun saveReadingProgress(bookId: String, page: Int) {
         val user = FirebaseAuth.getInstance().currentUser ?: return
         if (user == null) {
@@ -353,7 +361,7 @@ class PdfViewActivity : AppCompatActivity() {
         ref.child(userId).child(bookId).setValue(page)
     }
 
-    // ----------------- EXTRACT TEXT LAZY -----------------
+    // lay text ra
     private fun getTextForPage(page: Int, callback: (String) -> Unit) {
         pageCache[page]?.let { cached ->
             callback(cached)
@@ -378,6 +386,18 @@ class PdfViewActivity : AppCompatActivity() {
 
     // ----------------- TTS -----------------
     private fun speakText(text: String) {
+        val lang = detectLanguage(text)
+        val locale = if (lang == "vi") Locale("vi", "VN") else Locale.US
+
+        val result = textToSpeech.setLanguage(locale)
+        if (result == TextToSpeech.LANG_NOT_SUPPORTED || result == TextToSpeech.LANG_MISSING_DATA) {
+            Log.e(TAG, "❌ Ngôn ngữ $lang không được hỗ trợ")
+            Toast.makeText(this, "Không hỗ trợ ngôn ngữ $lang", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        Log.d(TAG, "🗣️ Bắt đầu đọc trang bằng ngôn ngữ: $lang")
+
         val chunkSize = TextToSpeech.getMaxSpeechInputLength()
         var start = 0
         var chunkIndex = 0
@@ -389,6 +409,7 @@ class PdfViewActivity : AppCompatActivity() {
             chunkIndex++
         }
     }
+
     //dịch
     fun translateText(text: String, callback: (String) -> Unit) {
         val options = TranslatorOptions.Builder()
@@ -413,14 +434,14 @@ class PdfViewActivity : AppCompatActivity() {
                 callback("❌ Không tải được model: ${e.message}")
             }
     }
-    // ----------------- UI -----------------
+    //hien thi thoi gian doc con lai
     private fun updateReadingStatus() {
         binding.toolbarSubtitleTv1.text = "Trang $currentPage/$totalPages"
         val pagesLeft = totalPages - currentPage
         val estimatedMinutes = (pagesLeft * averageReadingTimePerPage).roundToInt()
         binding.toolbarSubtitleTv2.text = "~${estimatedMinutes} phút còn lại"
     }
-
+// khi ket thuc giai phong bo nho
     override fun onDestroy() {
         pdfDocument?.close()
         if (::textToSpeech.isInitialized) {
