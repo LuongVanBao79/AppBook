@@ -1,15 +1,15 @@
 [
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-56:/layout/activity_dashboard_admin.xml",
-        "source": "com.example.appbook.app-main-59:/layout/activity_dashboard_admin.xml"
-    },
-    {
         "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-56:\\layout\\row_recommend.xml",
         "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\layout\\row_recommend.xml"
     },
     {
         "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-56:\\layout\\activity_pdf_edit.xml",
         "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\layout\\activity_pdf_edit.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeDebugResources-56:/layout/continue_reading_widget.xml",
+        "source": "com.example.appbook.app-main-59:/layout/continue_reading_widget.xml"
     },
     {
         "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-56:\\layout\\activity_dashboard_user.xml",
@@ -58,6 +58,10 @@
     {
         "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-56:\\layout\\row_pdf_admin.xml",
         "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\layout\\row_pdf_admin.xml"
+    },
+    {
+        "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-56:\\layout\\continue_reading_widget.xml",
+        "source": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-59:\\layout\\continue_reading_widget.xml"
     },
     {
         "merged": "C:\\Users\\Hieu\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-56:\\layout\\dialog_comment_add.xml",

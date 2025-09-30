@@ -26,6 +26,7 @@ import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import com.example.appbook.utils.LayoutTextStripper
+import com.example.appbook.utils.WidgetUtils
 import com.github.barteksc.pdfviewer.PDFView
 import com.google.firebase.auth.FirebaseAuth
 
@@ -39,7 +40,7 @@ class PdfViewActivity : AppCompatActivity() {
     private var totalPages = 0
     private var currentPage = 0
     private val averageReadingTimePerPage = 1.5 // phút/trang
-
+    private var openedFromWidget = false
     private var pdfDocument: PDDocument? = null
     private val pageCache = mutableMapOf<Int, String>() // cache text theo trang
     private val client = OkHttpClient()
@@ -51,7 +52,7 @@ class PdfViewActivity : AppCompatActivity() {
 
         // Init PDFBox
         PDFBoxResourceLoader.init(applicationContext)
-
+        openedFromWidget = intent.getBooleanExtra("fromWidget", false)
         // Init TTS
         textToSpeech = TextToSpeech(this) { status ->
             if (status == TextToSpeech.SUCCESS) {
@@ -101,6 +102,8 @@ class PdfViewActivity : AppCompatActivity() {
         binding.btnSpeed.setOnClickListener {
             showSpeedDialog()
         }
+
+
         binding.btnTranslate.setOnClickListener {
             getTextForPage(currentPage) { text ->
                 if (text.isNotEmpty()) {
@@ -304,12 +307,31 @@ class PdfViewActivity : AppCompatActivity() {
                             updateReadingStatus()
                             binding.progressBar.visibility = View.GONE
                             checkLastReadingPage(bookId, totalPages)
+
+                            // 🟡 Resume từ widget: xử lý ở đây sau khi PDF đã load xong
+                            val resumePage = intent.getIntExtra("resumePage", -1)
+                            if (resumePage > 0 && resumePage <= totalPages) {
+                                Log.d(TAG, "⏩ Resume to page $resumePage")
+                                binding.pdfView.jumpTo(resumePage - 1, true)
+                                currentPage = resumePage
+                                updateReadingStatus()
+
+                                // 🟢 Hiển thị chào mừng nếu mở từ widget
+                                if (openedFromWidget) {
+                                    Toast.makeText(
+                                        this@PdfViewActivity,
+                                        "👋 Chào mừng bạn quay lại, đọc tiếp nhé!",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
                         }
                         .onPageChange { page, pageCount ->
                             currentPage = page + 1
                             totalPages = pageCount
                             updateReadingStatus()
                             saveReadingProgress(bookId, currentPage)
+                            WidgetUtils.updateContinueReadingWidget(this@PdfViewActivity)
                         }
                         .load()
                 }
@@ -323,6 +345,8 @@ class PdfViewActivity : AppCompatActivity() {
             }
         })
     }
+
+
     // kiem tra tang nguoi dung da doc toi va nhay
     private fun checkLastReadingPage(bookId: String, totalPages: Int) {
         val user = FirebaseAuth.getInstance().currentUser ?: return
@@ -332,7 +356,17 @@ class PdfViewActivity : AppCompatActivity() {
         ref.child(userId).child(bookId).get().addOnSuccessListener { snapshot ->
             val lastPage = snapshot.getValue(Int::class.java) ?: 1
 
-            // 👉 Chỉ hiện dialog nếu lastPage > 1 và nằm trong totalPages
+            if (openedFromWidget) {
+                // 🟢 Nếu mở từ widget → bỏ qua dialog
+                Toast.makeText(
+                    this,
+                    "👋 Chào mừng quay lại, tiếp tục đọc nhé!",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@addOnSuccessListener
+            }
+
+            // 👉 Nếu không mở từ widget → xử lý như bình thường
             if (lastPage > 1 && lastPage in 1..totalPages) {
                 AlertDialog.Builder(this)
                     .setTitle("Tiếp tục đọc?")
@@ -348,18 +382,28 @@ class PdfViewActivity : AppCompatActivity() {
         }
     }
 
-// luu trang nguoi dung da doc toi
-    private fun saveReadingProgress(bookId: String, page: Int) {
-        val user = FirebaseAuth.getInstance().currentUser ?: return
-        if (user == null) {
-            // 🔹 Không đăng nhập thì bỏ qua
-            return
-        }
 
-        val userId = user.uid
-        val ref = FirebaseDatabase.getInstance().getReference("UserReadingProgress")
-        ref.child(userId).child(bookId).setValue(page)
+    // luu trang nguoi dung da doc toi
+    private fun saveReadingProgress(bookId: String, page: Int) {
+    val user = FirebaseAuth.getInstance().currentUser ?: return
+
+    val ref = FirebaseDatabase.getInstance().getReference("UserReadingProgress")
+    ref.child(user.uid).child(bookId).setValue(page)
+
+    val title = binding.toolbarTitleTv.text.toString()
+    saveLastOpenedBook(bookId, title, page, totalPages)
+}
+
+    private fun saveLastOpenedBook(bookId: String, title: String, page: Int, totalPages: Int) {
+        val prefs = getSharedPreferences("ReadingPrefs", Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("lastBookId", bookId)
+            .putString("lastBookTitle", title)
+            .putInt("lastBookPage", page)
+            .putInt("lastBookTotal", totalPages)
+            .apply()
     }
+
 
     // lay text ra
     private fun getTextForPage(page: Int, callback: (String) -> Unit) {
@@ -443,6 +487,7 @@ class PdfViewActivity : AppCompatActivity() {
     }
 // khi ket thuc giai phong bo nho
     override fun onDestroy() {
+    WidgetUtils.updateContinueReadingWidget(this)
         pdfDocument?.close()
         if (::textToSpeech.isInitialized) {
             textToSpeech.stop()

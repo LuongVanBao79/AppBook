@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widgetContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/shape_toolbar02"
+    android:padding="12dp">
+
+    <!-- Dòng trạng thái -->
+    <TextView
+        android:id="@+id/widgetStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="📚 Bạn đang đọc dở:"
+        android:textColor="@android:color/white"
+        android:textSize="13sp" />
+
+    <!-- Tên sách -->
+    <TextView
+        android:id="@+id/widgetTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tên sách"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:textSize="15sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:layout_marginTop="2dp"/>
+
+    <!-- Thông tin trang -->
+    <TextView
+        android:id="@+id/widgetPageInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Trang 0/0"
+        android:textColor="@android:color/white"
+        android:textSize="13sp"
+        android:layout_marginTop="2dp"/>
+
+    <!-- Nút đọc tiếp -->
+    <TextView
+        android:id="@+id/widgetContinueBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="📖 Đọc tiếp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/bg_widget_button"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="4dp"
+        android:textSize="13sp"
+        android:layout_marginTop="6dp"/>
+</LinearLayout>

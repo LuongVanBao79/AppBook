@@ -111,6 +111,18 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <receiver
+            android:name="com.example.appbook.ContinueReadingWidget"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/continue_reading_widget_info" />
+        </receiver>
+
         <activity
             android:name="com.cloudinary.android.uploadwidget.ui.UploadWidgetActivity"
             android:configChanges="orientation"
