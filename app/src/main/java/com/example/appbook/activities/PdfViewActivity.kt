@@ -116,6 +116,7 @@ class PdfViewActivity : AppCompatActivity() {
         }
 
     }
+   // hien thi toc do tts
     private fun showSpeedDialog() {
         val speeds = arrayOf("0.5x", "1x", "1.5x", "2x")
         val values = floatArrayOf(0.5f, 1.0f, 1.5f, 2.0f)
@@ -454,16 +455,32 @@ class PdfViewActivity : AppCompatActivity() {
         }
     }
 
+
+
     //dịch
     fun translateText(text: String, callback: (String) -> Unit) {
+        // 📝 Dùng hàm detectLanguage có sẵn để đoán ngôn ngữ đoạn văn bản
+        val detectedLang = detectLanguage(text)  // trả về "vi" hoặc "en"
+
+        val sourceLang: String
+        val targetLang: String
+
+        if (detectedLang == "vi") {
+            sourceLang = TranslateLanguage.VIETNAMESE
+            targetLang = TranslateLanguage.ENGLISH
+        } else {
+            sourceLang = TranslateLanguage.ENGLISH
+            targetLang = TranslateLanguage.VIETNAMESE
+        }
+
         val options = TranslatorOptions.Builder()
-            .setSourceLanguage(TranslateLanguage.ENGLISH)   // Ngôn ngữ gốc
-            .setTargetLanguage(TranslateLanguage.VIETNAMESE) // Ngôn ngữ đích
+            .setSourceLanguage(sourceLang)
+            .setTargetLanguage(targetLang)
             .build()
 
         val translator = Translation.getClient(options)
 
-        // Tải model dịch nếu chưa có
+        // 🔽 Tải model dịch nếu cần
         translator.downloadModelIfNeeded()
             .addOnSuccessListener {
                 translator.translate(text)
@@ -478,6 +495,7 @@ class PdfViewActivity : AppCompatActivity() {
                 callback("❌ Không tải được model: ${e.message}")
             }
     }
+
     //hien thi thoi gian doc con lai
     private fun updateReadingStatus() {
         binding.toolbarSubtitleTv1.text = "Trang $currentPage/$totalPages"
@@ -485,6 +503,7 @@ class PdfViewActivity : AppCompatActivity() {
         val estimatedMinutes = (pagesLeft * averageReadingTimePerPage).roundToInt()
         binding.toolbarSubtitleTv2.text = "~${estimatedMinutes} phút còn lại"
     }
+
 // khi ket thuc giai phong bo nho
     override fun onDestroy() {
     WidgetUtils.updateContinueReadingWidget(this)

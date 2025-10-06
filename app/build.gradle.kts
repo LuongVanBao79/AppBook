@@ -44,7 +44,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -57,7 +56,6 @@ dependencies {
     implementation(libs.firebase.storage)
     implementation(libs.cloudinary.android)
     implementation ("com.google.mlkit:translate:17.0.2")
-
     implementation("com.cloudinary:cloudinary-android:1.29.0")
     implementation ("com.github.DImuthuUpe:AndroidPdfViewer:3.1.0-beta.1")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
@@ -65,7 +63,6 @@ dependencies {
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
     implementation(libs.language.id.common)
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
