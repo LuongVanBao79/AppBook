@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.bumptech.glide.Glide
 import com.example.appbook.MyApplication
 import com.example.appbook.R
 import com.example.appbook.adapters.AdapterComment
@@ -33,33 +34,21 @@ import javax.net.ssl.HttpsURLConnection
 
 class PdfDetailActivity : AppCompatActivity() {
 
-    //view binding
     private lateinit var binding: ActivityPdfDetailBinding
 
     private companion object {
-        //TAG
         const val TAG = "BOOK_DETAILS_TAG"
     }
 
-    //book id, get from intent
     private var bookId = ""
-
-    //get from firebase
     private var bookTitle = ""
     private var bookUrl = ""
+    private var bookFileSize: Long = 0L // <-- KHAI BÁO TRƯỜNG MỚI ĐỂ DÙNG TRONG formatFileSize
 
-    //firebase auth
     private lateinit var firebaseAuth: FirebaseAuth
-
-    //progress dialog
     private lateinit var progressDialog: ProgressDialog
-
-    //arraylist to hold comments
     private lateinit var commentArrayList: ArrayList<ModelComment>
-    //adapter to be set to recyclerview
     private lateinit var adapterComment: AdapterComment
-
-    //will hold a boolean value false/true to indicate either is in current user's favorite list or not
     private var isInMyFavorite = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,62 +56,47 @@ class PdfDetailActivity : AppCompatActivity() {
         binding = ActivityPdfDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //get book id from intent
         bookId = intent.getStringExtra("bookId")!!
 
-        //init progress bar
         progressDialog = ProgressDialog(this)
-        progressDialog.setTitle("Please wait...")
+        progressDialog.setTitle("Vui Lòng Đợi...")
         progressDialog.setCanceledOnTouchOutside(false)
 
-        //init firebase auth
         firebaseAuth = FirebaseAuth.getInstance()
         if (firebaseAuth.currentUser != null) {
-            //user is logged in, check if book is in fav or not
             checkIsFavorite()
         }
 
-        MyApplication.Companion.incrementBookViewCount(bookId)
+        MyApplication.incrementBookViewCount(bookId)
         loadBookDetails()
         showComments()
 
-        //handle back button click, go back
         binding.backBtn.setOnClickListener {
             onBackPressed()
         }
 
-        //handle click, open pdf view activity
         binding.readBookBtn.setOnClickListener {
             val intent = Intent(this, PdfViewActivity::class.java)
             intent.putExtra("bookId", bookId)
             startActivity(intent)
         }
 
-        //handle click, download book/pdf
         binding.downloadBookBtn.setOnClickListener {
-            //first check storage permission
             if (ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                Log.d(TAG, "onCreate: STORAGE PERMISSION is already granted")
                 downloadBook()
             } else {
-                Log.d(TAG, "onCreate: STORAGE PERMISSION was not granted")
                 requestStoragePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }
 
-        //handle click, add/remove favorite
         binding.favoriteBtn.setOnClickListener {
-            //we can add only if user is logged in
-            //1 check if user is logged in or not
             if (firebaseAuth.currentUser == null) {
-                //user not logged in, cant do favorite functionality
                 Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show()
             } else {
-                //user is logged in, we can do favorite functionality
                 if (isInMyFavorite) {
                     MyApplication.removeFromFavorite(this, bookId)
                 } else {
@@ -131,25 +105,22 @@ class PdfDetailActivity : AppCompatActivity() {
             }
         }
 
-        //handle click, show add comment dialog
         binding.addCommentBtn.setOnClickListener {
-            /*To add a comment, user must be logged in, if not just show a message you're not logged in*/
             if(firebaseAuth.currentUser == null){
-                //user not logged in, dont allow adding comment
                 Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show()
             }
             else{
-                //user logged in, allow adding comment
                 addCommentDialog()
             }
         }
 
-        //fix lỗi cuộn
+        // fix lỗi cuộn: đảm bảo cuộn lên đầu khi Activity khởi tạo
         binding.mainScrollView.post {
-            binding.mainScrollView.fullScroll(View.FOCUS_UP)
+            binding.mainScrollView.scrollTo(0, 0)
         }
     }
 
+    // [GIỮ NGUYÊN] showComments, addCommentDialog, addComment
     private fun showComments() {
         //init arraylist
         commentArrayList = ArrayList()
@@ -243,9 +214,10 @@ class PdfDetailActivity : AppCompatActivity() {
             }
     }
 
+    // [GIỮ NGUYÊN] requestStoragePermissionLauncher
+
     private val requestStoragePermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            //lets check if granted or not
             if (isGranted) {
                 Log.d(TAG, "onCreate: STORAGE PERMISSION is granted")
                 downloadBook()
@@ -255,104 +227,85 @@ class PdfDetailActivity : AppCompatActivity() {
             }
         }
 
+    // [GIỮ NGUYÊN] downloadBook (Chỉ cần đảm bảo bookUrl được gán)
+
     private fun downloadBook() {
         Log.d(TAG, "downloadBook: Đang tải sách")
 
-        // Hiển thị hộp thoại tiến trình
         progressDialog.setMessage("Đang tải sách")
         progressDialog.show()
 
-        // Tạo tên file PDF mới (thêm timestamp để tránh trùng)
         val fileName = "downloaded_${System.currentTimeMillis()}.pdf"
-
-        // Tạo file trong thư mục Download riêng của app (bộ nhớ trong)
         val file = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
 
-        // Chạy quá trình tải trong luồng nền để tránh làm đơ giao diện
         Thread {
             try {
                 Log.d(TAG, "Starting download from: $bookUrl to ${file.absolutePath}")
 
-                // Mở kết nối đến URL
                 val urlConnection = URL(bookUrl).openConnection() as HttpsURLConnection
-                urlConnection.connectTimeout = 10000 // Timeout kết nối (10s)
-                urlConnection.readTimeout = 10000 // Timeout đọc dữ liệu
-                urlConnection.requestMethod = "GET" // Phương thức HTTP GET
-                urlConnection.setRequestProperty("Accept", "application/pdf") // Định dạng mong muốn
-                urlConnection.connect() // Bắt đầu kết nối
+                urlConnection.connectTimeout = 10000
+                urlConnection.readTimeout = 10000
+                urlConnection.requestMethod = "GET"
+                urlConnection.setRequestProperty("Accept", "application/pdf")
+                urlConnection.connect()
 
-                // Kiểm tra phản hồi từ server
                 val responseCode = urlConnection.responseCode
                 if (responseCode != HttpsURLConnection.HTTP_OK) {
                     throw Exception("Server returned code: $responseCode")
                 }
 
-                // Chuẩn bị đọc từ URL và ghi ra file
                 val inputStream = urlConnection.inputStream
                 val outputStream = FileOutputStream(file)
                 val buffer = ByteArray(1024)
                 var bytesRead: Int
 
-                // Đọc từng đoạn dữ liệu (1KB mỗi lần) và ghi vào file
                 while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                     outputStream.write(buffer, 0, bytesRead)
                 }
 
-                // Đóng luồng
                 outputStream.flush()
                 outputStream.close()
                 inputStream.close()
                 urlConnection.disconnect()
 
-                // Sau khi tải xong, quay lại luồng chính để cập nhật giao diện
                 runOnUiThread {
-                    // Kiểm tra nếu file thực sự tồn tại và không rỗng
                     if (file.exists() && file.length() > 0) {
-                        // Tạo URI an toàn để mở file bằng FileProvider
                         val fileUri = FileProvider.getUriForFile(
                             this@PdfDetailActivity,
-                            "com.example.appbook.fileprovider", // Authorities phải trùng trong AndroidManifest
+                            "com.example.appbook.fileprovider",
                             file
                         )
 
-                        // Tạo intent để mở file PDF bằng app bên ngoài
                         val intent = Intent(Intent.ACTION_VIEW)
                         intent.setDataAndType(fileUri, "application/pdf")
-                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Cấp quyền đọc cho app khác
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
                         try {
-                            // Mở file bằng ứng dụng đọc PDF
                             startActivity(intent)
                             Log.d(TAG, "downloadBook: Mở file thành công với URI: $fileUri")
                             Toast.makeText(this, "Tải và mở file thành công", Toast.LENGTH_SHORT).show()
-
-                            // Cập nhật lượt tải (nếu có chức năng thống kê)
                             incrementDownloadCount()
                         } catch (e: Exception) {
-                            // Nếu thiết bị không có app đọc PDF
                             Log.e(TAG, "downloadBook: Lỗi khi mở file: ${e.message}")
                             Toast.makeText(this, "Lỗi khi mở file: ${e.message}", Toast.LENGTH_LONG).show()
                         }
                     } else {
-                        // File không tồn tại hoặc bị rỗng
                         throw Exception("File not created or empty, size: ${file.length()} bytes")
                     }
 
-                    // Ẩn hộp thoại tiến trình sau khi hoàn thành
                     progressDialog.dismiss()
                 }
             } catch (e: Exception) {
-                // Nếu có lỗi trong quá trình tải, hiển thị lỗi trên giao diện
                 runOnUiThread {
                     Log.e(TAG, "downloadBook: Lỗi khi tải: ${e.message}")
                     Toast.makeText(this, "Tải thất bại: ${e.message}", Toast.LENGTH_LONG).show()
                     progressDialog.dismiss()
                 }
             }
-        }.start() // Bắt đầu chạy luồng tải
+        }.start()
     }
 
-
+    // [GIỮ NGUYÊN] incrementDownloadCount
     private fun incrementDownloadCount() {
         Log.d(TAG, "incrementDownloadCount: ")
 
@@ -361,12 +314,10 @@ class PdfDetailActivity : AppCompatActivity() {
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     var downloadsCount = "${snapshot.child("downloadsCount").value}"
-                    Log.d(TAG, "onDataChange: Current Downloads Count: $downloadsCount")
 
                     if (downloadsCount == "" || downloadsCount == "null") downloadsCount = "0"
 
                     val newDownloadCount = downloadsCount.toLong() + 1
-                    Log.d(TAG, "onDataChange: New Downloads Count: $newDownloadCount")
 
                     val hashMap = HashMap<String, Any>()
                     hashMap["downloadsCount"] = newDownloadCount
@@ -386,37 +337,82 @@ class PdfDetailActivity : AppCompatActivity() {
             })
     }
 
+    /**
+     * [THAY ĐỔI LỚN] Load details: Loại bỏ các hàm tải nặng (loadPdfFromUrlSinglePage, loadPdfSizeFromCloudinary)
+     * và thay thế bằng việc hiển thị dữ liệu đã tính toán sẵn (imageUrl, fileSize, pagesCount).
+     */
     private fun loadBookDetails() {
         val ref = FirebaseDatabase.getInstance().getReference("Books")
         ref.child(bookId)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
+                    // Lấy dữ liệu cũ
                     val categoryId = "${snapshot.child("categoryId").value}"
                     val description = "${snapshot.child("description").value}"
                     val downloadsCount = "${snapshot.child("downloadsCount").value}"
                     val timestamp = "${snapshot.child("timestamp").value}"
                     bookTitle = "${snapshot.child("title").value}"
-                    val uid = "${snapshot.child("uid").value}"
                     bookUrl = "${snapshot.child("url").value}"
                     val viewsCount = "${snapshot.child("viewsCount").value}"
 
-                    val date = MyApplication.Companion.formatTimeStamp(timestamp.toLong())
+                    // Lấy dữ liệu mới đã được tính toán sẵn
+                    val pagesCount = "${snapshot.child("pagesCount").value}"
+                    val fileSizeString = "${snapshot.child("fileSize").value}"
+                    val imageUrl = "${snapshot.child("imageUrl").value}"
 
-                    MyApplication.Companion.loadCategory(categoryId, binding.categoryTv)
-                    MyApplication.Companion.loadPdfFromUrlSinglePage(bookUrl, bookTitle, binding.pdfView, binding.progressBar, binding.pagesTv)
-                    MyApplication.Companion.loadPdfSizeFromCloudinary(bookUrl, binding.sizeTv)
+                    // Chuyển đổi fileSize sang Long và lưu vào biến cục bộ
+                    bookFileSize = fileSizeString.toLongOrNull() ?: 0L
 
+                    val date = MyApplication.formatTimeStamp(timestamp.toLong())
+
+                    // 1. Tải ảnh bìa (ImageView) thay vì PDFView
+                    try {
+                        // Tải ảnh bìa bằng Glide
+                        Glide.with(this@PdfDetailActivity)
+                            .load(imageUrl)
+                            .placeholder(R.drawable.ic_book_white) // Đặt placeholder
+                            .into(binding.coverIv) // Sử dụng ImageView mới
+                    } catch (e: Exception) {
+                        Log.e(TAG, "onDataChange: Error loading image", e)
+                    }
+
+                    // 2. Load Category (Giữ nguyên)
+                    MyApplication.loadCategory(categoryId, binding.categoryTv)
+
+                    // 3. Hiển thị dữ liệu
                     binding.titleTv.text = bookTitle
                     binding.descriptionTv.text = description
                     binding.viewsTv.text = viewsCount
                     binding.downloadsTv.text = downloadsCount
                     binding.dateTv.text = date
+
+                    // Hiển thị các trường mới
+                    binding.pagesTv.text = pagesCount
+
+                    // Hiển thị kích thước file (Sử dụng hàm tiện ích formatFileSize từ Adapter)
+                    binding.sizeTv.text = formatFileSize(bookFileSize)
+
+                    // BỎ CÁC HÀM TẢI NẶNG (đã được thay thế):
+                    // BỎ: MyApplication.Companion.loadPdfFromUrlSinglePage(bookUrl, bookTitle, binding.pdfView, binding.progressBar, binding.pagesTv)
+                    // BỎ: MyApplication.Companion.loadPdfSizeFromCloudinary(bookUrl, binding.sizeTv)
                 }
 
                 override fun onCancelled(error: DatabaseError) {}
             })
     }
 
+    /**
+     * Hàm tiện ích (copy từ Adapter) để định dạng kích thước file
+     */
+    private fun formatFileSize(bytes: Long): String {
+        val unit = 1024
+        if (bytes < unit) return "$bytes B"
+        val exp = (Math.log(bytes.toDouble()) / Math.log(unit.toDouble())).toInt()
+        val pre = "KMGTPE"[exp - 1]
+        return String.format("%.1f %sB", bytes / Math.pow(unit.toDouble(), exp.toDouble()), pre)
+    }
+
+    // [GIỮ NGUYÊN] checkIsFavorite, addToFavorite
     private fun checkIsFavorite() {
         Log.d(TAG, "checkIsFavorite: Checking if book is in fav or not")
 
@@ -464,5 +460,4 @@ class PdfDetailActivity : AppCompatActivity() {
                 Toast.makeText(this, "Thêm vào mục yêu thích thất bại do ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
 }

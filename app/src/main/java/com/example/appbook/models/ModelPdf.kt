@@ -1,43 +1,30 @@
 package com.example.appbook.models
 
-class ModelPdf {
-    //variables
-    var uid: String = ""
-    var id: String = ""
-    var title: String = ""
-    var description: String = ""
-    var categoryId: String = ""
-    var url: String = ""
-    var timestamp: Long = 0
-    var viewsCount: Long = 0
-    var downloadsCount: Long = 0
-    var isFavorite = false
+import com.google.firebase.database.IgnoreExtraProperties
 
-    //empty constructor (required by firebase)
-    constructor()
-    constructor(
-        uid: String,
-        id: String,
-        title: String,
-        description: String,
-        categoryId: String,
-        url: String,
-        timestamp: Long,
-        viewsCount: Long,
-        downloadsCount: Long,
-        isFavorite: Boolean
-    ) {
-        this.uid = uid
-        this.id = id
-        this.title = title
-        this.description = description
-        this.categoryId = categoryId
-        this.url = url
-        this.timestamp = timestamp
-        this.viewsCount = viewsCount
-        this.downloadsCount = downloadsCount
-        this.isFavorite = isFavorite
-    }
-    //parameterized constructor
+@IgnoreExtraProperties
+data class ModelPdf(
+    // Thông tin cơ bản và quản lý
+    var uid: String = "",
+    var id: String = "",
+    var title: String = "",
+    var description: String = "",
+    var categoryId: String = "",
 
+    // Thông tin về file và URL
+    var url: String = "",
+    var imageUrl: String = "", // URL ảnh bìa
+    var fileSize: Long = 0,    // Dung lượng file (bytes)
+    var pagesCount: Int = 0,   // Tổng số trang
+
+    // Thống kê và thời gian
+    var timestamp: Long = 0,
+    var viewsCount: Long = 0,
+    var downloadsCount: Long = 0,
+
+    // Trạng thái tạm thời
+    var isFavorite: Boolean = false
+) {
+    // KHÔNG CẦN ĐỊNH NGHĨA constructor() VÀ constructor(...) CŨ.
+    // Data class đã tự động tạo constructor rỗng và constructor đầy đủ.
 }

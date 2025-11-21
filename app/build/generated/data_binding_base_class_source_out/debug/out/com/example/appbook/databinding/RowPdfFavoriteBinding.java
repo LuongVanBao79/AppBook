@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -14,7 +15,6 @@ import androidx.cardview.widget.CardView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.example.appbook.R;
-import com.github.barteksc.pdfviewer.PDFView;
 import java.lang.NullPointerException;
 import java.lang.Override;
 import java.lang.String;
@@ -27,16 +27,19 @@ public final class RowPdfFavoriteBinding implements ViewBinding {
   public final TextView categoryTv;
 
   @NonNull
+  public final RelativeLayout coverImageRl;
+
+  @NonNull
+  public final ImageView coverIv;
+
+  @NonNull
   public final TextView dateTv;
 
   @NonNull
   public final TextView descriptionTv;
 
   @NonNull
-  public final RelativeLayout pdfRl;
-
-  @NonNull
-  public final PDFView pdfView;
+  public final TextView pagesTv;
 
   @NonNull
   public final ProgressBar progressBar;
@@ -51,15 +54,16 @@ public final class RowPdfFavoriteBinding implements ViewBinding {
   public final TextView titleTv;
 
   private RowPdfFavoriteBinding(@NonNull CardView rootView, @NonNull TextView categoryTv,
-      @NonNull TextView dateTv, @NonNull TextView descriptionTv, @NonNull RelativeLayout pdfRl,
-      @NonNull PDFView pdfView, @NonNull ProgressBar progressBar, @NonNull ImageButton removeFavBtn,
-      @NonNull TextView sizeTv, @NonNull TextView titleTv) {
+      @NonNull RelativeLayout coverImageRl, @NonNull ImageView coverIv, @NonNull TextView dateTv,
+      @NonNull TextView descriptionTv, @NonNull TextView pagesTv, @NonNull ProgressBar progressBar,
+      @NonNull ImageButton removeFavBtn, @NonNull TextView sizeTv, @NonNull TextView titleTv) {
     this.rootView = rootView;
     this.categoryTv = categoryTv;
+    this.coverImageRl = coverImageRl;
+    this.coverIv = coverIv;
     this.dateTv = dateTv;
     this.descriptionTv = descriptionTv;
-    this.pdfRl = pdfRl;
-    this.pdfView = pdfView;
+    this.pagesTv = pagesTv;
     this.progressBar = progressBar;
     this.removeFavBtn = removeFavBtn;
     this.sizeTv = sizeTv;
@@ -99,6 +103,18 @@ public final class RowPdfFavoriteBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.coverImageRl;
+      RelativeLayout coverImageRl = ViewBindings.findChildViewById(rootView, id);
+      if (coverImageRl == null) {
+        break missingId;
+      }
+
+      id = R.id.coverIv;
+      ImageView coverIv = ViewBindings.findChildViewById(rootView, id);
+      if (coverIv == null) {
+        break missingId;
+      }
+
       id = R.id.dateTv;
       TextView dateTv = ViewBindings.findChildViewById(rootView, id);
       if (dateTv == null) {
@@ -111,15 +127,9 @@ public final class RowPdfFavoriteBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.pdfRl;
-      RelativeLayout pdfRl = ViewBindings.findChildViewById(rootView, id);
-      if (pdfRl == null) {
-        break missingId;
-      }
-
-      id = R.id.pdfView;
-      PDFView pdfView = ViewBindings.findChildViewById(rootView, id);
-      if (pdfView == null) {
+      id = R.id.pagesTv;
+      TextView pagesTv = ViewBindings.findChildViewById(rootView, id);
+      if (pagesTv == null) {
         break missingId;
       }
 
@@ -147,8 +157,8 @@ public final class RowPdfFavoriteBinding implements ViewBinding {
         break missingId;
       }
 
-      return new RowPdfFavoriteBinding((CardView) rootView, categoryTv, dateTv, descriptionTv,
-          pdfRl, pdfView, progressBar, removeFavBtn, sizeTv, titleTv);
+      return new RowPdfFavoriteBinding((CardView) rootView, categoryTv, coverImageRl, coverIv,
+          dateTv, descriptionTv, pagesTv, progressBar, removeFavBtn, sizeTv, titleTv);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

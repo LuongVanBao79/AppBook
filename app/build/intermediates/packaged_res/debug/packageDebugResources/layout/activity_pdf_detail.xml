@@ -8,14 +8,12 @@
     android:background="@color/white"
     tools:context=".activities.PdfDetailActivity">
 
-    <!--Toolbar-->
     <RelativeLayout
         android:id="@+id/toolbarRl"
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
         android:background="@drawable/shape_toolbar02">
 
-        <!--Back button-->
         <ImageButton
             android:id="@+id/backBtn"
             android:layout_width="wrap_content"
@@ -23,9 +21,9 @@
             android:src="@drawable/ic_back_white"
             android:layout_marginStart="10dp"
             android:background="@android:color/transparent"
-            android:layout_centerVertical="true"/>
+            android:layout_centerVertical="true"
+            android:contentDescription="Quay lại"/>
 
-        <!--Title-->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -36,7 +34,6 @@
 
     </RelativeLayout>
 
-    <!--All content under scrollview-->
     <ScrollView
         android:id="@+id/mainScrollView"
         android:layout_above="@id/bookOptionsLl"
@@ -50,56 +47,59 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!--BookInfo-->
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <!--Book Preview-->
                 <RelativeLayout
-                    android:id="@+id/pdfRl"
+                    android:id="@+id/coverImageRl"
                     android:layout_width="110dp"
                     android:layout_height="150dp"
-                    android:layout_marginEnd="5dp"
+                    android:layout_marginEnd="10dp"
                     android:background="@color/gray02">
 
-                    <!--Pdfview-->
-                    <com.github.barteksc.pdfviewer.PDFView
-                        android:id="@+id/pdfView"
+                    <ImageView
+                        android:id="@+id/coverIv"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"/>
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_book_white"
+                        android:contentDescription="Ảnh bìa sách"/>
 
-                    <!--ProgressBar-->
                     <ProgressBar
                         android:id="@+id/progressBar"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"/>
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_centerInParent="true"
+                        android:visibility="gone"/>
                 </RelativeLayout>
 
-                <!--Book Title-->
                 <TextView
                     android:id="@+id/titleTv"
-                    style="@style/TextAppearance.MaterialComponents.Headline6"
+                    style="@style/TextAppearance.MaterialComponents.Headline5"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_toEndOf="@id/pdfRl"
-                    android:text="Book Title"/>
+                    android:layout_toEndOf="@id/coverImageRl"
+                    android:text="Tên Sách Thật Dài Và Hấp Dẫn"
+                    android:textColor="@color/black"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:layout_marginBottom="5dp"/>
 
-                <!--Table-->
                 <TableLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/titleTv"
-                    android:layout_toEndOf="@id/pdfRl">
+                    android:layout_toEndOf="@id/coverImageRl">
 
-                    <!--Category row-->
                     <TableRow>
                         <TextView
                             android:id="@+id/categoryLabelTv"
                             style="@style/TextAppearance.MaterialComponents.Caption"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Thể loại"
+                            android:text="Thể loại:"
+                            android:textStyle="bold"
                             android:layout_marginEnd="5dp"/>
 
                         <TextView
@@ -108,20 +108,19 @@
                             android:layout_weight="1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="N/A"
-                            android:layout_marginEnd="5dp"/>
-
+                            android:text="Kinh tế/Văn học"
+                            android:textColor="@color/black"/>
                     </TableRow>
 
-                    <!--Date row-->
                     <TableRow
-                        android:layout_marginTop="5dp">
+                        android:layout_marginTop="3dp">
                         <TextView
                             android:id="@+id/dateLabelTv"
                             style="@style/TextAppearance.MaterialComponents.Caption"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Ngày thêm"
+                            android:text="Ngày thêm:"
+                            android:textStyle="bold"
                             android:layout_marginEnd="5dp"/>
                         <TextView
                             android:id="@+id/dateTv"
@@ -129,19 +128,18 @@
                             android:layout_weight="1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="N/A"
-                            android:layout_marginEnd="5dp"/>
+                            android:text="20/11/2025"/>
                     </TableRow>
 
-                    <!--Size row-->
                     <TableRow
-                        android:layout_marginTop="5dp">
+                        android:layout_marginTop="3dp">
                         <TextView
                             android:id="@+id/sizeLabelTv"
                             style="@style/TextAppearance.MaterialComponents.Caption"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Kích cỡ"
+                            android:text="Kích cỡ:"
+                            android:textStyle="bold"
                             android:layout_marginEnd="5dp"/>
                         <TextView
                             android:id="@+id/sizeTv"
@@ -149,59 +147,18 @@
                             android:layout_weight="1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="N/A"
-                            android:layout_marginEnd="5dp"/>
+                            android:text="13.5 MB"/>
                     </TableRow>
 
-                    <!--Views Count row-->
                     <TableRow
-                        android:layout_marginTop="5dp">
-                        <TextView
-                            android:id="@+id/viewsLabelTv"
-                            style="@style/TextAppearance.MaterialComponents.Caption"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Lượt xem"
-                            android:layout_marginEnd="5dp"/>
-                        <TextView
-                            android:id="@+id/viewsTv"
-                            style="@style/TextAppearance.MaterialComponents.Caption"
-                            android:layout_weight="1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="N/A"
-                            android:layout_marginEnd="5dp"/>
-                    </TableRow>
-
-                    <!--Downloads Count row-->
-                    <TableRow
-                        android:layout_marginTop="5dp">
-                        <TextView
-                            android:id="@+id/downloadsLabelTv"
-                            style="@style/TextAppearance.MaterialComponents.Caption"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Lượt tải"
-                            android:layout_marginEnd="5dp"/>
-                        <TextView
-                            android:id="@+id/downloadsTv"
-                            style="@style/TextAppearance.MaterialComponents.Caption"
-                            android:layout_weight="1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="N/A"
-                            android:layout_marginEnd="5dp"/>
-                    </TableRow>
-
-                    <!--Number of page row-->
-                    <TableRow
-                        android:layout_marginTop="5dp">
+                        android:layout_marginTop="3dp">
                         <TextView
                             android:id="@+id/pagesLabelTv"
                             style="@style/TextAppearance.MaterialComponents.Caption"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Số trang"
+                            android:text="Số trang:"
+                            android:textStyle="bold"
                             android:layout_marginEnd="5dp"/>
                         <TextView
                             android:id="@+id/pagesTv"
@@ -209,15 +166,60 @@
                             android:layout_weight="1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="N/A"
+                            android:text="300"/>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_marginTop="3dp">
+                        <TextView
+                            android:id="@+id/viewsLabelTv"
+                            style="@style/TextAppearance.MaterialComponents.Caption"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Lượt xem:"
+                            android:textStyle="bold"
                             android:layout_marginEnd="5dp"/>
+                        <TextView
+                            android:id="@+id/viewsTv"
+                            style="@style/TextAppearance.MaterialComponents.Caption"
+                            android:layout_weight="1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1.2K"/>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_marginTop="3dp">
+                        <TextView
+                            android:id="@+id/downloadsLabelTv"
+                            style="@style/TextAppearance.MaterialComponents.Caption"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Lượt tải:"
+                            android:textStyle="bold"
+                            android:layout_marginEnd="5dp"/>
+                        <TextView
+                            android:id="@+id/downloadsTv"
+                            style="@style/TextAppearance.MaterialComponents.Caption"
+                            android:layout_weight="1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="300"/>
                     </TableRow>
 
                 </TableLayout>
 
             </RelativeLayout>
 
-            <!--Book Description-->
+            <TextView
+                android:id="@+id/descriptionLabelTv"
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="Mô tả"
+                android:textColor="@color/black"/>
+
             <TextView
                 android:id="@+id/descriptionTv"
                 android:layout_width="match_parent"
@@ -226,18 +228,16 @@
                 android:text="The description of the book"
                 android:textColor="@color/black"/>
 
-            <!--View: to Seprate-->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
                 android:background="@color/gray03"
-                android:layout_marginTop="5dp"/>
+                android:layout_marginTop="10dp"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <!--TextView: Comments Label-->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -246,7 +246,6 @@
                     android:textColor="@color/black"
                     android:textSize="16sp"/>
 
-                <!--ImageButton: Show dialog to add new comment-->
                 <ImageButton
                     android:id="@+id/addCommentBtn"
                     android:layout_width="wrap_content"
@@ -254,9 +253,9 @@
                     android:background="@android:color/transparent"
                     android:padding="10dp"
                     android:src="@drawable/ic_comment_add_black"
-                    android:layout_alignParentEnd="true"/>
+                    android:layout_alignParentEnd="true"
+                    android:contentDescription="Thêm bình luận"/>
 
-                <!--RecyclerView:: Show comments-->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/commentsRv"
                     android:layout_width="match_parent"
@@ -270,7 +269,6 @@
         </LinearLayout>
     </ScrollView>
 
-    <!--Bottom buttons for book options-->
     <LinearLayout
         android:id="@+id/bookOptionsLl"
         android:layout_width="match_parent"
@@ -279,34 +277,31 @@
         android:layout_alignParentBottom="true"
         android:background="@color/design_default_color_primary">
 
-        <!--Button: Read book-->
         <Button
             android:id="@+id/readBookBtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Đọc sách"
-            android:textSize="10sp"
+            android:textSize="12sp"
             android:drawableTop="@drawable/ic_book_white"
             android:layout_weight="1"/>
 
-        <!--Button: Download book (Downloads Folder)-->
         <Button
             android:id="@+id/downloadBookBtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Tải Sách"
-            android:textSize="10sp"
+            android:textSize="12sp"
             android:drawableTop="@drawable/ic_download_white"
             android:layout_weight="1"/>
 
-        <!--Button: Add/Remove favorite-->
         <Button
             android:id="@+id/favoriteBtn"
             android:layout_width="0dp"
             android:drawableTop="@drawable/ic_favorite_white"
             android:layout_height="wrap_content"
             android:text="Yêu Thích"
-            android:textSize="10sp"
+            android:textSize="12sp"
             android:layout_weight="1"/>
     </LinearLayout>
 

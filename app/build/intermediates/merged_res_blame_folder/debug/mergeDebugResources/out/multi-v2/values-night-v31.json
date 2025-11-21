@@ -4,7 +4,7 @@
             "outputFile": "com.example.appbook.app-mergeDebugResources-55:/values-night-v31/values-night-v31.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Hieu\\Documents\\AppBook-master\\app\\src\\main\\res\\values-night-v31\\themes.xml",
+                    "source": "F:\\WorkSpace\\AppBook\\app\\src\\main\\res\\values-night-v31\\themes.xml",
                     "from": {
                         "startLines": "5",
                         "startColumns": "4",

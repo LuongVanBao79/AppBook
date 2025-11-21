@@ -3166,6 +3166,7 @@ drawable ic_edit_white
 drawable ic_email_gray
 drawable ic_favorite_filled_white
 drawable ic_favorite_white
+drawable ic_file_size
 drawable ic_keyboard_black_24dp
 drawable ic_launcher_background
 drawable ic_launcher_foreground
@@ -3180,6 +3181,7 @@ drawable ic_mtrl_chip_checked_black
 drawable ic_mtrl_chip_checked_circle
 drawable ic_mtrl_chip_close_circle
 drawable ic_other_sign_in
+drawable ic_pages
 drawable ic_passkey
 drawable ic_password
 drawable ic_pause
@@ -3461,6 +3463,8 @@ id continuousVelocity
 id coordinator
 id cos
 id counterclockwise
+id coverImageRl
+id coverIv
 id cradle
 id cropRotateToolbar
 id crop_action
@@ -3480,6 +3484,7 @@ id deleteBtn
 id deltaRelative
 id dependency_ordering
 id descriptionEt
+id descriptionLabelTv
 id descriptionTil
 id descriptionTv
 id design_bottom_sheet
@@ -3729,7 +3734,6 @@ id passwordTil
 id password_toggle
 id path
 id pathRelative
-id pdfRl
 id pdfView
 id peekHeight
 id percent

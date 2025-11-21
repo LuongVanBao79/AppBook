@@ -5,7 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,7 +18,7 @@ import java.lang.String;
 
 public final class FragmentBooksUserBinding implements ViewBinding {
   @NonNull
-  private final LinearLayout rootView;
+  private final RelativeLayout rootView;
 
   @NonNull
   public final RecyclerView booksRv;
@@ -26,7 +26,7 @@ public final class FragmentBooksUserBinding implements ViewBinding {
   @NonNull
   public final EditText searchEt;
 
-  private FragmentBooksUserBinding(@NonNull LinearLayout rootView, @NonNull RecyclerView booksRv,
+  private FragmentBooksUserBinding(@NonNull RelativeLayout rootView, @NonNull RecyclerView booksRv,
       @NonNull EditText searchEt) {
     this.rootView = rootView;
     this.booksRv = booksRv;
@@ -35,7 +35,7 @@ public final class FragmentBooksUserBinding implements ViewBinding {
 
   @Override
   @NonNull
-  public LinearLayout getRoot() {
+  public RelativeLayout getRoot() {
     return rootView;
   }
 
@@ -72,7 +72,7 @@ public final class FragmentBooksUserBinding implements ViewBinding {
         break missingId;
       }
 
-      return new FragmentBooksUserBinding((LinearLayout) rootView, booksRv, searchEt);
+      return new FragmentBooksUserBinding((RelativeLayout) rootView, booksRv, searchEt);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

@@ -21,6 +21,11 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.tom_roush.pdfbox.pdmodel.PDDocument
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
@@ -77,7 +82,7 @@ class PdfAddActivity : AppCompatActivity() {
         // Xử lý sự kiện click vào nút "Tải lên"
         binding.submitBtn.setOnClickListener {
             // 1. Kiểm tra dữ liệu
-            // 2. Tải PDF lên Firebase Storage (hoặc Cloudinary)
+            // 2. Tải PDF lên Cloudinary
             // 3. Lấy URL của PDF đã tải lên
             // 4. Tải thông tin PDF lên Firebase Database
             validateData() // Kiểm tra dữ liệu trước khi tải lên
@@ -114,108 +119,128 @@ class PdfAddActivity : AppCompatActivity() {
     }
 
     // Hàm tải PDF lên Cloudinary
+    // import kotlinx.coroutines.* // Cần import Coroutine
+// import com.tom_roush.pdfbox.pdmodel.PDDocument // Cần thư viện PDFBox để xử lý file cục bộ
+
     private fun uploadPdfToCloudinary() {
         Log.d(TAG, "uploadPdfToCloudinary: uploading to Cloudinary...")
 
-        progressDialog.setMessage("Đang tải lên Cloudinary...") // Thiết lập thông báo
-        progressDialog.show() // Hiển thị ProgressDialog
+        progressDialog.setMessage("Đang tải lên Cloudinary...")
+        progressDialog.show()
 
-        val timestamp = System.currentTimeMillis() // Lấy timestamp để tạo ID duy nhất
+        val timestamp = System.currentTimeMillis()
+        var tempFile: File? = null // Khai báo ngoài try/catch để đảm bảo xóa được
 
-        // Tạo file tạm từ uri (vì Cloudinary có thể không hiểu rõ uri content://...)
-        try {
-            val inputStream = contentResolver.openInputStream(pdfUri!!) // Mở input stream từ URI
-            val tempFile = File.createTempFile("upload_pdf_temp", ".pdf", cacheDir) // Tạo file tạm
-            val outputStream = FileOutputStream(tempFile) // Tạo output stream để ghi vào file tạm
+        // Sử dụng Coroutine để tạo file tạm bất đồng bộ
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // 1. TÁC VỤ I/O NẶNG: Tạo file tạm
+                val inputStream = contentResolver.openInputStream(pdfUri!!)
+                tempFile = File.createTempFile("upload_pdf_temp", ".pdf", cacheDir)
+                val outputStream = FileOutputStream(tempFile)
 
-            inputStream?.copyTo(outputStream) // Sao chép dữ liệu từ input stream sang output stream
-            inputStream?.close() // Đóng input stream
-            outputStream.close() // Đóng output stream
+                inputStream?.copyTo(outputStream)
+                inputStream?.close()
+                outputStream.close()
 
-            // Upload bằng File path
-            MediaManager.get().upload(tempFile.absolutePath) // Tải file lên Cloudinary
-                .option("resource_type", "raw") // Chỉ định loại tài nguyên là "raw" (cho PDF)
-                .option("public_id", "Books/$timestamp") // Đặt public ID cho file trên Cloudinary
-                .option("type", "upload") // Chỉ định loại upload
-                .callback(object : UploadCallback { // Thiết lập callback để theo dõi quá trình upload
-                    override fun onStart(requestId: String?) {
-                        Log.d(TAG, "onStart: Upload bắt đầu")
-                    }
+                val filePath = tempFile!!.absolutePath
 
-                    override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {
-                        Log.d(TAG, "onProgress: $bytes/$totalBytes")
-                    }
+                // 2. BẮT ĐẦU UPLOAD TRÊN CLOUDINARY THREAD
+                MediaManager.get().upload(filePath)
+                    .option("resource_type", "raw")
+                    .option("public_id", "Books/$timestamp")
+                    .option("type", "upload")
+                    .callback(object : UploadCallback {
 
-                    override fun onSuccess(requestId: String?, resultData: MutableMap<Any?, Any?>?) {
-                        Log.d(TAG, "onSuccess: Upload thành công $resultData")
-                        val uploadedPdfUrl = resultData?.get("secure_url") as? String // Lấy URL của file đã tải lên
-                        if (uploadedPdfUrl != null) {
-                            uploadPdfInfoToDb(uploadedPdfUrl, timestamp) // Tải thông tin PDF lên Firebase Database
-                        } else {
-                            Toast.makeText(this@PdfAddActivity, "Không lấy được URL", Toast.LENGTH_SHORT).show()
+                        override fun onSuccess(requestId: String?, resultData: MutableMap<Any?, Any?>?) {
+                            Log.d(TAG, "onSuccess: Upload thành công $resultData")
+                            val uploadedPdfUrl = resultData?.get("secure_url") as? String
 
+                            // 3. XỬ LÝ DỮ LIỆU FILE TRÊN THIẾT BỊ (trước khi ghi DB)
+                            if (uploadedPdfUrl != null) {
+                                // Tải thông tin file (size, pages, ảnh bìa)
+                                extractPdfDataAndUploadInfo(uploadedPdfUrl, timestamp, tempFile!!)
+                            } else {
+                                // Quay lại Main Thread để hiển thị Toast
+                                runOnUiThread {
+                                    Toast.makeText(this@PdfAddActivity, "Không lấy được URL", Toast.LENGTH_SHORT).show()
+                                    progressDialog.dismiss()
+                                }
+                            }
+                            tempFile?.delete() // Xóa file tạm sau khi hoàn tất
                         }
 
-                        tempFile.delete() // Xóa file tạm
-                        progressDialog.dismiss() // Ẩn ProgressDialog
-                    }
+                        override fun onError(requestId: String?, error: ErrorInfo?) {
+                            runOnUiThread {
+                                progressDialog.dismiss()
+                                Toast.makeText(this@PdfAddActivity, "Upload thất bại: ${error?.description}", Toast.LENGTH_SHORT).show()
+                            }
+                            tempFile?.delete() // Xóa file tạm khi thất bại
+                            Log.e(TAG, "Upload error: ${error?.description}")
+                        }
 
-                    override fun onError(requestId: String?, error: ErrorInfo?) {
-                        progressDialog.dismiss() // Ẩn ProgressDialog
-                        Toast.makeText(this@PdfAddActivity, "Upload thất bại: ${error?.description}", Toast.LENGTH_SHORT).show()
-                        Log.e(TAG, "Upload error: ${error?.description}")
-                    }
+                        // ... Giữ nguyên onStart, onProgress, onReschedule ...
+                        override fun onStart(requestId: String?) { Log.d(TAG, "onStart: Upload bắt đầu") }
+                        override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) { Log.d(TAG, "onProgress: $bytes/$totalBytes") }
+                        override fun onReschedule(requestId: String?, error: ErrorInfo?) { Log.d(TAG, "onReschedule: $error") }
+                    })
+                    .dispatch()
 
-                    override fun onReschedule(requestId: String?, error: ErrorInfo?) {
-                        Log.d(TAG, "onReschedule: $error")
-                    }
-                })
-                .dispatch() // Bắt đầu upload
-
-        } catch (e: Exception) {
-            progressDialog.dismiss() // Ẩn ProgressDialog
-            Toast.makeText(this, "Lỗi khi xử lý file PDF: ${e.message}", Toast.LENGTH_LONG).show()
-            Log.e(TAG, "Lỗi khi xử lý file PDF", e)
+            } catch (e: Exception) {
+                tempFile?.delete() // Xóa file tạm khi có lỗi trong quá trình tạo
+                withContext(Dispatchers.Main) {
+                    progressDialog.dismiss()
+                    Toast.makeText(this@PdfAddActivity, "Lỗi I/O file: ${e.message}", Toast.LENGTH_LONG).show()
+                    Log.e(TAG, "Lỗi I/O file", e)
+                }
+            }
         }
     }
 
     // Hàm tải thông tin PDF lên Firebase Database
-    private fun PdfAddActivity.uploadPdfInfoToDb(uploadedPdfUrl: String, timestamp: Long) {
-        // 4. Tải thông tin PDF lên Firebase Database
+    private fun uploadPdfInfoToDb(
+        uploadedPdfUrl: String,
+        timestamp: Long,
+        fileSize: Long,      // THÊM: Dung lượng
+        pagesCount: Int,     // THÊM: Số trang
+        imageUrl: String     // THÊM: URL ảnh bìa
+    ) {
         Log.d(TAG, "uploadPdfInfoToDb: uploading to db")
-        progressDialog.setMessage("Đang tải thông tin PDF...") // Thiết lập thông báo
+        progressDialog.setMessage("Đang tải thông tin PDF...")
 
-        // Lấy UID của người dùng hiện tại
         val uid = firebaseAuth.uid
 
         // Thiết lập dữ liệu để tải lên
         val hashMap: HashMap<String, Any> = HashMap()
-        hashMap["uid"] = "$uid" // UID của người dùng
-        hashMap["id"] = "$timestamp" // ID của PDF (timestamp)
-        hashMap["title"] = "$title" // Tiêu đề
-        hashMap["description"] = "$description" // Mô tả
-        hashMap["categoryId"] = "$selectedCategoryId" // ID của danh mục
-        hashMap["url"] = "$uploadedPdfUrl" // URL của PDF đã tải lên
-        hashMap["timestamp"] = timestamp // Timestamp
-        hashMap["viewsCount"] = 0 // Số lượt xem
-        hashMap["downloadsCount"] = 0 // Số lượt tải
+        hashMap["uid"] = "$uid"
+        hashMap["id"] = "$timestamp"
+        hashMap["title"] = "$title"
+        hashMap["description"] = "$description"
+        hashMap["categoryId"] = "$selectedCategoryId"
+        hashMap["url"] = "$uploadedPdfUrl"
+        hashMap["timestamp"] = timestamp
+        hashMap["viewsCount"] = 0
+        hashMap["downloadsCount"] = 0
 
-        // Tham chiếu đến node "Books" trong Firebase Database
+        // THÊM CÁC TRƯỜNG DỮ LIỆU MỚI
+        hashMap["fileSize"] = fileSize
+        hashMap["pagesCount"] = pagesCount
+        hashMap["imageUrl"] = imageUrl // URL ảnh bìa (có thể rỗng nếu upload ảnh bìa thất bại)
+
         val ref = FirebaseDatabase.getInstance().getReference("Books")
-        ref.child("$timestamp") // Tạo node con với ID là timestamp
-            .setValue(hashMap) // Thiết lập giá trị cho node con
+        ref.child("$timestamp")
+            .setValue(hashMap)
             .addOnSuccessListener {
-                // Nếu tải lên thành công
                 Log.d(TAG, "uploadPdfInfoToDb: uploaded to db")
-                progressDialog.dismiss() // Ẩn ProgressDialog
-                Toast.makeText(this, "Đã tải lên...", Toast.LENGTH_SHORT).show()
+                progressDialog.dismiss()
+                Toast.makeText(this, "Đã tải lên thành công!", Toast.LENGTH_SHORT).show()
+                pdfUri = null
             }
             .addOnFailureListener { e ->
-                // Nếu tải lên thất bại
                 Log.d(TAG, "uploadPdfInfoDb: failed to upload due to ${e.message}")
-                progressDialog.dismiss() // Ẩn ProgressDialog
+                progressDialog.dismiss()
                 Toast.makeText(this, "Tải lên thất bại do ${e.message}", Toast.LENGTH_SHORT).show()
-                pdfUri = null // Đặt lại pdfUri về null
+                pdfUri = null
             }
     }
 
@@ -301,4 +326,68 @@ class PdfAddActivity : AppCompatActivity() {
             }
         }
     )
+
+
+    // Yêu cầu thư viện: implementation("com.tom-roush:pdfbox-android:2.0.27.0")
+    private fun extractPdfDataAndUploadInfo(uploadedPdfUrl: String, timestamp: Long, tempFile: File) {
+        Log.d(TAG, "extractPdfDataAndUploadInfo: Extracting file data...")
+
+        // 1. TÍNH TOÁN SIZE VÀ PAGES (Sử dụng PDFBox)
+        var pagesCount = 0
+        var imageUrl = ""
+        val fileSize = tempFile.length() // Lấy kích thước file cục bộ (bytes)
+
+        try {
+            val document = PDDocument.load(tempFile) // Tải PDF bằng PDFBox
+            pagesCount = document.numberOfPages // Lấy số trang
+
+            // 2. TRÍCH XUẤT ẢNH BÌA
+            val renderer = com.tom_roush.pdfbox.rendering.PDFRenderer(document)
+            val image = renderer.renderImageWithDPI(0, 100.toFloat()) // Render trang 0 với DPI 100
+
+            // Lưu ảnh tạm thời
+            val coverFile = File.createTempFile("cover_temp", ".png", cacheDir)
+            val out = FileOutputStream(coverFile)
+            image.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
+            out.flush()
+            out.close()
+
+            document.close() // Đóng tài liệu
+
+            // 3. UPLOAD ẢNH BÌA LÊN CLOUDINARY
+            MediaManager.get().upload(coverFile.absolutePath)
+                .option("public_id", "Covers/$timestamp")
+                .option("type", "upload")
+                .callback(object : UploadCallback {
+                    override fun onSuccess(requestId: String?, resultData: MutableMap<Any?, Any?>?) {
+                        imageUrl = resultData?.get("secure_url") as? String ?: ""
+                        coverFile.delete() // Xóa file cover tạm
+
+                        // 4. LƯU TẤT CẢ THÔNG TIN VÀO FIREBASE DB
+                        uploadPdfInfoToDb(uploadedPdfUrl, timestamp, fileSize, pagesCount, imageUrl)
+                    }
+
+                    override fun onError(requestId: String?, error: ErrorInfo?) {
+                        coverFile.delete()
+                        Log.e(TAG, "Cover Upload error: ${error?.description}")
+                        // Vẫn lưu thông tin vào DB nhưng không có ảnh bìa
+                        uploadPdfInfoToDb(uploadedPdfUrl, timestamp, fileSize, pagesCount, "")
+                    }
+
+                    // ... onStart, onProgress, onReschedule ...
+                    override fun onStart(requestId: String?) { /* ... */ }
+                    override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) { /* ... */ }
+                    override fun onReschedule(requestId: String?, error: ErrorInfo?) { /* ... */ }
+                })
+                .dispatch()
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Lỗi khi trích xuất dữ liệu PDF", e)
+            // Nếu lỗi, vẫn lưu thông tin cơ bản
+            uploadPdfInfoToDb(uploadedPdfUrl, timestamp, fileSize, pagesCount, imageUrl)
+        }
+    }
 }
+
+
+

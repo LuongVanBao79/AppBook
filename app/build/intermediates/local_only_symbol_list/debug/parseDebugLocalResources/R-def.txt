@@ -36,11 +36,13 @@ drawable ic_edit_white
 drawable ic_email_gray
 drawable ic_favorite_filled_white
 drawable ic_favorite_white
+drawable ic_file_size
 drawable ic_launcher_background
 drawable ic_launcher_foreground
 drawable ic_lock_gray
 drawable ic_logout_white
 drawable ic_more_black
+drawable ic_pages
 drawable ic_pause
 drawable ic_pdf_gray
 drawable ic_pdf_white
@@ -87,10 +89,13 @@ id commentEt
 id commentTil
 id commentTv
 id commentsRv
+id coverImageRl
+id coverIv
 id dateLabelTv
 id dateTv
 id deleteBtn
 id descriptionEt
+id descriptionLabelTv
 id descriptionTil
 id descriptionTv
 id detailsLl
@@ -124,7 +129,6 @@ id pagesLabelTv
 id pagesTv
 id passwordEt
 id passwordTil
-id pdfRl
 id pdfView
 id playBtn
 id profileBtn

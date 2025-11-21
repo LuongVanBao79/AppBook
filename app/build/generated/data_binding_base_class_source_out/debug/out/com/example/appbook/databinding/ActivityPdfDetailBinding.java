@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -17,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.example.appbook.R;
-import com.github.barteksc.pdfviewer.PDFView;
 import java.lang.NullPointerException;
 import java.lang.Override;
 import java.lang.String;
@@ -45,10 +45,19 @@ public final class ActivityPdfDetailBinding implements ViewBinding {
   public final RecyclerView commentsRv;
 
   @NonNull
+  public final RelativeLayout coverImageRl;
+
+  @NonNull
+  public final ImageView coverIv;
+
+  @NonNull
   public final TextView dateLabelTv;
 
   @NonNull
   public final TextView dateTv;
+
+  @NonNull
+  public final TextView descriptionLabelTv;
 
   @NonNull
   public final TextView descriptionTv;
@@ -78,12 +87,6 @@ public final class ActivityPdfDetailBinding implements ViewBinding {
   public final TextView pagesTv;
 
   @NonNull
-  public final RelativeLayout pdfRl;
-
-  @NonNull
-  public final PDFView pdfView;
-
-  @NonNull
   public final ProgressBar progressBar;
 
   @NonNull
@@ -110,14 +113,15 @@ public final class ActivityPdfDetailBinding implements ViewBinding {
   private ActivityPdfDetailBinding(@NonNull RelativeLayout rootView,
       @NonNull ImageButton addCommentBtn, @NonNull ImageButton backBtn,
       @NonNull LinearLayout bookOptionsLl, @NonNull TextView categoryLabelTv,
-      @NonNull TextView categoryTv, @NonNull RecyclerView commentsRv, @NonNull TextView dateLabelTv,
-      @NonNull TextView dateTv, @NonNull TextView descriptionTv, @NonNull Button downloadBookBtn,
+      @NonNull TextView categoryTv, @NonNull RecyclerView commentsRv,
+      @NonNull RelativeLayout coverImageRl, @NonNull ImageView coverIv,
+      @NonNull TextView dateLabelTv, @NonNull TextView dateTv, @NonNull TextView descriptionLabelTv,
+      @NonNull TextView descriptionTv, @NonNull Button downloadBookBtn,
       @NonNull TextView downloadsLabelTv, @NonNull TextView downloadsTv,
       @NonNull Button favoriteBtn, @NonNull RelativeLayout main, @NonNull ScrollView mainScrollView,
-      @NonNull TextView pagesLabelTv, @NonNull TextView pagesTv, @NonNull RelativeLayout pdfRl,
-      @NonNull PDFView pdfView, @NonNull ProgressBar progressBar, @NonNull Button readBookBtn,
-      @NonNull TextView sizeLabelTv, @NonNull TextView sizeTv, @NonNull TextView titleTv,
-      @NonNull RelativeLayout toolbarRl, @NonNull TextView viewsLabelTv,
+      @NonNull TextView pagesLabelTv, @NonNull TextView pagesTv, @NonNull ProgressBar progressBar,
+      @NonNull Button readBookBtn, @NonNull TextView sizeLabelTv, @NonNull TextView sizeTv,
+      @NonNull TextView titleTv, @NonNull RelativeLayout toolbarRl, @NonNull TextView viewsLabelTv,
       @NonNull TextView viewsTv) {
     this.rootView = rootView;
     this.addCommentBtn = addCommentBtn;
@@ -126,8 +130,11 @@ public final class ActivityPdfDetailBinding implements ViewBinding {
     this.categoryLabelTv = categoryLabelTv;
     this.categoryTv = categoryTv;
     this.commentsRv = commentsRv;
+    this.coverImageRl = coverImageRl;
+    this.coverIv = coverIv;
     this.dateLabelTv = dateLabelTv;
     this.dateTv = dateTv;
+    this.descriptionLabelTv = descriptionLabelTv;
     this.descriptionTv = descriptionTv;
     this.downloadBookBtn = downloadBookBtn;
     this.downloadsLabelTv = downloadsLabelTv;
@@ -137,8 +144,6 @@ public final class ActivityPdfDetailBinding implements ViewBinding {
     this.mainScrollView = mainScrollView;
     this.pagesLabelTv = pagesLabelTv;
     this.pagesTv = pagesTv;
-    this.pdfRl = pdfRl;
-    this.pdfView = pdfView;
     this.progressBar = progressBar;
     this.readBookBtn = readBookBtn;
     this.sizeLabelTv = sizeLabelTv;
@@ -212,6 +217,18 @@ public final class ActivityPdfDetailBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.coverImageRl;
+      RelativeLayout coverImageRl = ViewBindings.findChildViewById(rootView, id);
+      if (coverImageRl == null) {
+        break missingId;
+      }
+
+      id = R.id.coverIv;
+      ImageView coverIv = ViewBindings.findChildViewById(rootView, id);
+      if (coverIv == null) {
+        break missingId;
+      }
+
       id = R.id.dateLabelTv;
       TextView dateLabelTv = ViewBindings.findChildViewById(rootView, id);
       if (dateLabelTv == null) {
@@ -221,6 +238,12 @@ public final class ActivityPdfDetailBinding implements ViewBinding {
       id = R.id.dateTv;
       TextView dateTv = ViewBindings.findChildViewById(rootView, id);
       if (dateTv == null) {
+        break missingId;
+      }
+
+      id = R.id.descriptionLabelTv;
+      TextView descriptionLabelTv = ViewBindings.findChildViewById(rootView, id);
+      if (descriptionLabelTv == null) {
         break missingId;
       }
 
@@ -274,18 +297,6 @@ public final class ActivityPdfDetailBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.pdfRl;
-      RelativeLayout pdfRl = ViewBindings.findChildViewById(rootView, id);
-      if (pdfRl == null) {
-        break missingId;
-      }
-
-      id = R.id.pdfView;
-      PDFView pdfView = ViewBindings.findChildViewById(rootView, id);
-      if (pdfView == null) {
-        break missingId;
-      }
-
       id = R.id.progressBar;
       ProgressBar progressBar = ViewBindings.findChildViewById(rootView, id);
       if (progressBar == null) {
@@ -335,10 +346,10 @@ public final class ActivityPdfDetailBinding implements ViewBinding {
       }
 
       return new ActivityPdfDetailBinding((RelativeLayout) rootView, addCommentBtn, backBtn,
-          bookOptionsLl, categoryLabelTv, categoryTv, commentsRv, dateLabelTv, dateTv,
-          descriptionTv, downloadBookBtn, downloadsLabelTv, downloadsTv, favoriteBtn, main,
-          mainScrollView, pagesLabelTv, pagesTv, pdfRl, pdfView, progressBar, readBookBtn,
-          sizeLabelTv, sizeTv, titleTv, toolbarRl, viewsLabelTv, viewsTv);
+          bookOptionsLl, categoryLabelTv, categoryTv, commentsRv, coverImageRl, coverIv,
+          dateLabelTv, dateTv, descriptionLabelTv, descriptionTv, downloadBookBtn, downloadsLabelTv,
+          downloadsTv, favoriteBtn, main, mainScrollView, pagesLabelTv, pagesTv, progressBar,
+          readBookBtn, sizeLabelTv, sizeTv, titleTv, toolbarRl, viewsLabelTv, viewsTv);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));
