@@ -128,6 +128,9 @@ id pageInput
 id pagesLabelTv
 id pagesTv
 id passwordEt
+id passwordHint
+id passwordInput
+id passwordLayout
 id passwordTil
 id pdfView
 id playBtn
@@ -176,6 +179,7 @@ layout activity_model_pdf
 layout activity_pdf_add
 layout activity_pdf_detail
 layout activity_pdf_edit
+layout activity_pdf_file_handler
 layout activity_pdf_list_admin
 layout activity_pdf_view
 layout activity_profile
@@ -185,6 +189,7 @@ layout activity_splash
 layout continue_reading_widget
 layout dialog_comment_add
 layout dialog_loading
+layout dialog_password_prompt
 layout fragment_books_user
 layout fragment_translate
 layout row_category

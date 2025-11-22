@@ -3729,6 +3729,9 @@ int id parentPanel 0x7f0801b3
 int id parentRelative 0x7f0801b4
 int id parent_matrix 0x7f0801b5
 int id passwordEt 0x7f0801b6
+int id passwordHint 0x7f080282
+int id passwordInput 0x7f080283
+int id passwordLayout 0x7f080284
 int id passwordTil 0x7f0801b7
 int id password_toggle 0x7f0801b8
 int id path 0x7f0801b9
@@ -4057,6 +4060,7 @@ int layout activity_model_pdf 0x7f0b0022
 int layout activity_pdf_add 0x7f0b0023
 int layout activity_pdf_detail 0x7f0b0024
 int layout activity_pdf_edit 0x7f0b0025
+int layout activity_pdf_file_handler 0x7f0b0097
 int layout activity_pdf_list_admin 0x7f0b0026
 int layout activity_pdf_view 0x7f0b0027
 int layout activity_profile 0x7f0b0028
@@ -4087,6 +4091,7 @@ int layout design_text_input_end_icon 0x7f0b0040
 int layout design_text_input_start_icon 0x7f0b0041
 int layout dialog_comment_add 0x7f0b0042
 int layout dialog_loading 0x7f0b0043
+int layout dialog_password_prompt 0x7f0b0096
 int layout fragment_books_user 0x7f0b0044
 int layout fragment_crop_rotate 0x7f0b0045
 int layout fragment_translate 0x7f0b0046

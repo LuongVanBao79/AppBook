@@ -3730,6 +3730,9 @@ id parentPanel
 id parentRelative
 id parent_matrix
 id passwordEt
+id passwordHint
+id passwordInput
+id passwordLayout
 id passwordTil
 id password_toggle
 id path
@@ -4058,6 +4061,7 @@ layout activity_model_pdf
 layout activity_pdf_add
 layout activity_pdf_detail
 layout activity_pdf_edit
+layout activity_pdf_file_handler
 layout activity_pdf_list_admin
 layout activity_pdf_view
 layout activity_profile
@@ -4088,6 +4092,7 @@ layout design_text_input_end_icon
 layout design_text_input_start_icon
 layout dialog_comment_add
 layout dialog_loading
+layout dialog_password_prompt
 layout fragment_books_user
 layout fragment_crop_rotate
 layout fragment_translate

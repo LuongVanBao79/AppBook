@@ -21,14 +21,16 @@ import com.example.appbook.R
 import com.example.appbook.adapters.AdapterComment
 import com.example.appbook.databinding.ActivityPdfDetailBinding
 import com.example.appbook.databinding.DialogCommentAddBinding
+import com.example.appbook.databinding.DialogPasswordPromptBinding
 import com.example.appbook.models.ModelComment
+import com.example.appbook.utils.FileEncryptionHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileOutputStream
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
@@ -44,6 +46,7 @@ class PdfDetailActivity : AppCompatActivity() {
     private var bookTitle = ""
     private var bookUrl = ""
     private var bookFileSize: Long = 0L // <-- KHAI BÁO TRƯỜNG MỚI ĐỂ DÙNG TRONG formatFileSize
+    private var shouldPromptDownloadPassword = false
 
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var progressDialog: ProgressDialog
@@ -87,8 +90,9 @@ class PdfDetailActivity : AppCompatActivity() {
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                downloadBook()
+                promptDownloadPassword()
             } else {
+                shouldPromptDownloadPassword = true
                 requestStoragePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }
@@ -220,22 +224,49 @@ class PdfDetailActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
                 Log.d(TAG, "onCreate: STORAGE PERMISSION is granted")
-                downloadBook()
+                if (shouldPromptDownloadPassword) {
+                    promptDownloadPassword()
+                }
             } else {
                 Log.d(TAG, "onCreate: STORAGE PERMISSION is denied")
                 Toast.makeText(this, "Không có quyền truy cập", Toast.LENGTH_SHORT).show()
             }
+            shouldPromptDownloadPassword = false
         }
 
-    // [GIỮ NGUYÊN] downloadBook (Chỉ cần đảm bảo bookUrl được gán)
+    private fun promptDownloadPassword() {
+        val dialogBinding = DialogPasswordPromptBinding.inflate(LayoutInflater.from(this))
+        val dialog = AlertDialog.Builder(this, R.style.CustomDialog)
+            .setTitle("Mật khẩu mã hóa")
+            .setView(dialogBinding.root)
+            .setNegativeButton("Hủy") { d, _ -> d.dismiss() }
+            .setPositiveButton("Xác nhận", null)
+            .create()
 
-    private fun downloadBook() {
+        dialog.setOnShowListener {
+            val button = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            button.setOnClickListener {
+                val password = dialogBinding.passwordInput.text?.toString()?.trim().orEmpty()
+                if (password.length < 4) {
+                    dialogBinding.passwordLayout.error = "Mật khẩu phải có ít nhất 4 ký tự"
+                } else {
+                    dialogBinding.passwordLayout.error = null
+                    dialog.dismiss()
+                    downloadBook(password)
+                }
+            }
+        }
+
+        dialog.show()
+    }
+
+    private fun downloadBook(password: String) {
         Log.d(TAG, "downloadBook: Đang tải sách")
 
         progressDialog.setMessage("Đang tải sách")
         progressDialog.show()
 
-        val fileName = "downloaded_${System.currentTimeMillis()}.pdf"
+        val fileName = "downloaded_${System.currentTimeMillis()}.pdf.enc"
         val file = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
 
         Thread {
@@ -255,45 +286,29 @@ class PdfDetailActivity : AppCompatActivity() {
                 }
 
                 val inputStream = urlConnection.inputStream
-                val outputStream = FileOutputStream(file)
+                val byteStream = ByteArrayOutputStream()
                 val buffer = ByteArray(1024)
                 var bytesRead: Int
 
                 while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                    outputStream.write(buffer, 0, bytesRead)
+                    byteStream.write(buffer, 0, bytesRead)
                 }
 
-                outputStream.flush()
-                outputStream.close()
+                val plainBytes = byteStream.toByteArray()
+                byteStream.close()
                 inputStream.close()
                 urlConnection.disconnect()
 
+                FileEncryptionHelper.encryptToFile(plainBytes, password.toCharArray(), file)
+
                 runOnUiThread {
+                    progressDialog.dismiss()
                     if (file.exists() && file.length() > 0) {
-                        val fileUri = FileProvider.getUriForFile(
-                            this@PdfDetailActivity,
-                            "com.example.appbook.fileprovider",
-                            file
-                        )
-
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.setDataAndType(fileUri, "application/pdf")
-                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-
-                        try {
-                            startActivity(intent)
-                            Log.d(TAG, "downloadBook: Mở file thành công với URI: $fileUri")
-                            Toast.makeText(this, "Tải và mở file thành công", Toast.LENGTH_SHORT).show()
-                            incrementDownloadCount()
-                        } catch (e: Exception) {
-                            Log.e(TAG, "downloadBook: Lỗi khi mở file: ${e.message}")
-                            Toast.makeText(this, "Lỗi khi mở file: ${e.message}", Toast.LENGTH_LONG).show()
-                        }
+                        incrementDownloadCount()
+                        showEncryptedDownloadDialog(file)
                     } else {
                         throw Exception("File not created or empty, size: ${file.length()} bytes")
                     }
-
-                    progressDialog.dismiss()
                 }
             } catch (e: Exception) {
                 runOnUiThread {
@@ -303,6 +318,17 @@ class PdfDetailActivity : AppCompatActivity() {
                 }
             }
         }.start()
+    }
+
+    private fun showEncryptedDownloadDialog(encryptedFile: File) {
+        AlertDialog.Builder(this, R.style.CustomDialog)
+            .setTitle("Đã mã hóa file")
+            .setMessage(
+                "File đã được lưu với định dạng mã hóa:\n${encryptedFile.name}" +
+                    "\n\nBạn có thể mở lại bất cứ lúc nào từ trình quản lý file (sẽ yêu cầu mật khẩu)."
+            )
+            .setPositiveButton("OK", null)
+            .show()
     }
 
     // [GIỮ NGUYÊN] incrementDownloadCount

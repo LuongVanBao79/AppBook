@@ -7,6 +7,7 @@ import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.appbook.databinding.ActivityRegisterBinding
+import com.example.appbook.utils.EncryptionHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
@@ -111,7 +112,7 @@ class RegisterActivity : AppCompatActivity() {
         // Thiết lập dữ liệu để lưu vào database
         val hashMap: HashMap<String, Any?> = HashMap()
         hashMap["uid"] = uid
-        hashMap["email"] = email
+        hashMap["email"] = EncryptionHelper.encrypt(email)
         hashMap["name"] = name
         hashMap["profileImage"] = "" // Giá trị mặc định
         hashMap["userType"] = "user" // Giá trị mặc định

@@ -12,6 +12,7 @@ import com.example.appbook.R
 import com.example.appbook.adapters.AdapterPdfFavorite
 import com.example.appbook.databinding.ActivityProfileBinding
 import com.example.appbook.models.ModelPdf
+import com.example.appbook.utils.EncryptionHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
@@ -146,7 +147,9 @@ class ProfileActivity : AppCompatActivity() {
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     // Lấy thông tin người dùng từ snapshot
-                    val email = snapshot.child("email").value.toString()
+                    val encryptedEmail = snapshot.child("email").value?.toString().orEmpty()
+                    val email = EncryptionHelper.decryptOrNull(encryptedEmail)
+                        ?: firebaseUser.email.orEmpty()
                     val name = snapshot.child("name").value.toString()
                     val profileImage = snapshot.child("profileImage").value.toString()
                     val timestamp = snapshot.child("timestamp").value.toString()
