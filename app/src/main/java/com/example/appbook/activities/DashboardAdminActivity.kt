@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import androidx.appcompat.app.AppCompatActivity
+import com.example.appbook.MyApplication
 import com.example.appbook.adapters.AdapterCategory
 import com.example.appbook.databinding.ActivityDashboardAdminBinding
 import com.example.appbook.models.ModelCategory
@@ -102,6 +103,7 @@ class DashboardAdminActivity : AppCompatActivity() {
     private fun setupClickListeners() {
         binding.logoutBtn.setOnClickListener {
             firebaseAuth.signOut()
+            MyApplication.clearUserSession(applicationContext)
             checkUser()
         }
 

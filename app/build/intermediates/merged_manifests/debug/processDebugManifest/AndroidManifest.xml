@@ -31,6 +31,7 @@
         android:allowBackup="true"
         android:appComponentFactory="androidx.core.app.CoreComponentFactory"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:debuggable="true"
         android:extractNativeLibs="false"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/logo"
@@ -121,10 +122,6 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/continue_reading_widget_info" />
         </receiver>
-
-        <profileable
-            android:enabled="true"
-            android:shell="true" />
 
         <activity
             android:name="com.cloudinary.android.uploadwidget.ui.UploadWidgetActivity"

@@ -116,7 +116,7 @@ class PdfViewActivity : AppCompatActivity() {
         }
 
     }
-   // hien thi toc do tts
+    // hien thi toc do tts
     private fun showSpeedDialog() {
         val speeds = arrayOf("0.5x", "1x", "1.5x", "2x")
         val values = floatArrayOf(0.5f, 1.0f, 1.5f, 2.0f)
@@ -132,7 +132,7 @@ class PdfViewActivity : AppCompatActivity() {
             .show()
     }
 
-// nhay trang
+    // nhay trang
     private fun initPageJump() {
         // Khi bấm vào TextView chuyển sang chế độ nhập
         binding.toolbarSubtitleTv1.setOnClickListener {
@@ -165,7 +165,7 @@ class PdfViewActivity : AppCompatActivity() {
         binding.pageInput.requestFocus()
         showKeyboard(binding.pageInput)
     }
-// nhay trang
+    // nhay trang
     private fun exitPageEditModeAndJump() {
         val input = binding.pageInput.text.toString()
         val pageNum = input.toIntOrNull()
@@ -221,7 +221,7 @@ class PdfViewActivity : AppCompatActivity() {
             binding.playBtn.setImageResource(R.drawable.ic_play) // 🔹 stop → quay lại play
         }
     }
-// kiem tra ngon ngu
+    // kiem tra ngon ngu
     private fun detectLanguage(text: String): String {
         val vietnamesePattern = Regex("[ăâđêôơưĂÂĐÊÔƠƯáàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệóòỏõọốồổỗộớờởỡợúùủũụứừửữựíìỉĩịýỳỷỹỵ]")
         val matches = vietnamesePattern.findAll(text).count()
@@ -269,7 +269,7 @@ class PdfViewActivity : AppCompatActivity() {
             }
         })
     }
-// luu cac sach nguoi dung da doc
+    // luu cac sach nguoi dung da doc
     private fun saveBookToHistory(bookId: String) {
         val user = FirebaseAuth.getInstance().currentUser ?: return
         val ref = FirebaseDatabase.getInstance().getReference("Users")
@@ -386,14 +386,14 @@ class PdfViewActivity : AppCompatActivity() {
 
     // luu trang nguoi dung da doc toi
     private fun saveReadingProgress(bookId: String, page: Int) {
-    val user = FirebaseAuth.getInstance().currentUser ?: return
+        val user = FirebaseAuth.getInstance().currentUser ?: return
 
-    val ref = FirebaseDatabase.getInstance().getReference("UserReadingProgress")
-    ref.child(user.uid).child(bookId).setValue(page)
+        val ref = FirebaseDatabase.getInstance().getReference("UserReadingProgress")
+        ref.child(user.uid).child(bookId).setValue(page)
 
-    val title = binding.toolbarTitleTv.text.toString()
-    saveLastOpenedBook(bookId, title, page, totalPages)
-}
+        val title = binding.toolbarTitleTv.text.toString()
+        saveLastOpenedBook(bookId, title, page, totalPages)
+    }
 
     private fun saveLastOpenedBook(bookId: String, title: String, page: Int, totalPages: Int) {
         val prefs = getSharedPreferences("ReadingPrefs", Context.MODE_PRIVATE)
@@ -504,9 +504,9 @@ class PdfViewActivity : AppCompatActivity() {
         binding.toolbarSubtitleTv2.text = "~${estimatedMinutes} phút còn lại"
     }
 
-// khi ket thuc giai phong bo nho
+    // khi ket thuc giai phong bo nho
     override fun onDestroy() {
-    WidgetUtils.updateContinueReadingWidget(this)
+        WidgetUtils.updateContinueReadingWidget(this)
         pdfDocument?.close()
         if (::textToSpeech.isInitialized) {
             textToSpeech.stop()

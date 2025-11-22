@@ -12,6 +12,8 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import com.cloudinary.android.MediaManager
+import com.example.appbook.activities.PdfViewActivity
+import com.example.appbook.utils.WidgetUtils
 import com.github.barteksc.pdfviewer.PDFView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -24,6 +26,7 @@ import org.json.JSONObject
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import java.io.File
 import java.util.HashMap
 import java.util.Locale
 
@@ -43,6 +46,23 @@ class MyApplication : Application() {
 
     companion object {
         private val TAG = "MyApplication"
+
+        fun clearUserSession(context: Context) {
+            clearAllSharedPreferences(context)
+//            PdfViewActivity.clearCachedPages()
+            WidgetUtils.updateContinueReadingWidget(context)
+        }
+
+        private fun clearAllSharedPreferences(context: Context) {
+            val prefsDir = File(context.applicationInfo.dataDir, "shared_prefs")
+            prefsDir.listFiles()?.forEach { prefFile ->
+                val name = prefFile.nameWithoutExtension
+                context.getSharedPreferences(name, Context.MODE_PRIVATE)
+                    .edit()
+                    .clear()
+                    .apply()
+            }
+        }
 
         fun formatTimeStamp(timestamp: Long): String {
             val cal = Calendar.getInstance(Locale.ENGLISH)

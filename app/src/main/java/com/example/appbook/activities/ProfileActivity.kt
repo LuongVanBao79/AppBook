@@ -120,6 +120,7 @@ class ProfileActivity : AppCompatActivity() {
 
                 // Chuyển về màn hình đăng nhập sau 2 giây
                 binding.root.postDelayed({
+                    MyApplication.clearUserSession(applicationContext)
                     FirebaseAuth.getInstance().signOut() // Đăng xuất người dùng
                     val intent = Intent(this@ProfileActivity, LoginActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
