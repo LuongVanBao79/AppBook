@@ -22,23 +22,25 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.*
 import okhttp3.*
-import org.json.JSONObject
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
 import java.io.File
 import java.util.HashMap
 import java.util.Locale
+import java.util.UUID
 
 class MyApplication : Application() {
+
+    private external fun getApiSecretFromNative(): String
 
     override fun onCreate() {
         super.onCreate()
         // Khởi tạo Cloudinary khi ứng dụng bắt đầu
+        val secureSecret = getApiSecretFromNative()
+
+        // Khởi tạo Cloudinary
         val config = mapOf(
-            "cloud_name" to "dak4ks7mx",
-            "api_key" to "643815841764554",
-            "api_secret" to "bQzV_ZZp3F9eyonEWhnn9vcqQts",
+            "cloud_name" to BuildConfig.CLOUDINARY_CLOUD_NAME,
+            "api_key" to BuildConfig.CLOUDINARY_API_KEY,
+            "api_secret" to secureSecret,
             "secure" to true
         )
         MediaManager.init(this, config)
@@ -46,6 +48,13 @@ class MyApplication : Application() {
 
     companion object {
         private val TAG = "MyApplication"
+
+        init {
+            // Tên thư viện phải khớp với tên trong CMakeLists.txt (app-security)
+            System.loadLibrary("app-security")
+        }
+
+
 
         fun clearUserSession(context: Context) {
             clearAllSharedPreferences(context)
@@ -68,128 +77,6 @@ class MyApplication : Application() {
             val cal = Calendar.getInstance(Locale.ENGLISH)
             cal.timeInMillis = timestamp
             return DateFormat.format("dd/MM/yyyy", cal.time).toString()
-        }
-
-        fun loadPdfSizeFromCloudinary(pdfUrl: String, sizeTv: TextView) {
-            val cloudName = "dak4ks7mx"
-            val apiKey = "643815841764554"
-            val apiSecret = "bQzV_ZZp3F9eyonEWhnn9vcqQts"
-
-            // Lấy publicId từ URL Cloudinary
-            fun getPublicIdFromUrl(url: String): String {
-                val regex = """/upload/(?:v\d+/)?(.+)$""".toRegex() // Giữ nguyên đuôi .pdf
-                val match = regex.find(url)
-                return match?.groups?.get(1)?.value ?: ""
-            }
-
-            val publicId = getPublicIdFromUrl(pdfUrl)
-            Log.d("Cloudinary", "Public ID: $publicId")
-
-            if (publicId.isEmpty()) {
-                Log.e("Cloudinary", "Không lấy được publicId từ URL")
-                (sizeTv.context as Activity).runOnUiThread {
-                    sizeTv.text = "Lỗi URL"
-                }
-                return
-            }
-
-            val credential = Credentials.basic(apiKey, apiSecret)
-            val url = "https://api.cloudinary.com/v1_1/$cloudName/resources/raw/upload/$publicId"
-
-            val client = OkHttpClient()
-            val request = Request.Builder()
-                .url(url)
-                .addHeader("Authorization", credential)
-                .build()
-
-            client.newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    Log.e("Cloudinary", "Lỗi kết nối: ${e.message}")
-                    (sizeTv.context as Activity).runOnUiThread {
-                        sizeTv.text = "Lỗi kết nối"
-                    }
-                }
-
-                override fun onResponse(call: Call, response: Response) {
-                    if (!response.isSuccessful) {
-                        val errorBody = response.body?.string()
-                        Log.e("Cloudinary", "Phản hồi lỗi: ${response.code}, body: $errorBody")
-                        (sizeTv.context as Activity).runOnUiThread {
-                            sizeTv.text = "Lỗi server"
-                        }
-                        return
-                    }
-
-                    val body = response.body?.string() ?: ""
-                    val json = JSONObject(body)
-                    val bytes = json.optLong("bytes", -1)
-                    val sizeText = if (bytes != -1L) {
-                        val sizeInKB = bytes / 1024.0
-                        String.format("%.2f KB", sizeInKB)
-                    } else {
-                        "Không rõ dung lượng"
-                    }
-
-                    (sizeTv.context as Activity).runOnUiThread {
-                        sizeTv.text = sizeText
-                    }
-                }
-            })
-        }
-
-        fun loadPdfFromUrlSinglePage(
-            pdfUrl: String,
-            pdfTitle: String,
-            pdfView: PDFView,
-            progressBar: ProgressBar,
-            pagesTv: TextView?
-        ) {
-            progressBar.visibility = View.VISIBLE
-
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    val url = URL(pdfUrl)
-                    val connection = url.openConnection() as HttpURLConnection
-                    connection.connect()
-
-                    val inputStream = connection.inputStream
-                    val bytes = inputStream.readBytes()
-                    inputStream.close()
-
-                    withContext(Dispatchers.Main) {
-                        Log.d(TAG, "loadPdfFromUrlSinglePage: Loaded ${bytes.size} bytes")
-
-                        pdfView.fromBytes(bytes)
-                            .spacing(0)
-                            .swipeHorizontal(false)
-                            .enableSwipe(false) // Không cho vuốt sang trang khác
-                            .onError { t ->
-                                progressBar.visibility = View.INVISIBLE
-                                Log.e(TAG, "loadPdfFromUrlSinglePage: ${t.message}")
-                            }
-                            .onPageError { page, t ->
-                                progressBar.visibility = View.INVISIBLE
-                                Log.e(TAG, "loadPdfFromUrlSinglePage: Page $page error ${t.message}")
-                            }
-                            .onLoad { nbPages ->
-                                progressBar.visibility = View.INVISIBLE
-
-                                // Hiển thị tổng số trang đúng
-                                pagesTv?.text = "$nbPages"
-
-                                // Chỉ hiển thị trang đầu tiên (sau khi đã load xong)
-                                pdfView.jumpTo(0, true)
-                            }
-                            .load()
-
-                    }
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        progressBar.visibility = View.INVISIBLE
-                        Log.e(TAG, "loadPdfFromUrlSinglePage: Error ${e.message}")
-                    }
-                }
-            }
         }
 
         fun loadCategory(categoryId: String, categoryTv: TextView) {
@@ -232,24 +119,6 @@ class MyApplication : Application() {
                     }
                 }
         }
-
-
-
-        // KHÔNG bỏ phần mở rộng .pdf
-        private fun getPublicIdFromUrl(url: String): String {
-            return try {
-                val uri = Uri.parse(url)
-                val pathSegments = uri.pathSegments
-                val uploadIndex = pathSegments.indexOf("upload")
-                if (uploadIndex == -1 || uploadIndex + 2 >= pathSegments.size) return ""
-
-                val publicIdSegments = pathSegments.subList(uploadIndex + 2, pathSegments.size)
-                publicIdSegments.joinToString("/") // giữ nguyên cả .pdf
-            } catch (e: Exception) {
-                ""
-            }
-        }
-
 
         fun incrementBookViewCount(bookId: String){
             //get current book views count

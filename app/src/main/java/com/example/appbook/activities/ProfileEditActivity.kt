@@ -27,6 +27,16 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import java.util.UUID
 
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
+import java.util.concurrent.Executor
+
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 class ProfileEditActivity : AppCompatActivity() {
 
     // View Binding để truy cập các thành phần giao diện người dùng
@@ -40,6 +50,12 @@ class ProfileEditActivity : AppCompatActivity() {
 
     // Progress dialog để hiển thị thông báo trong quá trình xử lý
     private lateinit var progressDialog: ProgressDialog
+
+    private var name = ""
+
+    private lateinit var executor: Executor
+    private lateinit var biometricPrompt: BiometricPrompt
+    private lateinit var promptInfo: BiometricPrompt.PromptInfo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,9 +88,58 @@ class ProfileEditActivity : AppCompatActivity() {
         binding.updateBtn.setOnClickListener {
             validateData()
         }
+
+        setupBiometric()
     }
 
-    private var name = ""
+    private fun setupBiometric() {
+        executor = ContextCompat.getMainExecutor(this)
+
+        // Cấu hình hộp thoại nhắc
+        promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Xác thực người dùng")
+            .setSubtitle("Sử dụng vân tay hoặc khuôn mặt để truy cập ảnh")
+            .setNegativeButtonText("Hủy bỏ") // Nút hủy
+            .build()
+    }
+
+    private fun authenticateUser(action: () -> Unit) {
+        val biometricManager = BiometricManager.from(this)
+
+        // Kiểm tra xem máy có hỗ trợ sinh trắc học không
+        when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK)) {
+            BiometricManager.BIOMETRIC_SUCCESS -> {
+                // Máy có hỗ trợ -> Hiện hộp thoại xác thực
+                biometricPrompt = BiometricPrompt(this, executor,
+                    object : BiometricPrompt.AuthenticationCallback() {
+                        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                            super.onAuthenticationSucceeded(result)
+                            // Xác thực thành công -> Thực hiện hành động (mở cam/gallery)
+                            action()
+                        }
+
+                        override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                            super.onAuthenticationError(errorCode, errString)
+                            // Người dùng bấm Hủy hoặc quá nhiều lần sai
+                            Toast.makeText(applicationContext, "Xác thực lỗi: $errString", Toast.LENGTH_SHORT).show()
+                        }
+
+                        override fun onAuthenticationFailed() {
+                            super.onAuthenticationFailed()
+                            // Vân tay không khớp
+                            Toast.makeText(applicationContext, "Xác thực thất bại", Toast.LENGTH_SHORT).show()
+                        }
+                    })
+                biometricPrompt.authenticate(promptInfo)
+            }
+            else -> {
+                // Máy KHÔNG hỗ trợ sinh trắc học hoặc chưa cài đặt -> Cho phép mở luôn
+                action()
+            }
+        }
+    }
+
+
 
     // Hàm kiểm tra dữ liệu
     private fun validateData() {
@@ -99,46 +164,52 @@ class ProfileEditActivity : AppCompatActivity() {
 
     // Hàm tải ảnh lên Cloudinary
     private fun uploadImage() {
-        progressDialog.setMessage("Đang tải ảnh profile")
+        progressDialog.setMessage("Đang tải ảnh profile...")
         progressDialog.show()
 
-        val inputStream = contentResolver.openInputStream(imageUri!!)
-        if (inputStream == null) {
-            progressDialog.dismiss()
-            Toast.makeText(this, "Không thể mở ảnh", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val requestId = UUID.randomUUID().toString() // Tạo ID duy nhất cho ảnh
-
-        Thread {
+        // Sử dụng lifecycleScope để quản lý vòng đời
+        // Nếu Activity bị hủy, tiến trình này cũng tự dừng -> Không crash
+        lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val cloudinary = MediaManager.get().cloudinary
-                val uploadResult = cloudinary.uploader().upload(
-                    inputStream, ObjectUtils.asMap(
-                        "folder", "ProfileImages/",
-                        "public_id", firebaseAuth.uid, // Sử dụng UID để ghi đè ảnh cũ
-                        "resource_type", "image"
-                    )
-                )
+                val inputStream = contentResolver.openInputStream(imageUri!!)
 
-                val uploadedImageUrl = uploadResult["secure_url"] as String
-
-                runOnUiThread {
-                    progressDialog.dismiss()
-                    updateProfile(uploadedImageUrl)
+                if (inputStream == null) {
+                    // Chuyển về luồng chính để hiện Toast
+                    withContext(Dispatchers.Main) {
+                        progressDialog.dismiss()
+                        Toast.makeText(this@ProfileEditActivity, "Không thể mở ảnh", Toast.LENGTH_SHORT).show()
+                    }
+                    return@launch
                 }
-            } catch (e: Exception) {
-                runOnUiThread {
+
+                // Dùng .use để tự động đóng inputStream sau khi dùng xong (Khắc phục lỗi rò rỉ bộ nhớ)
+                val url = inputStream.use { stream ->
+                    val cloudinary = MediaManager.get().cloudinary
+                    val uploadResult = cloudinary.uploader().upload(
+                        stream, ObjectUtils.asMap(
+                            "folder", "ProfileImages/",
+                            "public_id", firebaseAuth.uid, // Ghi đè ảnh cũ bằng UID
+                            "resource_type", "image",
+                            "overwrite", true // Đảm bảo ghi đè
+                        )
+                    )
+                    uploadResult["secure_url"] as String
+                }
+
+                // Sau khi upload xong, quay về luồng chính để update UI
+                withContext(Dispatchers.Main) {
                     progressDialog.dismiss()
-                    Toast.makeText(
-                        this,
-                        "Không thể tải ảnh lên do ${e.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    updateProfile(url)
+                }
+
+            } catch (e: Exception) {
+                // Xử lý lỗi
+                withContext(Dispatchers.Main) {
+                    progressDialog.dismiss()
+                    Toast.makeText(this@ProfileEditActivity, "Lỗi: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
-        }.start()
+        }
     }
 
     // Hàm cập nhật profile lên Firebase
@@ -206,24 +277,23 @@ class ProfileEditActivity : AppCompatActivity() {
 
     // Hàm hiển thị menu chọn ảnh (Camera/Gallery)
     private fun showImageAttachMenu() {
-        /* Hiển thị popup menu với các tùy chọn Camera, Gallery để chọn ảnh */
-
-        // Thiết lập popup menu
         val popupMenu = PopupMenu(this, binding.profileIv)
         popupMenu.menu.add(Menu.NONE, 0, 0, "Camera")
         popupMenu.menu.add(Menu.NONE, 1, 1, "Gallery")
         popupMenu.show()
 
-        // Xử lý sự kiện click vào item trong popup menu
         popupMenu.setOnMenuItemClickListener { item ->
-            // Lấy ID của item được click
             val id = item.itemId
             if (id == 0) {
-                // Camera được click
-                pickImageCamera()
+                // Khi chọn Camera -> Gọi xác thực trước
+                authenticateUser {
+                    pickImageCamera()
+                }
             } else if (id == 1) {
-                // Gallery được click
-                pickImageGallery()
+                // Khi chọn Gallery -> Gọi xác thực trước
+                authenticateUser {
+                    pickImageGallery()
+                }
             }
             true
         }

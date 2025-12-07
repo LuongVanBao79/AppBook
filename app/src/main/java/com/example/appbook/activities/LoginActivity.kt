@@ -1,6 +1,7 @@
 package com.example.appbook.activities
 
 import android.app.ProgressDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
@@ -15,134 +16,313 @@ import com.google.firebase.database.ValueEventListener
 
 class LoginActivity : AppCompatActivity() {
 
-    // View Binding để truy cập các thành phần giao diện người dùng
+    // View Binding & Firebase
     private lateinit var binding: ActivityLoginBinding
-
-    // Firebase Authentication để xác thực người dùng
     private lateinit var firebaseAuth: FirebaseAuth
-
-    // ProgressDialog để hiển thị thông báo trong khi thực hiện các tác vụ
     private lateinit var progressDialog: ProgressDialog
+
+    // Biến cho bộ đếm thời gian xác thực
+    private var verificationTimer: android.os.CountDownTimer? = null
+    private var checkEmailDialog: android.app.AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Khởi tạo Firebase Authentication
+        // Init Firebase & ProgressDialog
         firebaseAuth = FirebaseAuth.getInstance()
+        progressDialog = ProgressDialog(this).apply {
+            setTitle("Vui lòng đợi")
+            setCanceledOnTouchOutside(false)
+        }
 
-        // Khởi tạo ProgressDialog
-        progressDialog = ProgressDialog(this)
-        progressDialog.setTitle("Vui lòng đợi") // Thiết lập tiêu đề
-        progressDialog.setCanceledOnTouchOutside(false) // Ngăn người dùng tắt bằng cách chạm ra ngoài
-
-        // Xử lý sự kiện click vào TextView "Chưa có tài khoản? Đăng ký"
+        // Chuyển màn hình Đăng ký
         binding.noAccountTv.setOnClickListener {
-            // Mở màn hình đăng ký (RegisterActivity)
             startActivity(Intent(this, RegisterActivity::class.java))
         }
 
-        /*
-        Các bước thực hiện đăng nhập:
-        1. Nhập dữ liệu (email, password)
-        2. Kiểm tra dữ liệu (validate)
-        3. Đăng nhập bằng Firebase Authentication
-        4. Kiểm tra loại người dùng (user/admin) trong Firebase Realtime Database
-            - Nếu là user: Chuyển đến màn hình DashboardUserActivity
-            - Nếu là admin: Chuyển đến màn hình DashboardAdminActivity
-         */
-
-        // Xử lý sự kiện click vào nút "Đăng nhập"
+        // Click Đăng nhập
         binding.loginBtn.setOnClickListener {
-            validateData() // Kiểm tra dữ liệu trước khi đăng nhập
+            validateData()
         }
 
-        // Xử lý sự kiện click vào TextView "Quên mật khẩu?"
+        // Quên mật khẩu
         binding.forgotTv.setOnClickListener {
-            // Mở màn hình Quên mật khẩu (ForgotPasswordActivity)
             startActivity(Intent(this, ForgotPasswordActivity::class.java))
         }
     }
 
-    private var email = "" // Biến lưu trữ email
-    private var password = "" // Biến lưu trữ mật khẩu
+    private var email = ""
+    private var password = ""
 
-    // Hàm kiểm tra tính hợp lệ của dữ liệu nhập vào
     private fun validateData() {
-        // 1. Nhập dữ liệu
-        email = binding.emailEt.text.toString().trim() // Lấy email từ EditText và loại bỏ khoảng trắng
-        password = binding.passwordEt.text.toString().trim() // Lấy mật khẩu từ EditText và loại bỏ khoảng trắng
+        email = binding.emailEt.text.toString().trim()
+        password = binding.passwordEt.text.toString().trim()
 
-        // 2. Kiểm tra dữ liệu
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            // Nếu email không đúng định dạng
-            Toast.makeText(this, "Định dạng email không hợp lệ...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Định dạng email không hợp lệ", Toast.LENGTH_SHORT).show()
         } else if (password.isEmpty()) {
-            // Nếu mật khẩu trống
-            Toast.makeText(this, "Vui lòng nhập mật khẩu...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Vui lòng nhập mật khẩu", Toast.LENGTH_SHORT).show()
         } else {
-            // Nếu dữ liệu hợp lệ, tiến hành đăng nhập
             loginUser()
         }
     }
 
-    // Hàm thực hiện đăng nhập
     private fun loginUser() {
-        // 3. Đăng nhập bằng Firebase Authentication
+        progressDialog.setMessage("Đang đăng nhập...")
+        progressDialog.show()
 
-        // Hiển thị ProgressDialog
-        progressDialog.setMessage("Đang đăng nhập...") // Thiết lập thông báo
-        progressDialog.show() // Hiển thị ProgressDialog
-
-        // Sử dụng Firebase Authentication để đăng nhập bằng email và mật khẩu
         firebaseAuth.signInWithEmailAndPassword(email, password)
             .addOnSuccessListener {
-                // Nếu đăng nhập thành công
-                checkUser() // Kiểm tra loại người dùng
+                // Lấy user hiện tại
+                val user = firebaseAuth.currentUser
+
+                // --- CHỐT CHẶN BẢO MẬT QUAN TRỌNG NHẤT ---
+                if (user != null && user.isEmailVerified) {
+                    // Nếu đã xác thực email -> Mới cho phép đi tiếp kiểm tra thiết bị
+                    checkDeviceAndProcess()
+                } else {
+                    // Nếu chưa xác thực email -> CHẶN NGAY LẬP TỨC
+                    progressDialog.dismiss()
+                    firebaseAuth.signOut() // Đăng xuất ngay để không lưu session
+
+                    // Hiển thị thông báo và cho phép gửi lại email
+                    showUnverifiedAccountDialog()
+                }
             }
             .addOnFailureListener { e ->
-                // Nếu đăng nhập thất bại
-                progressDialog.dismiss() // Ẩn ProgressDialog
-                Toast.makeText(this, "Đăng nhập thất bại do ${e.message}", Toast.LENGTH_SHORT).show() // Hiển thị thông báo lỗi
+                progressDialog.dismiss()
+                Toast.makeText(this, "Đăng nhập thất bại: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
-    // Hàm kiểm tra loại người dùng (user/admin)
+    // Hàm hiển thị thông báo khi user chưa xác thực (Kèm nút gửi lại mail)
+    private fun showUnverifiedAccountDialog() {
+        val builder = android.app.AlertDialog.Builder(this)
+        builder.setTitle("Tài khoản chưa xác thực")
+        builder.setMessage("Email này chưa được xác thực. Vui lòng kiểm tra hộp thư đến (hoặc Spam) và bấm vào link xác nhận để kích hoạt tài khoản.")
+        builder.setCancelable(false)
+
+        builder.setPositiveButton("Đã hiểu") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        builder.setNeutralButton("Gửi lại Email") { _, _ ->
+            resendVerificationEmail()
+        }
+
+        builder.show()
+    }
+
+    // Hàm gửi lại email xác thực (dành cho trường hợp link cũ hết hạn hoặc bị trôi)
+    private fun resendVerificationEmail() {
+        progressDialog.setMessage("Đang gửi lại email...")
+        progressDialog.show()
+
+        // Mẹo: Cần đăng nhập lại tạm thời để lấy object user, sau đó gửi mail rồi signout ngay
+        firebaseAuth.signInWithEmailAndPassword(email, password)
+            .addOnSuccessListener {
+                val user = firebaseAuth.currentUser
+                user?.sendEmailVerification()
+                    ?.addOnSuccessListener {
+                        progressDialog.dismiss()
+                        firebaseAuth.signOut() // Gửi xong đá ra luôn
+                        Toast.makeText(this, "Đã gửi lại email. Vui lòng kiểm tra hộp thư.", Toast.LENGTH_LONG).show()
+                    }
+                    ?.addOnFailureListener {
+                        progressDialog.dismiss()
+                        firebaseAuth.signOut()
+                        Toast.makeText(this, "Lỗi gửi mail: ${it.message}", Toast.LENGTH_SHORT).show()
+                    }
+            }
+    }
+
+    // --- LOGIC BẢO MẬT THIẾT BỊ ---
+
+    private fun checkDeviceAndProcess() {
+        val user = firebaseAuth.currentUser ?: return
+        val currentDeviceId = getAppUniqueId() // Lấy ID máy hiện tại
+
+        val userRef = FirebaseDatabase.getInstance().getReference("Users").child(user.uid)
+
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val serverDeviceId = snapshot.child("deviceId").value as? String
+
+                if (serverDeviceId == null) {
+                    // TH1: Chưa có deviceId -> Lưu và cho vào
+                    userRef.child("deviceId").setValue(currentDeviceId)
+                    checkUser()
+                } else if (serverDeviceId == currentDeviceId) {
+                    // TH2: Khớp thiết bị -> Cho vào
+                    checkUser()
+                } else {
+                    // TH3: Thiết bị lạ -> Cảnh báo
+                    progressDialog.dismiss()
+                    showNewDeviceAlert(currentDeviceId)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                progressDialog.dismiss()
+                Toast.makeText(this@LoginActivity, "Lỗi Server: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    // Hàm lấy ID thiết bị (tránh trùng tên với hàm hệ thống Android 14)
+    private fun getAppUniqueId(): String {
+        val prefs = getSharedPreferences("app_security_prefs", MODE_PRIVATE)
+        var deviceId = prefs.getString("device_id", null)
+
+        if (deviceId == null) {
+            deviceId = java.util.UUID.randomUUID().toString()
+            prefs.edit().putString("device_id", deviceId).apply()
+        }
+        return deviceId!!
+    }
+
+    // Hiển thị Dialog cảnh báo thiết bị mới
+    private fun showNewDeviceAlert(newDeviceId: String) {
+        val builder = android.app.AlertDialog.Builder(this)
+        builder.setTitle("Phát hiện thiết bị mới")
+        builder.setMessage("Tài khoản đang đăng nhập trên thiết bị khác. Bạn có muốn chuyển sang thiết bị này không?\n(Cần xác thực Email)")
+        builder.setCancelable(false)
+
+        builder.setPositiveButton("Gửi Email xác thực") { dialog: DialogInterface, which: Int ->
+            sendVerificationEmail(newDeviceId)
+        }
+        builder.setNegativeButton("Hủy bỏ") { dialog: DialogInterface, which: Int ->
+            firebaseAuth.signOut()
+        }
+        builder.show()
+    }
+
+    // Gửi email và kích hoạt Timer
+    private fun sendVerificationEmail(newDeviceId: String) {
+        progressDialog.setMessage("Đang gửi email xác thực...")
+        progressDialog.show()
+
+        val user = firebaseAuth.currentUser
+        user?.sendEmailVerification()?.addOnSuccessListener {
+            progressDialog.dismiss()
+            // Gửi xong -> Bắt đầu đếm ngược ngay lập tức
+            startVerificationTimer(newDeviceId)
+
+        }?.addOnFailureListener { e ->
+            progressDialog.dismiss()
+            Toast.makeText(this, "Lỗi gửi mail: ${e.message}", Toast.LENGTH_SHORT).show()
+            firebaseAuth.signOut()
+        }
+    }
+
+    // --- LOGIC TIMER TỰ ĐỘNG KIỂM TRA ---
+
+    private fun startVerificationTimer(newDeviceId: String) {
+        // 1. Tạo Dialog hiển thị thời gian
+        val builder = android.app.AlertDialog.Builder(this)
+        builder.setTitle("Đang chờ xác thực...")
+        builder.setMessage("Đã gửi email. Vui lòng kiểm tra hộp thư và bấm xác nhận.\n\nThời gian còn lại: 120s")
+        builder.setCancelable(false)
+
+        // Nút Hủy nếu người dùng không muốn đợi nữa
+        builder.setNegativeButton("Hủy bỏ") { _, _ ->
+            stopVerificationTimer()
+            firebaseAuth.signOut()
+        }
+
+        checkEmailDialog = builder.create()
+        checkEmailDialog?.show()
+
+        // 2. Chạy Timer: 120 giây, mỗi 2 giây kiểm tra 1 lần
+        verificationTimer = object : android.os.CountDownTimer(120000, 2000) {
+
+            override fun onTick(millisUntilFinished: Long) {
+                // Update text thông báo
+                checkEmailDialog?.setMessage("Đã gửi email. Vui lòng bấm link xác nhận trong hộp thư.\n\nThời gian còn lại: ${millisUntilFinished / 1000}s")
+
+                // Tự động kiểm tra trạng thái Email
+                val user = firebaseAuth.currentUser
+                user?.reload()?.addOnSuccessListener {
+                    if (user.isEmailVerified) {
+                        // Đã xác thực -> Dừng timer -> Vào App
+                        stopVerificationTimer()
+                        checkEmailDialog?.dismiss()
+                        updateDeviceIdAndLogin(newDeviceId)
+                    }
+                }
+            }
+
+            override fun onFinish() {
+                // Hết giờ
+                checkEmailDialog?.dismiss()
+                android.app.AlertDialog.Builder(this@LoginActivity)
+                    .setTitle("Hết thời gian")
+                    .setMessage("Đã quá thời gian xác thực. Vui lòng đăng nhập lại.")
+                    .setPositiveButton("Đóng") { _, _ ->
+                        firebaseAuth.signOut()
+                    }
+                    .setCancelable(false)
+                    .show()
+            }
+        }
+        verificationTimer?.start()
+    }
+
+    private fun stopVerificationTimer() {
+        verificationTimer?.cancel()
+        verificationTimer = null
+    }
+
+    // Cập nhật DeviceID mới và chuyển màn hình
+    private fun updateDeviceIdAndLogin(newDeviceId: String) {
+        val uid = firebaseAuth.uid!!
+        progressDialog.setMessage("Đang hoàn tất thiết lập...")
+        progressDialog.show()
+
+        FirebaseDatabase.getInstance().getReference("Users").child(uid)
+            .child("deviceId").setValue(newDeviceId)
+            .addOnSuccessListener {
+                progressDialog.dismiss()
+                Toast.makeText(this, "Xác thực thành công!", Toast.LENGTH_SHORT).show()
+                checkUser()
+            }
+            .addOnFailureListener {
+                progressDialog.dismiss()
+                Toast.makeText(this, "Lỗi cập nhật thiết bị: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    // --- ĐIỀU HƯỚNG NGƯỜI DÙNG ---
+
     private fun checkUser() {
-        progressDialog.setMessage("Đang kiểm tra người dùng...") // Thiết lập thông báo
+        // Đôi khi dialog chưa kịp tắt ở bước trước
+        if(progressDialog.isShowing) progressDialog.dismiss()
+        progressDialog.setMessage("Đang vào ứng dụng...")
+        progressDialog.show()
 
-        val firebaseUser = firebaseAuth.currentUser!! // Lấy thông tin người dùng hiện tại
-
-        // Lấy tham chiếu đến node "Users" trong Firebase Realtime Database
+        val firebaseUser = firebaseAuth.currentUser!!
         val ref = FirebaseDatabase.getInstance().getReference("Users")
-        // Truy vấn thông tin người dùng dựa trên UID
+
         ref.child(firebaseUser.uid)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    // Dữ liệu đã được truy xuất thành công
-                    progressDialog.dismiss() // Ẩn ProgressDialog
-
-                    // Lấy loại người dùng (user/admin) từ snapshot
+                    progressDialog.dismiss()
                     val userType = snapshot.child("userType").value
+
                     if (userType == "user") {
-                        // Nếu là user, chuyển đến màn hình DashboardUserActivity
                         startActivity(Intent(this@LoginActivity, DashboardUserActivity::class.java))
-                        finish() // Đóng Activity hiện tại
+                        finish()
                     } else if (userType == "admin") {
-                        // Nếu là admin, chuyển đến màn hình DashboardAdminActivity
-                        startActivity(
-                            Intent(
-                                this@LoginActivity,
-                                DashboardAdminActivity::class.java
-                            )
-                        )
-                        finish() // Đóng Activity hiện tại
+                        startActivity(Intent(this@LoginActivity, DashboardAdminActivity::class.java))
+                        finish()
                     }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    // Xảy ra lỗi trong quá trình truy xuất dữ liệu
+                    progressDialog.dismiss()
+                    Toast.makeText(this@LoginActivity, "Lỗi lấy dữ liệu user", Toast.LENGTH_SHORT).show()
                 }
             })
     }

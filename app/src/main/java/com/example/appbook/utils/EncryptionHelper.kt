@@ -14,18 +14,26 @@ import javax.crypto.spec.SecretKeySpec
  */
 object EncryptionHelper {
 
+    init {
+        System.loadLibrary("app-security")
+    }
+
+    external fun getAesKeyFromNative(): String
+
     private const val TRANSFORMATION = "AES/GCM/NoPadding"
     private const val AES_ALGORITHM = "AES"
     private const val GCM_TAG_LENGTH = 128
 
-    // Demo-only static key; replace with a secure key management strategy in real projects.
-    private const val RAW_SECRET = "ChangeMeDemoKey123ChangeMeDemoKey123"
+
 
     private val charset = Charsets.UTF_8
     private val secureRandom = SecureRandom()
 
     private fun getSecretKey(): SecretKey {
-        val keyBytes = RAW_SECRET.toByteArray(charset)
+        // 3. Lấy key từ NDK thay vì hardcode
+        val rawSecret = getAesKeyFromNative()
+
+        val keyBytes = rawSecret.toByteArray(charset)
         return SecretKeySpec(keyBytes.copyOf(32), AES_ALGORITHM)
     }
 

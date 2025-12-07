@@ -1,0 +1,18 @@
+@echo off
+"C:\\Users\\Admin\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\cmake.exe" ^
+  "-HF:\\WorkSpace\\AppBook\\app" ^
+  "-DCMAKE_SYSTEM_NAME=Android" ^
+  "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON" ^
+  "-DCMAKE_SYSTEM_VERSION=24" ^
+  "-DANDROID_PLATFORM=android-24" ^
+  "-DANDROID_ABI=x86" ^
+  "-DCMAKE_ANDROID_ARCH_ABI=x86" ^
+  "-DANDROID_NDK=C:\\Users\\Admin\\AppData\\Local\\Android\\Sdk\\ndk\\27.0.12077973" ^
+  "-DCMAKE_ANDROID_NDK=C:\\Users\\Admin\\AppData\\Local\\Android\\Sdk\\ndk\\27.0.12077973" ^
+  "-DCMAKE_TOOLCHAIN_FILE=C:\\Users\\Admin\\AppData\\Local\\Android\\Sdk\\ndk\\27.0.12077973\\build\\cmake\\android.toolchain.cmake" ^
+  "-DCMAKE_MAKE_PROGRAM=C:\\Users\\Admin\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe" ^
+  "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=F:\\WorkSpace\\AppBook\\app\\build\\intermediates\\cxx\\Debug\\d1z2k2r5\\obj\\x86" ^
+  "-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=F:\\WorkSpace\\AppBook\\app\\build\\intermediates\\cxx\\Debug\\d1z2k2r5\\obj\\x86" ^
+  "-DCMAKE_BUILD_TYPE=Debug" ^
+  "-BF:\\WorkSpace\\AppBook\\app\\.cxx\\Debug\\d1z2k2r5\\x86" ^
+  -GNinja

@@ -131,6 +131,7 @@ id passwordEt
 id passwordHint
 id passwordInput
 id passwordLayout
+id passwordStrengthTv
 id passwordTil
 id pdfView
 id playBtn

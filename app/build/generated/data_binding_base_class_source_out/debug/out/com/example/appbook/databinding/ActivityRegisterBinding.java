@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewbinding.ViewBinding;
@@ -53,6 +54,9 @@ public final class ActivityRegisterBinding implements ViewBinding {
   public final EditText passwordEt;
 
   @NonNull
+  public final TextView passwordStrengthTv;
+
+  @NonNull
   public final TextInputLayout passwordTil;
 
   @NonNull
@@ -65,8 +69,9 @@ public final class ActivityRegisterBinding implements ViewBinding {
       @NonNull EditText cPasswordEt, @NonNull TextInputLayout cPasswordTil,
       @NonNull EditText emailEt, @NonNull TextInputLayout emailTil, @NonNull ImageView iconIv,
       @NonNull RelativeLayout main, @NonNull EditText nameEt, @NonNull TextInputLayout nameTil,
-      @NonNull EditText passwordEt, @NonNull TextInputLayout passwordTil,
-      @NonNull Button registerBtn, @NonNull RelativeLayout toolbarRl) {
+      @NonNull EditText passwordEt, @NonNull TextView passwordStrengthTv,
+      @NonNull TextInputLayout passwordTil, @NonNull Button registerBtn,
+      @NonNull RelativeLayout toolbarRl) {
     this.rootView = rootView;
     this.backBtn = backBtn;
     this.cPasswordEt = cPasswordEt;
@@ -78,6 +83,7 @@ public final class ActivityRegisterBinding implements ViewBinding {
     this.nameEt = nameEt;
     this.nameTil = nameTil;
     this.passwordEt = passwordEt;
+    this.passwordStrengthTv = passwordStrengthTv;
     this.passwordTil = passwordTil;
     this.registerBtn = registerBtn;
     this.toolbarRl = toolbarRl;
@@ -166,6 +172,12 @@ public final class ActivityRegisterBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.passwordStrengthTv;
+      TextView passwordStrengthTv = ViewBindings.findChildViewById(rootView, id);
+      if (passwordStrengthTv == null) {
+        break missingId;
+      }
+
       id = R.id.passwordTil;
       TextInputLayout passwordTil = ViewBindings.findChildViewById(rootView, id);
       if (passwordTil == null) {
@@ -185,8 +197,8 @@ public final class ActivityRegisterBinding implements ViewBinding {
       }
 
       return new ActivityRegisterBinding((RelativeLayout) rootView, backBtn, cPasswordEt,
-          cPasswordTil, emailEt, emailTil, iconIv, main, nameEt, nameTil, passwordEt, passwordTil,
-          registerBtn, toolbarRl);
+          cPasswordTil, emailEt, emailTil, iconIv, main, nameEt, nameTil, passwordEt,
+          passwordStrengthTv, passwordTil, registerBtn, toolbarRl);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));
