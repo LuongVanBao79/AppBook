@@ -4,10 +4,11 @@ package com.example.appbook.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.example.appbook.R;
@@ -18,7 +19,10 @@ import java.lang.String;
 
 public final class RowCommentBinding implements ViewBinding {
   @NonNull
-  private final CardView rootView;
+  private final RelativeLayout rootView;
+
+  @NonNull
+  public final LinearLayout adminReplyLayout;
 
   @NonNull
   public final TextView commentTv;
@@ -32,18 +36,29 @@ public final class RowCommentBinding implements ViewBinding {
   @NonNull
   public final ShapeableImageView profileIv;
 
-  private RowCommentBinding(@NonNull CardView rootView, @NonNull TextView commentTv,
-      @NonNull TextView dateTv, @NonNull TextView nameTv, @NonNull ShapeableImageView profileIv) {
+  @NonNull
+  public final TextView replyDateTv;
+
+  @NonNull
+  public final TextView replyTv;
+
+  private RowCommentBinding(@NonNull RelativeLayout rootView,
+      @NonNull LinearLayout adminReplyLayout, @NonNull TextView commentTv, @NonNull TextView dateTv,
+      @NonNull TextView nameTv, @NonNull ShapeableImageView profileIv,
+      @NonNull TextView replyDateTv, @NonNull TextView replyTv) {
     this.rootView = rootView;
+    this.adminReplyLayout = adminReplyLayout;
     this.commentTv = commentTv;
     this.dateTv = dateTv;
     this.nameTv = nameTv;
     this.profileIv = profileIv;
+    this.replyDateTv = replyDateTv;
+    this.replyTv = replyTv;
   }
 
   @Override
   @NonNull
-  public CardView getRoot() {
+  public RelativeLayout getRoot() {
     return rootView;
   }
 
@@ -68,6 +83,12 @@ public final class RowCommentBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.adminReplyLayout;
+      LinearLayout adminReplyLayout = ViewBindings.findChildViewById(rootView, id);
+      if (adminReplyLayout == null) {
+        break missingId;
+      }
+
       id = R.id.commentTv;
       TextView commentTv = ViewBindings.findChildViewById(rootView, id);
       if (commentTv == null) {
@@ -92,7 +113,20 @@ public final class RowCommentBinding implements ViewBinding {
         break missingId;
       }
 
-      return new RowCommentBinding((CardView) rootView, commentTv, dateTv, nameTv, profileIv);
+      id = R.id.replyDateTv;
+      TextView replyDateTv = ViewBindings.findChildViewById(rootView, id);
+      if (replyDateTv == null) {
+        break missingId;
+      }
+
+      id = R.id.replyTv;
+      TextView replyTv = ViewBindings.findChildViewById(rootView, id);
+      if (replyTv == null) {
+        break missingId;
+      }
+
+      return new RowCommentBinding((RelativeLayout) rootView, adminReplyLayout, commentTv, dateTv,
+          nameTv, profileIv, replyDateTv, replyTv);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

@@ -111,8 +111,8 @@
 57            android:windowSoftInputMode="stateHidden" />
 57-->F:\WorkSpace\AppBook\app\src\main\AndroidManifest.xml:35:13-54
 58        <activity
-58-->F:\WorkSpace\AppBook\app\src\main\AndroidManifest.xml:36:9-39:50
-59            android:name="com.example.appbook.activities.PdfViewActivity"
+58-->F:\WorkSpace\AppBook\app\src\main\AndroidManifest.xml:36:9-39:49
+59            android:name="com.example.appbook.activities.ReadingActivity"
 59-->F:\WorkSpace\AppBook\app\src\main\AndroidManifest.xml:37:13-55
 60            android:exported="false"
 60-->F:\WorkSpace\AppBook\app\src\main\AndroidManifest.xml:38:13-37
@@ -204,8 +204,8 @@
 98        </activity>
 99        <activity
 99-->F:\WorkSpace\AppBook\app\src\main\AndroidManifest.xml:77:9-79:40
-100            android:name="com.example.appbook.activities.PdfDetailActivity"
-100-->F:\WorkSpace\AppBook\app\src\main\AndroidManifest.xml:78:13-57
+100            android:name="com.example.appbook.activities.BookDetailActivity"
+100-->F:\WorkSpace\AppBook\app\src\main\AndroidManifest.xml:78:13-58
 101            android:exported="false" />
 101-->F:\WorkSpace\AppBook\app\src\main\AndroidManifest.xml:79:13-37
 102        <activity

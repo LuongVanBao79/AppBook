@@ -11,7 +11,7 @@ import com.example.appbook.MyApplication
 import com.example.appbook.R
 import com.example.appbook.adapters.AdapterPdfFavorite
 import com.example.appbook.databinding.ActivityProfileBinding
-import com.example.appbook.models.ModelPdf
+import com.example.appbook.models.ModelBook
 import com.example.appbook.utils.EncryptionHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -32,7 +32,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var firebaseUser: FirebaseUser
 
     // ArrayList để lưu trữ danh sách các sách yêu thích
-    private lateinit var booksArrayList: ArrayList<ModelPdf>
+    private lateinit var booksArrayList: ArrayList<ModelBook>
 
     // Adapter để hiển thị danh sách các sách yêu thích
     private lateinit var adapterPdfFavorite: AdapterPdfFavorite
@@ -198,7 +198,7 @@ class ProfileActivity : AppCompatActivity() {
                         val bookId = ds.child("bookId").value.toString()
 
                         // Tạo model
-                        val modelPdf = ModelPdf()
+                        val modelPdf = ModelBook()
                         modelPdf.id = bookId // Chỉ gán bookId, các thông tin khác sẽ được tải trong Adapter
 
                         // Thêm model vào list

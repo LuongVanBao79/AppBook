@@ -24,10 +24,10 @@ public final class RowPdfFavoriteBinding implements ViewBinding {
   private final CardView rootView;
 
   @NonNull
-  public final TextView categoryTv;
+  public final TextView authorTv;
 
   @NonNull
-  public final RelativeLayout coverImageRl;
+  public final TextView categoryTv;
 
   @NonNull
   public final ImageView coverIv;
@@ -39,7 +39,7 @@ public final class RowPdfFavoriteBinding implements ViewBinding {
   public final TextView descriptionTv;
 
   @NonNull
-  public final TextView pagesTv;
+  public final RelativeLayout pdfRl;
 
   @NonNull
   public final ProgressBar progressBar;
@@ -48,26 +48,27 @@ public final class RowPdfFavoriteBinding implements ViewBinding {
   public final ImageButton removeFavBtn;
 
   @NonNull
-  public final TextView sizeTv;
-
-  @NonNull
   public final TextView titleTv;
 
-  private RowPdfFavoriteBinding(@NonNull CardView rootView, @NonNull TextView categoryTv,
-      @NonNull RelativeLayout coverImageRl, @NonNull ImageView coverIv, @NonNull TextView dateTv,
-      @NonNull TextView descriptionTv, @NonNull TextView pagesTv, @NonNull ProgressBar progressBar,
-      @NonNull ImageButton removeFavBtn, @NonNull TextView sizeTv, @NonNull TextView titleTv) {
+  @NonNull
+  public final TextView viewsTv;
+
+  private RowPdfFavoriteBinding(@NonNull CardView rootView, @NonNull TextView authorTv,
+      @NonNull TextView categoryTv, @NonNull ImageView coverIv, @NonNull TextView dateTv,
+      @NonNull TextView descriptionTv, @NonNull RelativeLayout pdfRl,
+      @NonNull ProgressBar progressBar, @NonNull ImageButton removeFavBtn,
+      @NonNull TextView titleTv, @NonNull TextView viewsTv) {
     this.rootView = rootView;
+    this.authorTv = authorTv;
     this.categoryTv = categoryTv;
-    this.coverImageRl = coverImageRl;
     this.coverIv = coverIv;
     this.dateTv = dateTv;
     this.descriptionTv = descriptionTv;
-    this.pagesTv = pagesTv;
+    this.pdfRl = pdfRl;
     this.progressBar = progressBar;
     this.removeFavBtn = removeFavBtn;
-    this.sizeTv = sizeTv;
     this.titleTv = titleTv;
+    this.viewsTv = viewsTv;
   }
 
   @Override
@@ -97,15 +98,15 @@ public final class RowPdfFavoriteBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
-      id = R.id.categoryTv;
-      TextView categoryTv = ViewBindings.findChildViewById(rootView, id);
-      if (categoryTv == null) {
+      id = R.id.authorTv;
+      TextView authorTv = ViewBindings.findChildViewById(rootView, id);
+      if (authorTv == null) {
         break missingId;
       }
 
-      id = R.id.coverImageRl;
-      RelativeLayout coverImageRl = ViewBindings.findChildViewById(rootView, id);
-      if (coverImageRl == null) {
+      id = R.id.categoryTv;
+      TextView categoryTv = ViewBindings.findChildViewById(rootView, id);
+      if (categoryTv == null) {
         break missingId;
       }
 
@@ -127,9 +128,9 @@ public final class RowPdfFavoriteBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.pagesTv;
-      TextView pagesTv = ViewBindings.findChildViewById(rootView, id);
-      if (pagesTv == null) {
+      id = R.id.pdfRl;
+      RelativeLayout pdfRl = ViewBindings.findChildViewById(rootView, id);
+      if (pdfRl == null) {
         break missingId;
       }
 
@@ -145,20 +146,20 @@ public final class RowPdfFavoriteBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.sizeTv;
-      TextView sizeTv = ViewBindings.findChildViewById(rootView, id);
-      if (sizeTv == null) {
-        break missingId;
-      }
-
       id = R.id.titleTv;
       TextView titleTv = ViewBindings.findChildViewById(rootView, id);
       if (titleTv == null) {
         break missingId;
       }
 
-      return new RowPdfFavoriteBinding((CardView) rootView, categoryTv, coverImageRl, coverIv,
-          dateTv, descriptionTv, pagesTv, progressBar, removeFavBtn, sizeTv, titleTv);
+      id = R.id.viewsTv;
+      TextView viewsTv = ViewBindings.findChildViewById(rootView, id);
+      if (viewsTv == null) {
+        break missingId;
+      }
+
+      return new RowPdfFavoriteBinding((CardView) rootView, authorTv, categoryTv, coverIv, dateTv,
+          descriptionTv, pdfRl, progressBar, removeFavBtn, titleTv, viewsTv);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

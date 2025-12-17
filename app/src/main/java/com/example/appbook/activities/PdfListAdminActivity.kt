@@ -7,7 +7,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.appbook.adapters.AdapterPdfAdmin
 import com.example.appbook.databinding.ActivityPdfListAdminBinding
-import com.example.appbook.models.ModelPdf
+import com.example.appbook.models.ModelBook
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -26,7 +26,7 @@ class PdfListAdminActivity : AppCompatActivity() {
     private lateinit var adapterPdfAdmin: AdapterPdfAdmin
 
     // ArrayList để lưu trữ danh sách các PDF
-    private lateinit var pdfArrayList: ArrayList<ModelPdf>
+    private lateinit var pdfArrayList: ArrayList<ModelBook>
 
     // Category id và title, được truyền từ Intent
     private var categoryId = ""
@@ -87,7 +87,7 @@ class PdfListAdminActivity : AppCompatActivity() {
                     pdfArrayList.clear()
                     for (ds in snapshot.children) {
                         // Lấy dữ liệu
-                        val model = ds.getValue(ModelPdf::class.java)
+                        val model = ds.getValue(ModelBook::class.java)
 
                         // Thêm vào list
                         model?.let { pdfArrayList.add(it) }

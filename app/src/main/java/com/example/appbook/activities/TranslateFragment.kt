@@ -33,13 +33,25 @@ class TranslateFragment : BottomSheetDialogFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        // 1. Nạp giao diện
         val view = inflater.inflate(R.layout.fragment_translate, container, false)
+
+        // 2. Tìm View hiển thị kết quả (Bạn đã làm đúng ở đây)
         val tvTranslated = view.findViewById<TextView>(R.id.tvTranslated)
 
-        // Gọi dịch bằng hàm trong PdfViewActivity
+        // (Tùy chọn) Tìm View hiển thị text gốc nếu XML của bạn có
+        // val tvOriginal = view.findViewById<TextView>(R.id.tvOriginal)
+        // tvOriginal?.text = originalText
+
+        // 3. Gọi hàm dịch
         originalText?.let { text ->
-            (activity as? PdfViewActivity)?.translateText(text) { translated ->
-                tvTranslated.text = translated
+            if (activity is ReadingActivity) {
+                (activity as ReadingActivity).translateText(text) { translated ->
+                    // --- SỬA LỖI TẠI ĐÂY ---
+                    // Thay vì dùng 'binding.translatedTv' (chưa khai báo),
+                    // ta dùng biến 'tvTranslated' đã tìm thấy ở trên.
+                    tvTranslated.text = translated
+                }
             }
         }
 

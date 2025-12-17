@@ -5,30 +5,19 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.view.View
 import android.widget.RemoteViews
-import com.example.appbook.activities.PdfViewActivity
+import com.example.appbook.activities.ReadingActivity
 
-/**
- * Implementation of App Widget functionality.
- */
 class ContinueReadingWidget : AppWidgetProvider() {
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
-    }
-
-    override fun onEnabled(context: Context) {
-        // Enter relevant functionality for when the first widget is created
-    }
-
-    override fun onDisabled(context: Context) {
-        // Enter relevant functionality for when the last widget is disabled
     }
 }
 
@@ -37,27 +26,30 @@ internal fun updateAppWidget(
     appWidgetManager: AppWidgetManager,
     appWidgetId: Int
 ) {
-    val prefs = context.getSharedPreferences("ReadingPrefs", Context.MODE_PRIVATE)
+    // Đọc dữ liệu từ file "WidgetPrefs" mà ReadingActivity đã lưu
+    val prefs = context.getSharedPreferences("WidgetPrefs", Context.MODE_PRIVATE)
     val bookId = prefs.getString("lastBookId", null)
-    val title = prefs.getString("lastBookTitle", "Chưa có sách nào") ?: ""
-    val page = prefs.getInt("lastBookPage", 0)
-    val total = prefs.getInt("lastBookTotal", 0)
+    val chapterId = prefs.getString("lastChapterId", "")
+    val chapterTitle = prefs.getString("lastChapterTitle", "Đọc tiếp...") ?: "Đọc tiếp..."
 
     val views = RemoteViews(context.packageName, R.layout.continue_reading_widget)
 
     if (bookId == null) {
-        views.setTextViewText(R.id.widgetStatus, "📚 Bạn chưa đọc cuốn nào")
-        views.setTextViewText(R.id.widgetTitle, "")
-        views.setTextViewText(R.id.widgetPageInfo, "")
+        // Trường hợp chưa đọc sách nào
+        views.setViewVisibility(R.id.layoutContent, View.GONE)
+        views.setViewVisibility(R.id.layoutEmpty, View.VISIBLE)
     } else {
-        views.setTextViewText(R.id.widgetTitle, title)
-        views.setTextViewText(R.id.widgetPageInfo, "Trang $page/$total")
+        // Trường hợp đã có lịch sử
+        views.setViewVisibility(R.id.layoutContent, View.VISIBLE)
+        views.setViewVisibility(R.id.layoutEmpty, View.GONE)
 
-        // 🟡 Intent mở lại PdfViewActivity ở đúng trang
-        val intent = Intent(context, PdfViewActivity::class.java).apply {
-            putExtra("bookId", bookId)
-            putExtra("resumePage", page)
-            putExtra("fromWidget", true)   // 🟡 Thêm flag này
+        views.setTextViewText(R.id.widgetTitle, "Đang đọc dở:")
+        views.setTextViewText(R.id.widgetChapterInfo, chapterTitle)
+
+        // Tạo Intent mở ReadingActivity
+        val intent = Intent(context, ReadingActivity::class.java).apply {
+            putExtra("BOOK_ID", bookId)         // Key khớp với ReadingActivity
+            putExtra("CHAPTER_ID", chapterId)   // Key khớp với ReadingActivity
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
@@ -67,9 +59,11 @@ internal fun updateAppWidget(
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+
+        // Gán sự kiện click cho toàn bộ widget hoặc nút bấm
+        views.setOnClickPendingIntent(R.id.widgetContainer, pendingIntent)
         views.setOnClickPendingIntent(R.id.widgetContinueBtn, pendingIntent)
     }
 
     appWidgetManager.updateAppWidget(appWidgetId, views)
 }
-

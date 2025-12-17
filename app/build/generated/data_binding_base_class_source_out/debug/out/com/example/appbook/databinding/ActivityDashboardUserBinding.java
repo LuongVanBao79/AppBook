@@ -4,12 +4,13 @@ package com.example.appbook.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import androidx.viewpager.widget.ViewPager;
@@ -24,7 +25,10 @@ public final class ActivityDashboardUserBinding implements ViewBinding {
   private final RelativeLayout rootView;
 
   @NonNull
-  public final ImageView logoutBtn;
+  public final RelativeLayout contentRl;
+
+  @NonNull
+  public final ImageButton logoutBtn;
 
   @NonNull
   public final RelativeLayout main;
@@ -33,32 +37,34 @@ public final class ActivityDashboardUserBinding implements ViewBinding {
   public final ImageButton profileBtn;
 
   @NonNull
-  public final TextView subTitleTv;
+  public final EditText searchEt;
+
+  @NonNull
+  public final RecyclerView searchRv;
 
   @NonNull
   public final TabLayout tabLayout;
 
   @NonNull
-  public final TextView titleTv;
-
-  @NonNull
-  public final RelativeLayout toolbarRl;
+  public final LinearLayout toolbarLl;
 
   @NonNull
   public final ViewPager viewPager;
 
   private ActivityDashboardUserBinding(@NonNull RelativeLayout rootView,
-      @NonNull ImageView logoutBtn, @NonNull RelativeLayout main, @NonNull ImageButton profileBtn,
-      @NonNull TextView subTitleTv, @NonNull TabLayout tabLayout, @NonNull TextView titleTv,
-      @NonNull RelativeLayout toolbarRl, @NonNull ViewPager viewPager) {
+      @NonNull RelativeLayout contentRl, @NonNull ImageButton logoutBtn,
+      @NonNull RelativeLayout main, @NonNull ImageButton profileBtn, @NonNull EditText searchEt,
+      @NonNull RecyclerView searchRv, @NonNull TabLayout tabLayout, @NonNull LinearLayout toolbarLl,
+      @NonNull ViewPager viewPager) {
     this.rootView = rootView;
+    this.contentRl = contentRl;
     this.logoutBtn = logoutBtn;
     this.main = main;
     this.profileBtn = profileBtn;
-    this.subTitleTv = subTitleTv;
+    this.searchEt = searchEt;
+    this.searchRv = searchRv;
     this.tabLayout = tabLayout;
-    this.titleTv = titleTv;
-    this.toolbarRl = toolbarRl;
+    this.toolbarLl = toolbarLl;
     this.viewPager = viewPager;
   }
 
@@ -89,8 +95,14 @@ public final class ActivityDashboardUserBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.contentRl;
+      RelativeLayout contentRl = ViewBindings.findChildViewById(rootView, id);
+      if (contentRl == null) {
+        break missingId;
+      }
+
       id = R.id.logoutBtn;
-      ImageView logoutBtn = ViewBindings.findChildViewById(rootView, id);
+      ImageButton logoutBtn = ViewBindings.findChildViewById(rootView, id);
       if (logoutBtn == null) {
         break missingId;
       }
@@ -103,9 +115,15 @@ public final class ActivityDashboardUserBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.subTitleTv;
-      TextView subTitleTv = ViewBindings.findChildViewById(rootView, id);
-      if (subTitleTv == null) {
+      id = R.id.searchEt;
+      EditText searchEt = ViewBindings.findChildViewById(rootView, id);
+      if (searchEt == null) {
+        break missingId;
+      }
+
+      id = R.id.searchRv;
+      RecyclerView searchRv = ViewBindings.findChildViewById(rootView, id);
+      if (searchRv == null) {
         break missingId;
       }
 
@@ -115,15 +133,9 @@ public final class ActivityDashboardUserBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.titleTv;
-      TextView titleTv = ViewBindings.findChildViewById(rootView, id);
-      if (titleTv == null) {
-        break missingId;
-      }
-
-      id = R.id.toolbarRl;
-      RelativeLayout toolbarRl = ViewBindings.findChildViewById(rootView, id);
-      if (toolbarRl == null) {
+      id = R.id.toolbarLl;
+      LinearLayout toolbarLl = ViewBindings.findChildViewById(rootView, id);
+      if (toolbarLl == null) {
         break missingId;
       }
 
@@ -133,8 +145,8 @@ public final class ActivityDashboardUserBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ActivityDashboardUserBinding((RelativeLayout) rootView, logoutBtn, main,
-          profileBtn, subTitleTv, tabLayout, titleTv, toolbarRl, viewPager);
+      return new ActivityDashboardUserBinding((RelativeLayout) rootView, contentRl, logoutBtn, main,
+          profileBtn, searchEt, searchRv, tabLayout, toolbarLl, viewPager);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

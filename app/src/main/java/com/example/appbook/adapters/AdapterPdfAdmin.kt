@@ -13,27 +13,26 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide // <<— Cần thêm import Glide
 import com.example.appbook.MyApplication
-import com.example.appbook.activities.PdfDetailActivity
+import com.example.appbook.activities.BookDetailActivity
 import com.example.appbook.activities.PdfEditActivity
 import com.example.appbook.databinding.RowPdfAdminBinding
 import com.example.appbook.filters.FilterPdfAdmin
-import com.example.appbook.models.ModelPdf
+import com.example.appbook.models.ModelBook
 import com.example.appbook.R
-import java.util.concurrent.TimeUnit
 
 class AdapterPdfAdmin : RecyclerView.Adapter<AdapterPdfAdmin.HolderPdfAdmin>, Filterable {
 
 
     private val TAG = "ADAPTER_PDF_ADMIN"
     private var context: Context
-    public var pdfArrayList: ArrayList<ModelPdf>
-    private val filterList: ArrayList<ModelPdf>
+    public var pdfArrayList: ArrayList<ModelBook>
+    private val filterList: ArrayList<ModelBook>
 
     private lateinit var binding: RowPdfAdminBinding
     private var filter: FilterPdfAdmin? = null
 
     // Constructor (Giữ nguyên)
-    constructor(context: Context, pdfArrayList: ArrayList<ModelPdf>) : super() {
+    constructor(context: Context, pdfArrayList: ArrayList<ModelBook>) : super() {
         this.context = context
         this.pdfArrayList = pdfArrayList
         this.filterList = pdfArrayList
@@ -53,20 +52,20 @@ class AdapterPdfAdmin : RecyclerView.Adapter<AdapterPdfAdmin.HolderPdfAdmin>, Fi
         val title = model.title
         val description = model.description
 
-        // Lấy dữ liệu mới đã được tính toán sẵn
-        val pdfUrl = model.url
-        val timestamp = model.timestamp
-        val fileSize = model.fileSize // Lấy dung lượng (bytes)
-        val pagesCount = model.pagesCount // Lấy số trang
-        val imageUrl = model.imageUrl // Lấy URL ảnh bìa
+//        // Lấy dữ liệu mới đã được tính toán sẵn
+//        val pdfUrl = model.url
+//        val timestamp = model.timestamp
+//        val fileSize = model.fileSize // Lấy dung lượng (bytes)
+//        val pagesCount = model.pagesCount // Lấy số trang
+//        val imageUrl = model.imageUrl // Lấy URL ảnh bìa
 
-        // convert timestamp to dd/MM/yyy format
-        val formattedDate = MyApplication.formatTimeStamp(timestamp) // Vẫn dùng MyApplication.Companion
+//        // convert timestamp to dd/MM/yyy format
+//        val formattedDate = MyApplication.formatTimeStamp(timestamp) // Vẫn dùng MyApplication.Companion
 
         //set data
         holder.titleTv.text = title
         holder.descriptionTv.text = description
-        holder.dateTv.text = formattedDate
+//        holder.dateTv.text = formattedDate
 
         // =================== CẬP NHẬT LOGIC TẢI DỮ LIỆU ===================
 
@@ -76,23 +75,23 @@ class AdapterPdfAdmin : RecyclerView.Adapter<AdapterPdfAdmin.HolderPdfAdmin>, Fi
         // 2. Load Ảnh Bìa (imageUrl) thay vì PDF View
         holder.progressBar.visibility = View.VISIBLE // Hiển thị ProgressBar khi tải ảnh
 
-        try {
-            // Sử dụng Glide để tải ảnh bìa
-            Glide.with(context)
-                .load(imageUrl) // Sử dụng URL ảnh bìa
-                .centerCrop()
-                .placeholder(R.drawable.ic_book_white) // Cần thêm placeholder image
-                .into(holder.coverIv)
-        } catch (e: Exception) {
-            Log.e(TAG, "onBindViewHolder: Error loading image", e)
-            holder.coverIv.setImageResource(R.drawable.ic_book_white)
-        } finally {
-            holder.progressBar.visibility = View.GONE // Ẩn ProgressBar
-        }
+//        try {
+//            // Sử dụng Glide để tải ảnh bìa
+//            Glide.with(context)
+//                .load(imageUrl) // Sử dụng URL ảnh bìa
+//                .centerCrop()
+//                .placeholder(R.drawable.ic_book_white) // Cần thêm placeholder image
+//                .into(holder.coverIv)
+//        } catch (e: Exception) {
+//            Log.e(TAG, "onBindViewHolder: Error loading image", e)
+//            holder.coverIv.setImageResource(R.drawable.ic_book_white)
+//        } finally {
+//            holder.progressBar.visibility = View.GONE // Ẩn ProgressBar
+//        }
 
         // 3. Hiển thị Dữ liệu đã tính toán (fileSize, pagesCount)
-        holder.sizeTv.text = formatFileSize(fileSize) // Dùng hàm formatFileSize mới
-        holder.pagesTv.text = "$pagesCount trang"
+//        holder.sizeTv.text = formatFileSize(fileSize) // Dùng hàm formatFileSize mới
+//        holder.pagesTv.text = "$pagesCount trang"
 
         // 4. LOẠI BỎ CÁC HÀM TẢI NẶNG (đã được thay thế):
         // BỎ: MyApplication.Companion.loadPdfFromUrlSinglePage(pdfUrl, title, holder.pdfView, holder.progressBar, null)
@@ -107,7 +106,7 @@ class AdapterPdfAdmin : RecyclerView.Adapter<AdapterPdfAdmin.HolderPdfAdmin>, Fi
 
         //handle item click, open PdfDetailActivity
         holder.itemView.setOnClickListener {
-            val intent = Intent(context, PdfDetailActivity::class.java)
+            val intent = Intent(context, BookDetailActivity::class.java)
             intent.putExtra("bookId", pdfId)
             context.startActivity(intent)
         }
@@ -125,7 +124,7 @@ class AdapterPdfAdmin : RecyclerView.Adapter<AdapterPdfAdmin.HolderPdfAdmin>, Fi
     }
 
 
-    private fun moreOptionsDialog(model: ModelPdf, holder: HolderPdfAdmin) {
+    private fun moreOptionsDialog(model: ModelBook, holder: HolderPdfAdmin) {
         // ... (Giữ nguyên logic moreOptionsDialog)
         val bookId = model.id
         val bookTitle = model.title

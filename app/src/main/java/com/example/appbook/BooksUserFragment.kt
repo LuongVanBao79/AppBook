@@ -8,11 +8,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.appbook.adapters.AdapterPdfUser
+import com.example.appbook.adapters.AdapterBookUser
 import com.example.appbook.databinding.FragmentBooksUserBinding
-import com.example.appbook.databinding.RowPdfUserBinding
-import com.example.appbook.models.ModelPdf
-import com.google.firebase.Firebase
+import com.example.appbook.models.ModelBook
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -43,8 +41,8 @@ class BooksUserFragment : Fragment() {
     private var category = ""
     private var uid = ""
 
-    private lateinit var pdfArrayList: ArrayList<ModelPdf>
-    private lateinit var adapterPdfUser: AdapterPdfUser
+    private lateinit var pdfArrayList: ArrayList<ModelBook>
+    private lateinit var adapterPdfUser: AdapterBookUser
 
 
 
@@ -82,20 +80,20 @@ class BooksUserFragment : Fragment() {
             loadCategorizedBooks()
         }
 
-        //search
-        binding.searchEt.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                try {
-                    adapterPdfUser.filter?.filter(s)
-                } catch (e: Exception) {
-                    Log.d(TAG, "onTextChanged: SEARCH EXCEPTION: ${e.message}")
-                }
-            }
-
-            override fun afterTextChanged(s: Editable?) {}
-        })
+//        //search
+//        binding.searchEt.addTextChangedListener(object : TextWatcher {
+//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+//
+//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+//                try {
+//                    adapterPdfUser.filter?.filter(s)
+//                } catch (e: Exception) {
+//                    Log.d(TAG, "onTextChanged: SEARCH EXCEPTION: ${e.message}")
+//                }
+//            }
+//
+//            override fun afterTextChanged(s: Editable?) {}
+//        })
 
         return binding.root
     }
@@ -110,12 +108,12 @@ class BooksUserFragment : Fragment() {
                 pdfArrayList.clear()
                 for(ds in snapshot.children){
                     //get data
-                    val model = ds.getValue(ModelPdf::class.java)
+                    val model = ds.getValue(ModelBook::class.java)
                     //add to list
                     pdfArrayList.add(model!!)
                 }
                 //setup adapter
-                adapterPdfUser = AdapterPdfUser(context!!, pdfArrayList)
+                adapterPdfUser = AdapterBookUser(context!!, pdfArrayList)
                 //set adapter to recyclerview
                 binding.booksRv.adapter = adapterPdfUser
             }
@@ -137,13 +135,13 @@ class BooksUserFragment : Fragment() {
                 pdfArrayList.clear()
                 for(ds in snapshot.children){
                     //get data
-                    val model = ds.getValue(ModelPdf::class.java)
+                    val model = ds.getValue(ModelBook::class.java)
                     //add to list
                     pdfArrayList.add(model!!)
                 }
                 pdfArrayList.reverse()
                 //setup adapter
-                adapterPdfUser = AdapterPdfUser(context!!, pdfArrayList)
+                adapterPdfUser = AdapterBookUser(context!!, pdfArrayList)
                 //set adapter to recyclerview
                 binding.booksRv.adapter = adapterPdfUser
             }
@@ -165,12 +163,12 @@ class BooksUserFragment : Fragment() {
                     pdfArrayList.clear()
                     for(ds in snapshot.children){
                         //get data
-                        val model = ds.getValue(ModelPdf::class.java)
+                        val model = ds.getValue(ModelBook::class.java)
                         //add to list
                         pdfArrayList.add(model!!)
                     }
                     //setup adapter
-                    adapterPdfUser = AdapterPdfUser(context!!, pdfArrayList)
+                    adapterPdfUser = AdapterBookUser(context!!, pdfArrayList)
                     //set adapter to recyclerview
                     binding.booksRv.adapter = adapterPdfUser
                 }

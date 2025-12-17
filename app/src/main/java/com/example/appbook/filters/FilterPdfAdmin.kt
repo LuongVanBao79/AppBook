@@ -2,17 +2,17 @@ package com.example.appbook.filters
 
 import android.widget.Filter
 import com.example.appbook.adapters.AdapterPdfAdmin
-import com.example.appbook.models.ModelPdf
+import com.example.appbook.models.ModelBook
 
 // Used to filter data from recyclerview | search pdf from pdf list in recyclerview
 class FilterPdfAdmin : Filter {
     //arraylist in which me want to search
-    var filterList: ArrayList<ModelPdf>
+    var filterList: ArrayList<ModelBook>
     //adapter in which filter need to be implemented
     var adapterPdfAdmin: AdapterPdfAdmin
 
     //constructor
-    constructor(adapterPdfAdmin: AdapterPdfAdmin, filterList: ArrayList<ModelPdf>) {
+    constructor(adapterPdfAdmin: AdapterPdfAdmin, filterList: ArrayList<ModelBook>) {
         this.adapterPdfAdmin = adapterPdfAdmin
         this.filterList = filterList
     }
@@ -24,7 +24,7 @@ class FilterPdfAdmin : Filter {
         if(constraint != null && constraint.isNotEmpty()){
             //change to upper case, or lowercase to avoid case sensitivity
             constraint = constraint.toString().lowercase()
-            val filteredModels = ArrayList<ModelPdf>()
+            val filteredModels = ArrayList<ModelBook>()
             for(i in filterList.indices){
                 //validate if match
                 if(filterList[i].title.lowercase().contains(constraint)){
@@ -48,7 +48,7 @@ class FilterPdfAdmin : Filter {
         results: FilterResults
     ) {
         //apply filter changes
-        adapterPdfAdmin.pdfArrayList = results.values as ArrayList<ModelPdf>
+        adapterPdfAdmin.pdfArrayList = results.values as ArrayList<ModelBook>
 
         //notify changes
         adapterPdfAdmin.notifyDataSetChanged()

@@ -12,7 +12,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import com.cloudinary.android.MediaManager
-import com.example.appbook.activities.PdfViewActivity
 import com.example.appbook.utils.WidgetUtils
 import com.github.barteksc.pdfviewer.PDFView
 import com.google.firebase.auth.FirebaseAuth
@@ -71,6 +70,12 @@ class MyApplication : Application() {
                     .clear()
                     .apply()
             }
+        }
+
+        fun formatTimestamp(timestamp: Long): String {
+            val calendar = java.util.Calendar.getInstance(java.util.Locale.ENGLISH)
+            calendar.timeInMillis = timestamp
+            return android.text.format.DateFormat.format("dd/MM/yyyy", calendar).toString()
         }
 
         fun formatTimeStamp(timestamp: Long): String {

@@ -34,9 +34,9 @@
             android:exported="false"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name=".activities.PdfViewActivity"
+            android:name=".activities.ReadingActivity"
             android:exported="false"
-            android:screenOrientation="sensor" />
+            android:screenOrientation="sensor"/>
         <activity
             android:name=".activities.PdfFileHandlerActivity"
             android:exported="true"
@@ -75,7 +75,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.PdfDetailActivity"
+            android:name=".activities.BookDetailActivity"
             android:exported="false" />
         <activity
             android:name=".activities.PdfEditActivity"

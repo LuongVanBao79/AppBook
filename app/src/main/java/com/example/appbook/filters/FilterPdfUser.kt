@@ -1,18 +1,18 @@
 package com.example.appbook.filters
 
 import android.widget.Filter
-import com.example.appbook.adapters.AdapterPdfUser
-import com.example.appbook.models.ModelPdf
+import com.example.appbook.adapters.AdapterBookUser
+import com.example.appbook.models.ModelBook
 
 class FilterPdfUser: Filter {
     //arraylist in which we want to search
-    var filterList: ArrayList<ModelPdf>
+    var filterList: ArrayList<ModelBook>
     //adapter in which filter need to be implemented
-    var adapterPdfUser: AdapterPdfUser
+    var adapterPdfUser: AdapterBookUser
     //
 
     //constructor
-    constructor(filterList: ArrayList<ModelPdf>, adapterPdfUser: AdapterPdfUser) {
+    constructor(filterList: ArrayList<ModelBook>, adapterPdfUser: AdapterBookUser) {
         this.filterList = filterList
         this.adapterPdfUser = adapterPdfUser
     }
@@ -27,7 +27,7 @@ class FilterPdfUser: Filter {
 
             //change to upper case, or lower case to remove case sensitivity
             constraint = constraint.toString().uppercase()
-            val filteredModels = ArrayList<ModelPdf>()
+            val filteredModels = ArrayList<ModelBook>()
             for(i in filterList.indices){
                 //validate if match
                 if(filterList[i].title.uppercase().contains(constraint)){
@@ -54,7 +54,7 @@ class FilterPdfUser: Filter {
         results: FilterResults
     ) {
         //apply filter changes
-        adapterPdfUser.pdfArrayList = results.values as ArrayList<ModelPdf>
+        adapterPdfUser.pdfArrayList = results.values as ArrayList<ModelBook>
 
         //notify changes
         adapterPdfUser.notifyDataSetChanged()

@@ -1,3 +1,0 @@
-com.example.appbook.test
-style WhiteBackgroundDialogTheme
-style WhiteBackgroundTheme

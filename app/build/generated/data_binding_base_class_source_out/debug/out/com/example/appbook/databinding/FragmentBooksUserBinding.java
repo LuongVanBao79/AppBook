@@ -4,7 +4,6 @@ package com.example.appbook.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,14 +22,10 @@ public final class FragmentBooksUserBinding implements ViewBinding {
   @NonNull
   public final RecyclerView booksRv;
 
-  @NonNull
-  public final EditText searchEt;
-
-  private FragmentBooksUserBinding(@NonNull RelativeLayout rootView, @NonNull RecyclerView booksRv,
-      @NonNull EditText searchEt) {
+  private FragmentBooksUserBinding(@NonNull RelativeLayout rootView,
+      @NonNull RecyclerView booksRv) {
     this.rootView = rootView;
     this.booksRv = booksRv;
-    this.searchEt = searchEt;
   }
 
   @Override
@@ -66,13 +61,7 @@ public final class FragmentBooksUserBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.searchEt;
-      EditText searchEt = ViewBindings.findChildViewById(rootView, id);
-      if (searchEt == null) {
-        break missingId;
-      }
-
-      return new FragmentBooksUserBinding((RelativeLayout) rootView, booksRv, searchEt);
+      return new FragmentBooksUserBinding((RelativeLayout) rootView, booksRv);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

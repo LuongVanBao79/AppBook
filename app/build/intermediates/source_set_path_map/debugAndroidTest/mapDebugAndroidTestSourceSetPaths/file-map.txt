@@ -1,6 +1,0 @@
-com.example.appbook.test.app-jetified-tracing-1.2.0-0 C:\Users\Admin\.gradle\caches\8.11.1\transforms\97de690fd654f06a288db99687c10a41\transformed\jetified-tracing-1.2.0\res
-com.example.appbook.test.app-jetified-core-1.6.1-1 C:\Users\Admin\.gradle\caches\8.11.1\transforms\adef52fd288aed7dafb10cba38cc9128\transformed\jetified-core-1.6.1\res
-com.example.appbook.test.app-androidTest-2 F:\WorkSpace\AppBook\app\build\generated\res\resValues\androidTest\debug
-com.example.appbook.test.app-mergeDebugAndroidTestResources-3 F:\WorkSpace\AppBook\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
-com.example.appbook.test.app-mergeDebugAndroidTestResources-4 F:\WorkSpace\AppBook\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
-com.example.appbook.test.app-debugAndroidTest-5 F:\WorkSpace\AppBook\app\build\intermediates\merged_res\debugAndroidTest\mergeDebugAndroidTestResources

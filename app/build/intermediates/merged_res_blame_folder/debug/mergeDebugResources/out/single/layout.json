@@ -1,114 +1,138 @@
 [
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_main.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_main.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\dialog_appearance.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\dialog_appearance.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_pdf_edit.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_pdf_edit.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_pdf_edit.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_pdf_edit.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/row_pdf_user.xml",
-        "source": "com.example.appbook.app-main-60:/layout/row_pdf_user.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_login.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_login.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_dashboard_admin.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_dashboard_admin.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\row_category.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\row_category.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_splash.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_splash.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_profile.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_profile.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_register.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_register.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\dialog_loading.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\dialog_loading.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/row_pdf_admin.xml",
-        "source": "com.example.appbook.app-main-60:/layout/row_pdf_admin.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_splash.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_splash.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_forgot_password.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_forgot_password.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_dashboard_admin.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_dashboard_admin.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_dashboard_user.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_dashboard_user.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\row_pdf_favorite.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\row_pdf_favorite.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/row_pdf_favorite.xml",
-        "source": "com.example.appbook.app-main-60:/layout/row_pdf_favorite.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\dialog_tools.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\dialog_tools.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_pdf_detail.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_pdf_detail.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\row_chapter_toc.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\row_chapter_toc.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_model_pdf.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_model_pdf.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_book_detail.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_book_detail.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/dialog_password_prompt.xml",
-        "source": "com.example.appbook.app-main-60:/layout/dialog_password_prompt.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\fragment_translate.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\fragment_translate.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/dialog_comment_add.xml",
-        "source": "com.example.appbook.app-main-60:/layout/dialog_comment_add.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\row_search_book.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\row_search_book.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_profile_edit.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_profile_edit.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_pdf_add.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_pdf_add.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\row_comment.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\row_comment.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_register.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_register.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_main.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\dialog_password_prompt.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\dialog_password_prompt.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_category_add.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_category_add.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\continue_reading_widget.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\continue_reading_widget.xml"
     },
     {
         "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/continue_reading_widget.xml",
         "source": "com.example.appbook.app-main-60:/layout/continue_reading_widget.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/dialog_loading.xml",
-        "source": "com.example.appbook.app-main-60:/layout/dialog_loading.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\fragment_books_user.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\fragment_books_user.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/fragment_translate.xml",
-        "source": "com.example.appbook.app-main-60:/layout/fragment_translate.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_forgot_password.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_forgot_password.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_pdf_view.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_pdf_view.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_model_pdf.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_model_pdf.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_category_add.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_category_add.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\row_book_user.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\row_book_user.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_pdf_add.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_pdf_add.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\dialog_toc.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\dialog_toc.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_profile.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_profile.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_pdf_file_handler.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_pdf_file_handler.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_pdf_list_admin.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_pdf_list_admin.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\dialog_comment_add.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\dialog_comment_add.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_pdf_file_handler.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_pdf_file_handler.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_dashboard_user.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_dashboard_user.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/row_category.xml",
-        "source": "com.example.appbook.app-main-60:/layout/row_category.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_pdf_list_admin.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_pdf_list_admin.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/row_comment.xml",
-        "source": "com.example.appbook.app-main-60:/layout/row_comment.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\activity_reading.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\activity_reading.xml"
     },
     {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/fragment_books_user.xml",
-        "source": "com.example.appbook.app-main-60:/layout/fragment_books_user.xml"
-    },
-    {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_login.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_login.xml"
-    },
-    {
-        "merged": "com.example.appbook.app-mergeDebugResources-57:/layout/activity_profile_edit.xml",
-        "source": "com.example.appbook.app-main-60:/layout/activity_profile_edit.xml"
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-mergeDebugResources-57:\\layout\\row_pdf_admin.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.11.1\\com.example.appbook.app-main-60:\\layout\\row_pdf_admin.xml"
     }
 ]

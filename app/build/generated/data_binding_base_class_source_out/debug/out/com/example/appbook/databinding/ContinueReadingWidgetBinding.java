@@ -4,7 +4,10 @@ package com.example.appbook.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,38 +20,42 @@ import java.lang.String;
 
 public final class ContinueReadingWidgetBinding implements ViewBinding {
   @NonNull
-  private final LinearLayout rootView;
+  private final FrameLayout rootView;
 
   @NonNull
-  public final LinearLayout widgetContainer;
+  public final RelativeLayout layoutContent;
 
   @NonNull
-  public final TextView widgetContinueBtn;
+  public final LinearLayout layoutEmpty;
 
   @NonNull
-  public final TextView widgetPageInfo;
+  public final TextView widgetChapterInfo;
 
   @NonNull
-  public final TextView widgetStatus;
+  public final FrameLayout widgetContainer;
+
+  @NonNull
+  public final ImageView widgetContinueBtn;
 
   @NonNull
   public final TextView widgetTitle;
 
-  private ContinueReadingWidgetBinding(@NonNull LinearLayout rootView,
-      @NonNull LinearLayout widgetContainer, @NonNull TextView widgetContinueBtn,
-      @NonNull TextView widgetPageInfo, @NonNull TextView widgetStatus,
-      @NonNull TextView widgetTitle) {
+  private ContinueReadingWidgetBinding(@NonNull FrameLayout rootView,
+      @NonNull RelativeLayout layoutContent, @NonNull LinearLayout layoutEmpty,
+      @NonNull TextView widgetChapterInfo, @NonNull FrameLayout widgetContainer,
+      @NonNull ImageView widgetContinueBtn, @NonNull TextView widgetTitle) {
     this.rootView = rootView;
+    this.layoutContent = layoutContent;
+    this.layoutEmpty = layoutEmpty;
+    this.widgetChapterInfo = widgetChapterInfo;
     this.widgetContainer = widgetContainer;
     this.widgetContinueBtn = widgetContinueBtn;
-    this.widgetPageInfo = widgetPageInfo;
-    this.widgetStatus = widgetStatus;
     this.widgetTitle = widgetTitle;
   }
 
   @Override
   @NonNull
-  public LinearLayout getRoot() {
+  public FrameLayout getRoot() {
     return rootView;
   }
 
@@ -73,23 +80,29 @@ public final class ContinueReadingWidgetBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
-      LinearLayout widgetContainer = (LinearLayout) rootView;
+      id = R.id.layoutContent;
+      RelativeLayout layoutContent = ViewBindings.findChildViewById(rootView, id);
+      if (layoutContent == null) {
+        break missingId;
+      }
+
+      id = R.id.layoutEmpty;
+      LinearLayout layoutEmpty = ViewBindings.findChildViewById(rootView, id);
+      if (layoutEmpty == null) {
+        break missingId;
+      }
+
+      id = R.id.widgetChapterInfo;
+      TextView widgetChapterInfo = ViewBindings.findChildViewById(rootView, id);
+      if (widgetChapterInfo == null) {
+        break missingId;
+      }
+
+      FrameLayout widgetContainer = (FrameLayout) rootView;
 
       id = R.id.widgetContinueBtn;
-      TextView widgetContinueBtn = ViewBindings.findChildViewById(rootView, id);
+      ImageView widgetContinueBtn = ViewBindings.findChildViewById(rootView, id);
       if (widgetContinueBtn == null) {
-        break missingId;
-      }
-
-      id = R.id.widgetPageInfo;
-      TextView widgetPageInfo = ViewBindings.findChildViewById(rootView, id);
-      if (widgetPageInfo == null) {
-        break missingId;
-      }
-
-      id = R.id.widgetStatus;
-      TextView widgetStatus = ViewBindings.findChildViewById(rootView, id);
-      if (widgetStatus == null) {
         break missingId;
       }
 
@@ -99,8 +112,8 @@ public final class ContinueReadingWidgetBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ContinueReadingWidgetBinding((LinearLayout) rootView, widgetContainer,
-          widgetContinueBtn, widgetPageInfo, widgetStatus, widgetTitle);
+      return new ContinueReadingWidgetBinding((FrameLayout) rootView, layoutContent, layoutEmpty,
+          widgetChapterInfo, widgetContainer, widgetContinueBtn, widgetTitle);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

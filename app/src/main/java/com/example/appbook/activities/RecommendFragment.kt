@@ -10,8 +10,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appbook.R
-import com.example.appbook.adapters.AdapterPdfUser
-import com.example.appbook.models.ModelPdf
+import com.example.appbook.adapters.AdapterBookUser
+import com.example.appbook.models.ModelBook
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlin.math.log10
@@ -20,8 +20,8 @@ class RecommendFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var emptyText: TextView
-    private lateinit var adapter: AdapterPdfUser
-    private lateinit var pdfList: ArrayList<ModelPdf>
+    private lateinit var adapter: AdapterBookUser
+    private lateinit var pdfList: ArrayList<ModelBook>
 
     private val dbRef: DatabaseReference = FirebaseDatabase.getInstance().getReference("Books")
     private val usersRef: DatabaseReference = FirebaseDatabase.getInstance().getReference("Users")
@@ -47,7 +47,7 @@ class RecommendFragment : Fragment() {
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         pdfList = ArrayList()
-        adapter = AdapterPdfUser(requireContext(), pdfList)
+        adapter = AdapterBookUser(requireContext(), pdfList)
         recyclerView.adapter = adapter
 
         loadRecommendations()
@@ -167,7 +167,7 @@ class RecommendFragment : Fragment() {
         val sortedIds = scores.entries.sortedByDescending { it.value.total }.map { it.key }
         pdfList.clear()
         for (id in sortedIds) {
-            val model = snapshot.child(id).getValue(ModelPdf::class.java)
+            val model = snapshot.child(id).getValue(ModelBook::class.java)
             if (model != null) pdfList.add(model)
         }
 

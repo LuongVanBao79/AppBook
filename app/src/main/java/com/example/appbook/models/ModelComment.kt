@@ -1,22 +1,12 @@
 package com.example.appbook.models
 
-class ModelComment {
-    //variables, should be with same spellings and type as we added in firebase
-    var id = ""
-    var bookId = ""
-    var timestamp = ""
-    var comment = ""
-    var uid = ""
 
-    //empty constructor, required by firebase
-    constructor()
-
-    //param constructor
-    constructor(id: String, bookId: String, timestamp: String, comment: String, uid: String) {
-        this.id = id
-        this.bookId = bookId
-        this.timestamp = timestamp
-        this.comment = comment
-        this.uid = uid
-    }
-}
+data class ModelComment(
+    var id: String = "",
+    var bookId: String = "",
+    var uid: String = "",      // ID người bình luận
+    var comment: String = "",  // Nội dung bình luận
+    var timestamp: Long = 0,    // QUAN TRỌNG: Đổi sang Long để sort đúng thời gian
+    var adminReply: String = "",      // Nội dung trả lời
+    var replyTimestamp: Long = 0
+)
