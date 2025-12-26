@@ -4,16 +4,18 @@ package com.example.appbook.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.example.appbook.R;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -21,10 +23,13 @@ import java.lang.String;
 
 public final class ActivityLoginBinding implements ViewBinding {
   @NonNull
-  private final RelativeLayout rootView;
+  private final ConstraintLayout rootView;
 
   @NonNull
-  public final EditText emailEt;
+  public final ImageButton biometricBtn;
+
+  @NonNull
+  public final TextInputEditText emailEt;
 
   @NonNull
   public final TextInputLayout emailTil;
@@ -33,47 +38,58 @@ public final class ActivityLoginBinding implements ViewBinding {
   public final TextView forgotTv;
 
   @NonNull
-  public final ImageView iconIv;
+  public final ImageView imgLogo;
 
   @NonNull
-  public final Button loginBtn;
+  public final LinearLayout layoutRegister;
 
   @NonNull
-  public final RelativeLayout main;
+  public final AppCompatButton loginBtn;
+
+  @NonNull
+  public final ConstraintLayout main;
 
   @NonNull
   public final TextView noAccountTv;
 
   @NonNull
-  public final EditText passwordEt;
+  public final TextInputEditText passwordEt;
 
   @NonNull
   public final TextInputLayout passwordTil;
 
   @NonNull
-  public final RelativeLayout toolbarRl;
+  public final TextView tvSubtitle;
 
-  private ActivityLoginBinding(@NonNull RelativeLayout rootView, @NonNull EditText emailEt,
-      @NonNull TextInputLayout emailTil, @NonNull TextView forgotTv, @NonNull ImageView iconIv,
-      @NonNull Button loginBtn, @NonNull RelativeLayout main, @NonNull TextView noAccountTv,
-      @NonNull EditText passwordEt, @NonNull TextInputLayout passwordTil,
-      @NonNull RelativeLayout toolbarRl) {
+  @NonNull
+  public final TextView tvWelcome;
+
+  private ActivityLoginBinding(@NonNull ConstraintLayout rootView,
+      @NonNull ImageButton biometricBtn, @NonNull TextInputEditText emailEt,
+      @NonNull TextInputLayout emailTil, @NonNull TextView forgotTv, @NonNull ImageView imgLogo,
+      @NonNull LinearLayout layoutRegister, @NonNull AppCompatButton loginBtn,
+      @NonNull ConstraintLayout main, @NonNull TextView noAccountTv,
+      @NonNull TextInputEditText passwordEt, @NonNull TextInputLayout passwordTil,
+      @NonNull TextView tvSubtitle, @NonNull TextView tvWelcome) {
     this.rootView = rootView;
+    this.biometricBtn = biometricBtn;
     this.emailEt = emailEt;
     this.emailTil = emailTil;
     this.forgotTv = forgotTv;
-    this.iconIv = iconIv;
+    this.imgLogo = imgLogo;
+    this.layoutRegister = layoutRegister;
     this.loginBtn = loginBtn;
     this.main = main;
     this.noAccountTv = noAccountTv;
     this.passwordEt = passwordEt;
     this.passwordTil = passwordTil;
-    this.toolbarRl = toolbarRl;
+    this.tvSubtitle = tvSubtitle;
+    this.tvWelcome = tvWelcome;
   }
 
   @Override
   @NonNull
-  public RelativeLayout getRoot() {
+  public ConstraintLayout getRoot() {
     return rootView;
   }
 
@@ -98,8 +114,14 @@ public final class ActivityLoginBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.biometricBtn;
+      ImageButton biometricBtn = ViewBindings.findChildViewById(rootView, id);
+      if (biometricBtn == null) {
+        break missingId;
+      }
+
       id = R.id.emailEt;
-      EditText emailEt = ViewBindings.findChildViewById(rootView, id);
+      TextInputEditText emailEt = ViewBindings.findChildViewById(rootView, id);
       if (emailEt == null) {
         break missingId;
       }
@@ -116,19 +138,25 @@ public final class ActivityLoginBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.iconIv;
-      ImageView iconIv = ViewBindings.findChildViewById(rootView, id);
-      if (iconIv == null) {
+      id = R.id.imgLogo;
+      ImageView imgLogo = ViewBindings.findChildViewById(rootView, id);
+      if (imgLogo == null) {
+        break missingId;
+      }
+
+      id = R.id.layoutRegister;
+      LinearLayout layoutRegister = ViewBindings.findChildViewById(rootView, id);
+      if (layoutRegister == null) {
         break missingId;
       }
 
       id = R.id.loginBtn;
-      Button loginBtn = ViewBindings.findChildViewById(rootView, id);
+      AppCompatButton loginBtn = ViewBindings.findChildViewById(rootView, id);
       if (loginBtn == null) {
         break missingId;
       }
 
-      RelativeLayout main = (RelativeLayout) rootView;
+      ConstraintLayout main = (ConstraintLayout) rootView;
 
       id = R.id.noAccountTv;
       TextView noAccountTv = ViewBindings.findChildViewById(rootView, id);
@@ -137,7 +165,7 @@ public final class ActivityLoginBinding implements ViewBinding {
       }
 
       id = R.id.passwordEt;
-      EditText passwordEt = ViewBindings.findChildViewById(rootView, id);
+      TextInputEditText passwordEt = ViewBindings.findChildViewById(rootView, id);
       if (passwordEt == null) {
         break missingId;
       }
@@ -148,14 +176,21 @@ public final class ActivityLoginBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.toolbarRl;
-      RelativeLayout toolbarRl = ViewBindings.findChildViewById(rootView, id);
-      if (toolbarRl == null) {
+      id = R.id.tvSubtitle;
+      TextView tvSubtitle = ViewBindings.findChildViewById(rootView, id);
+      if (tvSubtitle == null) {
         break missingId;
       }
 
-      return new ActivityLoginBinding((RelativeLayout) rootView, emailEt, emailTil, forgotTv,
-          iconIv, loginBtn, main, noAccountTv, passwordEt, passwordTil, toolbarRl);
+      id = R.id.tvWelcome;
+      TextView tvWelcome = ViewBindings.findChildViewById(rootView, id);
+      if (tvWelcome == null) {
+        break missingId;
+      }
+
+      return new ActivityLoginBinding((ConstraintLayout) rootView, biometricBtn, emailEt, emailTil,
+          forgotTv, imgLogo, layoutRegister, loginBtn, main, noAccountTv, passwordEt, passwordTil,
+          tvSubtitle, tvWelcome);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

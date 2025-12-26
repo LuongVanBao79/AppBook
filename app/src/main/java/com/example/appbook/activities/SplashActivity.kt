@@ -3,69 +3,87 @@ package com.example.appbook.activities
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
+import android.view.View
+import android.view.animation.DecelerateInterpolator
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.example.appbook.R
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 
 class SplashActivity : AppCompatActivity() {
 
-    // Firebase Authentication
     private lateinit var firebaseAuth: FirebaseAuth
 
-    // Thời gian hiển thị màn hình splash (2 giây)
+    // Thời gian hiển thị màn hình splash (2 giây) - Đủ để chạy xong animation
     private val SPLASH_DELAY: Long = 2000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        // Khởi tạo Firebase Auth
+        // 1. Cấu hình hiển thị full màn hình (Edge-to-edge) cho đẹp
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
+        // 2. Bắt đầu chạy Animation (Hiệu ứng)
+        startAnimations()
+
+        // 3. Khởi tạo Firebase Auth
         firebaseAuth = FirebaseAuth.getInstance()
 
-        // Sau 2 giây sẽ kiểm tra trạng thái đăng nhập
-        Handler().postDelayed({ checkUser() }, SPLASH_DELAY)
+        // 4. Sau 2 giây sẽ kiểm tra trạng thái đăng nhập
+        Handler(Looper.getMainLooper()).postDelayed({ checkUser() }, SPLASH_DELAY)
+    }
+
+    /**
+     * Hàm xử lý hiệu ứng: Logo bay từ dưới lên và hiện dần ra
+     */
+    private fun startAnimations() {
+        // Ánh xạ View từ XML (Đảm bảo file XML đã có id centerContent và loadingSpinner như bước trước)
+        val centerContent = findViewById<View>(R.id.centerContent)
+        val loadingSpinner = findViewById<View>(R.id.loadingSpinner)
+
+        // Thiết lập trạng thái ban đầu (Ẩn và nằm thấp hơn vị trí gốc)
+        centerContent.translationY = 100f
+        centerContent.alpha = 0f
+
+        loadingSpinner.alpha = 0f // Ẩn spinner lúc đầu
+
+        // Chạy Animation cho Logo + Tên App
+        centerContent.animate()
+            .translationY(0f)       // Trượt về vị trí gốc
+            .alpha(1f)              // Hiện rõ dần
+            .setDuration(1500)      // Chạy trong 1.5 giây
+            .setInterpolator(DecelerateInterpolator()) // Chậm dần đều cho mượt
+            .start()
+
+        // Chạy Animation cho Spinner (hiện lên sau 0.5s)
+        loadingSpinner.animate()
+            .alpha(1f)
+            .setDuration(1000)
+            .setStartDelay(500)
+            .start()
     }
 
     /**
      * Kiểm tra trạng thái người dùng:
-     * - Chưa đăng nhập: chuyển đến MainActivity
-     * - Đã đăng nhập: kiểm tra loại tài khoản (user/admin) và chuyển đến màn hình tương ứng
+     * - Chưa đăng nhập: chuyển đến MainActivity (để đăng nhập/đăng ký)
+     * - Đã đăng nhập: chuyển thẳng vào DashboardUserActivity
      */
     private fun checkUser() {
-        firebaseAuth.currentUser?.let { user ->
-            // Người dùng đã đăng nhập, kiểm tra loại tài khoản
-            checkUserType(user.uid)
-        } ?: run {
-            // Người dùng chưa đăng nhập, chuyển đến màn hình chính
+        val firebaseUser = firebaseAuth.currentUser
+        if (firebaseUser == null) {
+            // Người dùng chưa đăng nhập
             navigateToActivity(MainActivity::class.java)
+        } else {
+            // Người dùng đã đăng nhập (Bất kể là admin hay user đều vào giao diện đọc sách)
+            navigateToActivity(DashboardUserActivity::class.java)
         }
-    }
-
-    /**
-     * Kiểm tra loại tài khoản (user/admin) từ Firebase Database
-     * @param uid ID của người dùng
-     */
-    private fun checkUserType(uid: String) {
-        FirebaseDatabase.getInstance().getReference("Users")
-            .child(uid)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    when (snapshot.child("userType").value) {
-                        "user" -> navigateToActivity(DashboardUserActivity::class.java)
-                        "admin" -> navigateToActivity(DashboardAdminActivity::class.java)
-                        else -> navigateToActivity(MainActivity::class.java) // Trường hợp không xác định
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    // Nếu có lỗi, chuyển về màn hình chính
-                    navigateToActivity(MainActivity::class.java)
-                }
-            })
     }
 
     /**
@@ -73,7 +91,8 @@ class SplashActivity : AppCompatActivity() {
      * @param activityClass Class của Activity đích
      */
     private fun <T : AppCompatActivity> navigateToActivity(activityClass: Class<T>) {
-        startActivity(Intent(this, activityClass))
-        finish()
+        val intent = Intent(this, activityClass)
+        startActivity(intent)
+        finish() // Đóng SplashActivity
     }
 }

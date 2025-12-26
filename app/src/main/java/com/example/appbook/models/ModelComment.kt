@@ -1,6 +1,9 @@
 package com.example.appbook.models
 
+import androidx.annotation.Keep
 
+
+@Keep
 data class ModelComment(
     var id: String = "",
     var bookId: String = "",

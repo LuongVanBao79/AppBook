@@ -14,8 +14,7 @@ import com.bumptech.glide.Glide
 import com.example.appbook.MyApplication
 import com.example.appbook.R
 import com.example.appbook.adapters.AdapterComment
-import com.example.appbook.adapters.ChapterAdapter // Adapter bạn đã tạo ở bước trước
-import com.example.appbook.databinding.ActivityBookDetailBinding // Binding tự sinh từ layout mới
+import com.example.appbook.databinding.ActivityBookDetailBinding
 import com.example.appbook.databinding.DialogCommentAddBinding
 import com.example.appbook.models.ModelComment
 import com.example.appbook.models.ModelChapter
@@ -39,8 +38,8 @@ class BookDetailActivity : AppCompatActivity() {
     private lateinit var commentArrayList: ArrayList<ModelComment>
     private lateinit var adapterComment: AdapterComment
 
+    // Chỉ giữ lại List dữ liệu để xử lý Logic nút Đọc, không cần Adapter hiển thị nữa
     private lateinit var chapterArrayList: ArrayList<ModelChapter>
-    private lateinit var adapterChapter: ChapterAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,17 +63,50 @@ class BookDetailActivity : AppCompatActivity() {
 
         // Load dữ liệu
         loadBookDetails()
-        loadChapters() // MỚI: Tải danh sách chương
+        loadChapters() // Hàm này giờ chỉ để lấy dữ liệu ngầm
         showComments()
 
         // Sự kiện Click
         binding.backBtn.setOnClickListener { onBackPressed() }
 
+        // Logic Nút Đọc Ngay
+        // Trong BookDetailActivity.kt -> onCreate()
+
         binding.readBookBtn.setOnClickListener {
-            // Mặc định đọc chương đầu tiên nếu có
-            if (chapterArrayList.isNotEmpty()) {
-                val firstChapter = chapterArrayList[0]
-                openReadingActivity(firstChapter.id)
+            if (::chapterArrayList.isInitialized && chapterArrayList.isNotEmpty()) {
+                val user = firebaseAuth.currentUser
+
+                if (user != null) {
+                    // 1. Nếu đã đăng nhập -> Kiểm tra lịch sử đọc trên Firebase
+                    val progressRef = FirebaseDatabase.getInstance().getReference("UserReadingProgress")
+                        .child(user.uid).child(bookId)
+
+                    progressRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (snapshot.exists()) {
+                                // 2. Nếu có lịch sử -> Lấy ID chương đang đọc dở
+                                val lastChapterId = snapshot.child("chapterId").value.toString()
+
+                                // Mở ReadingActivity với chương dở dang này
+                                openReadingActivity(lastChapterId)
+                            } else {
+                                // 3. Nếu chưa đọc bao giờ -> Mở chương 1
+                                val firstChapterId = chapterArrayList[0].id
+                                openReadingActivity(firstChapterId)
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            // Lỗi mạng -> Mở chương 1 cho chắc
+                            val firstChapterId = chapterArrayList[0].id
+                            openReadingActivity(firstChapterId)
+                        }
+                    })
+                } else {
+                    // 4. Nếu chưa đăng nhập -> Mặc định mở chương 1
+                    val firstChapterId = chapterArrayList[0].id
+                    openReadingActivity(firstChapterId)
+                }
             } else {
                 Toast.makeText(this, "Sách này chưa có nội dung!", Toast.LENGTH_SHORT).show()
             }
@@ -113,7 +145,7 @@ class BookDetailActivity : AppCompatActivity() {
                     val categoryId = "${snapshot.child("categoryId").value}"
                     val viewsCount = "${snapshot.child("viewsCount").value}"
                     val imageUrl = "${snapshot.child("imageUrl").value}"
-                    val author = "${snapshot.child("author").value}" // Lấy tên tác giả
+                    val author = "${snapshot.child("author").value}"
 
                     // Gán vào View
                     binding.titleTv.text = title
@@ -137,16 +169,10 @@ class BookDetailActivity : AppCompatActivity() {
             })
     }
 
-    // --- 2. LOAD DANH SÁCH CHƯƠNG (QUAN TRỌNG) ---
+    // --- 2. LOAD DANH SÁCH CHƯƠNG (ĐÃ SỬA LẠI) ---
+    // Hàm này giờ chỉ tải dữ liệu về để nút "Đọc Ngay" hoạt động đúng
     private fun loadChapters() {
         chapterArrayList = ArrayList()
-        // Khởi tạo Adapter trước
-        adapterChapter = ChapterAdapter(chapterArrayList) { chapter ->
-            // Sự kiện khi bấm vào 1 dòng chương
-            openReadingActivity(chapter.id)
-        }
-        binding.rvChapters.layoutManager = LinearLayoutManager(this)
-        binding.rvChapters.adapter = adapterChapter
 
         val ref = FirebaseDatabase.getInstance().getReference("Chapters").child(bookId)
         ref.addValueEventListener(object : ValueEventListener {
@@ -162,19 +188,15 @@ class BookDetailActivity : AppCompatActivity() {
                 // Sắp xếp chương theo thời gian
                 chapterArrayList.sortBy { it.timestamp }
 
-                adapterChapter.notifyDataSetChanged()
-
-                // Ẩn hiện giao diện
+                // CẬP NHẬT TRẠNG THÁI NÚT ĐỌC (Thay vì hiển thị list)
                 if (chapterArrayList.isEmpty()) {
-                    binding.rvChapters.visibility = View.GONE
-                    binding.tvNoChapters.visibility = View.VISIBLE
                     binding.readBookBtn.isEnabled = false
                     binding.readBookBtn.text = "Chưa có nội dung"
+                    binding.readBookBtn.alpha = 0.5f // Làm mờ nút
                 } else {
-                    binding.rvChapters.visibility = View.VISIBLE
-                    binding.tvNoChapters.visibility = View.GONE
                     binding.readBookBtn.isEnabled = true
                     binding.readBookBtn.text = "Đọc Ngay"
+                    binding.readBookBtn.alpha = 1.0f // Làm sáng nút
                 }
             }
 
@@ -189,11 +211,14 @@ class BookDetailActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    // --- 3. CÁC HÀM CŨ (COMMENT, FAVORITE) ---
-    // (Giữ nguyên logic của bạn nhưng đã dọn dẹp gọn gàng)
+    // --- 3. COMMENT & FAVORITE (GIỮ NGUYÊN) ---
 
     private fun showComments() {
         commentArrayList = ArrayList()
+        // Cần đảm bảo RecyclerView Comment trong XML có nestedScrollingEnabled=false nếu nằm trong ScrollView
+        // Nhưng ở layout mới bạn đã cấu hình đúng rồi.
+        binding.commentsRv.layoutManager = LinearLayoutManager(this)
+
         val ref = FirebaseDatabase.getInstance().getReference("Books")
         ref.child(bookId).child("Comments")
             .addValueEventListener(object : ValueEventListener{
@@ -218,14 +243,24 @@ class BookDetailActivity : AppCompatActivity() {
         alertDialog.show()
 
         commentAddBinding.backBtn.setOnClickListener { alertDialog.dismiss() }
+
         commentAddBinding.submitBtn.setOnClickListener {
             val comment = commentAddBinding.commentEt.text.toString().trim()
+
             if(comment.isEmpty()){
                 Toast.makeText(this, "Nhập nội dung...", Toast.LENGTH_SHORT).show()
-            } else {
-                alertDialog.dismiss()
-                addComment(comment)
+                return@setOnClickListener
             }
+
+            // Validate HTML (Bảo mật)
+            val htmlPattern = Regex("<(\"[^\"]*\"|'[^']*'|[^'\">])*>")
+            if (htmlPattern.containsMatchIn(comment)) {
+                Toast.makeText(this, "Bình luận không được chứa ký tự đặc biệt!", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+
+            alertDialog.dismiss()
+            addComment(comment)
         }
     }
 
@@ -233,11 +268,11 @@ class BookDetailActivity : AppCompatActivity() {
         progressDialog.setMessage("Đang gửi bình luận...")
         progressDialog.show()
 
-        val timestamp = System.currentTimeMillis() // Dùng Long thay vì String cho timestamp
+        val timestamp = System.currentTimeMillis()
         val hashMap = HashMap<String, Any>()
         hashMap["id"] = "$timestamp"
         hashMap["bookId"] = bookId
-        hashMap["timestamp"] = timestamp // Lưu dạng số Long
+        hashMap["timestamp"] = timestamp
         hashMap["comment"] = comment
         hashMap["uid"] = "${firebaseAuth.uid}"
 

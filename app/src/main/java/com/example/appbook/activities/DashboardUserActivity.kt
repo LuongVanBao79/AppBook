@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import com.example.appbook.BooksUserFragment
+import com.example.appbook.fragment.BooksUserFragment
 
 import com.example.appbook.databinding.ActivityDashboardUserBinding
 import com.example.appbook.models.ModelCategory
@@ -20,6 +20,8 @@ import com.google.firebase.database.ValueEventListener
 
 import android.text.Editable
 import android.text.TextWatcher
+import com.example.appbook.ContinueReadingWidget
+import com.example.appbook.fragment.RecommendFragment
 
 import com.example.appbook.adapters.AdapterBookSearch
 import com.example.appbook.models.ModelBook
@@ -235,10 +237,27 @@ class DashboardUserActivity : AppCompatActivity() {
     private fun setupClickListeners() {
         // Đăng xuất
         binding.logoutBtn.setOnClickListener {
+            // 1. Đăng xuất khỏi Firebase Auth
+            // (Hành động này sẽ hủy Token JWT và Refresh Token trên thiết bị ngay lập tức)
             firebaseAuth.signOut()
-            // Xóa session nếu cần thiết
-            // MyApplication.clearUserSession(applicationContext)
-            startActivity(Intent(this, MainActivity::class.java))
+
+            // 3. Xóa dữ liệu Widget (Đã mã hóa)
+            // (Để người dùng sau đăng nhập vào không nhìn thấy sách người trước đang đọc dở)
+            try {
+                val widgetPrefs = com.example.appbook.utils.SecurityUtils.getEncryptedPrefs(this)
+                widgetPrefs.edit().clear().apply()
+
+                // Cập nhật lại widget thành trạng thái trống
+                updateWidgetAfterLogout()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            // 4. Chuyển về màn hình Đăng nhập và XÓA SẠCH lịch sử màn hình cũ
+            // (Để người dùng không thể bấm nút Back trên điện thoại để quay lại màn hình Dashboard)
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
             finish()
         }
 
@@ -246,6 +265,16 @@ class DashboardUserActivity : AppCompatActivity() {
         binding.profileBtn.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
         }
+    }
+
+
+    private fun updateWidgetAfterLogout() {
+        val intent = Intent(this, ContinueReadingWidget::class.java)
+        intent.action = android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        val ids = android.appwidget.AppWidgetManager.getInstance(application)
+            .getAppWidgetIds(android.content.ComponentName(application, ContinueReadingWidget::class.java))
+        intent.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        sendBroadcast(intent)
     }
 
     /**

@@ -47,7 +47,7 @@ class ProfileActivity : AppCompatActivity() {
 
         // Reset các text view về giá trị mặc định
         binding.accountTypeTv.text = "N/A"
-        binding.memberDateTv.text = "N/A"
+//        binding.memberDateTv.text = "N/A"
         binding.favoriteBookCountTv.text = "N/A"
         binding.accountStatusTv.text = "N/A"
 
@@ -161,7 +161,7 @@ class ProfileActivity : AppCompatActivity() {
                     // Set thông tin lên view
                     binding.nameTv.text = name
                     binding.emailTv.text = email
-                    binding.memberDateTv.text = formattedDate
+//                    binding.memberDateTv.text = formattedDate
                     binding.accountTypeTv.text = userType
 
                     // Tải ảnh profile

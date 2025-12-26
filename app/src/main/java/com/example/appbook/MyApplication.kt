@@ -1,30 +1,21 @@
 package com.example.appbook
 
-import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.icu.util.Calendar
-import android.net.Uri
 import android.text.format.DateFormat
 import android.util.Log
-import android.view.View
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import com.cloudinary.android.MediaManager
-import com.example.appbook.utils.WidgetUtils
-import com.github.barteksc.pdfviewer.PDFView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import kotlinx.coroutines.*
-import okhttp3.*
 import java.io.File
 import java.util.HashMap
 import java.util.Locale
-import java.util.UUID
 
 class MyApplication : Application() {
 
@@ -43,6 +34,9 @@ class MyApplication : Application() {
             "secure" to true
         )
         MediaManager.init(this, config)
+
+        val ref = FirebaseDatabase.getInstance().reference
+        Log.d("BAO_MAT_DUONG_TRUYEN", "Kết nối an toàn tới: $ref")
     }
 
     companion object {
@@ -58,7 +52,7 @@ class MyApplication : Application() {
         fun clearUserSession(context: Context) {
             clearAllSharedPreferences(context)
 //            PdfViewActivity.clearCachedPages()
-            WidgetUtils.updateContinueReadingWidget(context)
+//            WidgetUtils.updateContinueReadingWidget(context)
         }
 
         private fun clearAllSharedPreferences(context: Context) {
@@ -99,31 +93,7 @@ class MyApplication : Application() {
                 })
         }
 
-        fun deleteBook(
-            context: Context,
-            bookId: String,
-            bookTitle: String
-        ) {
-            val progressDialog = android.app.ProgressDialog(context)
-            progressDialog.setCancelable(false)
-            progressDialog.setMessage("Đang xóa sách...")
-            progressDialog.show()
 
-            val ref = com.google.firebase.database.FirebaseDatabase.getInstance().getReference("Books")
-            ref.child(bookId).removeValue()
-                .addOnSuccessListener {
-                    (context as? android.app.Activity)?.runOnUiThread {
-                        progressDialog.dismiss()
-                        android.widget.Toast.makeText(context, "Xóa sách thành công: $bookTitle", android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                }
-                .addOnFailureListener { e ->
-                    (context as? android.app.Activity)?.runOnUiThread {
-                        progressDialog.dismiss()
-                        android.widget.Toast.makeText(context, "Xóa sách trên Firebase thất bại: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                }
-        }
 
         fun incrementBookViewCount(bookId: String){
             //get current book views count

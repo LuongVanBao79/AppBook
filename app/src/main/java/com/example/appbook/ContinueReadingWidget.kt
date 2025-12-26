@@ -26,43 +26,59 @@ internal fun updateAppWidget(
     appWidgetManager: AppWidgetManager,
     appWidgetId: Int
 ) {
-    // Đọc dữ liệu từ file "WidgetPrefs" mà ReadingActivity đã lưu
-    val prefs = context.getSharedPreferences("WidgetPrefs", Context.MODE_PRIVATE)
-    val bookId = prefs.getString("lastBookId", null)
-    val chapterId = prefs.getString("lastChapterId", "")
-    val chapterTitle = prefs.getString("lastChapterTitle", "Đọc tiếp...") ?: "Đọc tiếp..."
+    // 1. Lấy SharedPreferences (Đã mã hóa hoặc thường tùy bạn chọn ở bước trước)
+    val prefs = try {
+        com.example.appbook.utils.SecurityUtils.getEncryptedPrefs(context)
+    } catch (e: Exception) {
+        null
+    }
+
+    // Nếu lỗi đọc file, coi như chưa có dữ liệu
+    val bookId = prefs?.getString("lastBookId", null)
+    val chapterId = prefs?.getString("lastChapterId", "")
+    val chapterTitle = prefs?.getString("lastChapterTitle", "Đọc tiếp...") ?: "Đọc tiếp..."
 
     val views = RemoteViews(context.packageName, R.layout.continue_reading_widget)
 
+    // --- XỬ LÝ GIAO DIỆN ---
     if (bookId == null) {
-        // Trường hợp chưa đọc sách nào
+        // TRƯỜNG HỢP 1: TRỐNG / ĐÃ ĐĂNG XUẤT
+        // Hiện layout Empty, Ẩn layout Content
         views.setViewVisibility(R.id.layoutContent, View.GONE)
         views.setViewVisibility(R.id.layoutEmpty, View.VISIBLE)
+
+        // **QUAN TRỌNG:** Tạo Intent mở MainActivity (Màn hình đăng nhập/Trang chủ)
+        val intentOpenApp = Intent(context, com.example.appbook.activities.SplashActivity::class.java)
+        val pendingIntentOpen = PendingIntent.getActivity(
+            context, 0, intentOpenApp, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        // Gán sự kiện bấm vào toàn bộ widget để mở App
+        views.setOnClickPendingIntent(R.id.widgetContainer, pendingIntentOpen)
+
     } else {
-        // Trường hợp đã có lịch sử
+        // TRƯỜNG HỢP 2: CÓ DỮ LIỆU
+        // Hiện layout Content, Ẩn layout Empty
         views.setViewVisibility(R.id.layoutContent, View.VISIBLE)
         views.setViewVisibility(R.id.layoutEmpty, View.GONE)
 
-        views.setTextViewText(R.id.widgetTitle, "Đang đọc dở:")
+        // Set text
+        views.setTextViewText(R.id.widgetTitle, "TIẾP TỤC ĐỌC") // Sửa lại text cho hợp style mới
         views.setTextViewText(R.id.widgetChapterInfo, chapterTitle)
 
-        // Tạo Intent mở ReadingActivity
-        val intent = Intent(context, ReadingActivity::class.java).apply {
-            putExtra("BOOK_ID", bookId)         // Key khớp với ReadingActivity
-            putExtra("CHAPTER_ID", chapterId)   // Key khớp với ReadingActivity
+        // Tạo Intent mở thẳng vào trang đọc sách (ReadingActivity)
+        val intentReading = Intent(context, ReadingActivity::class.java).apply {
+            putExtra("BOOK_ID", bookId)
+            putExtra("CHAPTER_ID", chapterId)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        val pendingIntentReading = PendingIntent.getActivity(
+            context, 0, intentReading, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Gán sự kiện click cho toàn bộ widget hoặc nút bấm
-        views.setOnClickPendingIntent(R.id.widgetContainer, pendingIntent)
-        views.setOnClickPendingIntent(R.id.widgetContinueBtn, pendingIntent)
+        // Gán sự kiện click cho nút Play và toàn bộ khung
+        views.setOnClickPendingIntent(R.id.widgetContainer, pendingIntentReading)
+        views.setOnClickPendingIntent(R.id.widgetContinueBtn, pendingIntentReading)
     }
 
     appWidgetManager.updateAppWidget(appWidgetId, views)

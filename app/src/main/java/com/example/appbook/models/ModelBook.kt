@@ -1,8 +1,10 @@
 package com.example.appbook.models
 
+import androidx.annotation.Keep
 import com.google.firebase.database.IgnoreExtraProperties
 
 @IgnoreExtraProperties
+@Keep
 data class ModelBook(
     // Định danh
     var id: String = "",

@@ -1,7 +1,9 @@
 package com.example.appbook.models
 
+import androidx.annotation.Keep
 import com.google.firebase.database.IgnoreExtraProperties
 
+@Keep
 @IgnoreExtraProperties
 data class ModelChapter(
     var id: String = "",

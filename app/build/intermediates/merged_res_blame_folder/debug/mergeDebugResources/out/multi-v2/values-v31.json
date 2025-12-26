@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.appbook.app-mergeDebugResources-56:/values-v31/values-v31.xml",
+            "outputFile": "com.example.appbook.app-mergeDebugResources-57:/values-v31/values-v31.xml",
             "map": [
                 {
                     "source": "F:\\WorkSpace\\AppBook\\app\\src\\main\\res\\values-v31\\themes.xml",

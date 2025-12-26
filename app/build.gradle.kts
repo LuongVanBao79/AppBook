@@ -45,7 +45,10 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+
+            // SỬA: Thêm ngoặc đơn () và ngoặc kép ""
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -85,6 +88,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
 
     implementation("com.nulab-inc:zxcvbn:1.9.0")

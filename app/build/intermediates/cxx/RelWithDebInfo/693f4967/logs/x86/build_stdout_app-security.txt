@@ -1,0 +1,3 @@
+ninja: Entering directory `F:\WorkSpace\AppBook\app\.cxx\RelWithDebInfo\693f4967\x86'
+[1/2] Building CXX object CMakeFiles/app-security.dir/native-lib.cpp.o
+[2/2] Linking CXX shared library F:\WorkSpace\AppBook\app\build\intermediates\cxx\RelWithDebInfo\693f4967\obj\x86\libapp-security.so

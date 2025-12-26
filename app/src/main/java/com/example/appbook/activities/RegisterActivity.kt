@@ -111,9 +111,6 @@ class RegisterActivity : AppCompatActivity() {
         binding.passwordStrengthTv.text = text
         binding.passwordStrengthTv.setTextColor(colorRes)
 
-        // Có thể hiển thị gợi ý (suggestion) nếu muốn
-        // val suggestions = result.feedback.suggestions.joinToString("\n")
-        // Log.d("PasswordStrength", "Suggestions: $suggestions")
     }
 
     // Hàm kiểm tra dữ liệu
@@ -124,9 +121,17 @@ class RegisterActivity : AppCompatActivity() {
         password = binding.passwordEt.text.toString().trim()
         val cPassword = binding.cPasswordEt.text.toString().trim()
 
+        val htmlPattern = Regex("<(\"[^\"]*\"|'[^']*'|[^'\">])*>")
+
         // Kiểm tra dữ liệu
         if (name.isEmpty()) {
             Toast.makeText(this, "Vui lòng nhập tên...", Toast.LENGTH_SHORT).show()
+        } else if (htmlPattern.containsMatchIn(name)) {
+            Toast.makeText(
+                this,
+                "Tên không được chứa ký tự đặc biệt hoặc thẻ HTML!",
+                Toast.LENGTH_SHORT
+            ).show()
         } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             Toast.makeText(this, "Email không hợp lệ", Toast.LENGTH_SHORT).show()
         } else if (password.isEmpty()) {

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@color/white">
+
+    <TextView
+        android:text="Tùy chỉnh giao diện"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:textColor="@color/black"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="15dp">
+        <ImageView android:src="@drawable/ic_more_black" android:layout_width="24dp" android:layout_height="24dp"/>
+        <SeekBar
+            android:id="@+id/sbBrightness"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="50"
+            android:layout_marginHorizontal="10dp"/>
+        <ImageView android:src="@drawable/ic_comment_black" android:layout_width="24dp" android:layout_height="24dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="15dp">
+        <Button
+            android:id="@+id/btnDecreaseSize"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="A-"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:id="@+id/tvTextSizeValue"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="18"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
+        <Button
+            android:id="@+id/btnIncreaseSize"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="A+"
+            android:textSize="18sp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="15dp">
+
+        <Button
+            android:id="@+id/btnFontSerif"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Có chân (Serif)"
+            android:layout_marginEnd="5dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+        <Button
+            android:id="@+id/btnFontSans"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Không chân"
+            android:layout_marginStart="5dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="10dp">
+
+        <ImageButton
+            android:id="@+id/btnThemeWhite"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/bg_circle_button"
+            android:backgroundTint="#FFFFFF"
+            android:src="@drawable/ic_check"
+            android:tint="@color/black"
+            android:layout_marginEnd="20dp"
+            android:elevation="4dp"/>
+
+        <ImageButton
+            android:id="@+id/btnThemeSepia"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/bg_circle_button"
+            android:backgroundTint="#FFF9E6"
+            android:src="@drawable/ic_check"
+            android:tint="@color/black"
+            android:layout_marginEnd="20dp"
+            android:visibility="invisible"
+            android:elevation="4dp"/> <ImageButton
+        android:id="@+id/btnThemeDark"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_circle_button"
+        android:backgroundTint="#121212"
+        android:src="@drawable/ic_check"
+        android:tint="@color/white"
+        android:visibility="invisible"
+        android:elevation="4dp"/>
+    </LinearLayout>
+
+</LinearLayout>

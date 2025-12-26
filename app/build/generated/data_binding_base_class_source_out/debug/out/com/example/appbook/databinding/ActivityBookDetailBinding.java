@@ -66,16 +66,10 @@ public final class ActivityBookDetailBinding implements ViewBinding {
   public final Button readBookBtn;
 
   @NonNull
-  public final RecyclerView rvChapters;
-
-  @NonNull
   public final TextView titleTv;
 
   @NonNull
   public final RelativeLayout toolbarRl;
-
-  @NonNull
-  public final TextView tvNoChapters;
 
   @NonNull
   public final TextView viewsTv;
@@ -85,10 +79,8 @@ public final class ActivityBookDetailBinding implements ViewBinding {
       @NonNull LinearLayout bookOptionsLl, @NonNull TextView categoryTv,
       @NonNull RecyclerView commentsRv, @NonNull CardView coverCard, @NonNull ImageView coverIv,
       @NonNull TextView descriptionTv, @NonNull Button favoriteBtn, @NonNull RelativeLayout main,
-      @NonNull ScrollView mainScrollView, @NonNull Button readBookBtn,
-      @NonNull RecyclerView rvChapters, @NonNull TextView titleTv,
-      @NonNull RelativeLayout toolbarRl, @NonNull TextView tvNoChapters,
-      @NonNull TextView viewsTv) {
+      @NonNull ScrollView mainScrollView, @NonNull Button readBookBtn, @NonNull TextView titleTv,
+      @NonNull RelativeLayout toolbarRl, @NonNull TextView viewsTv) {
     this.rootView = rootView;
     this.addCommentBtn = addCommentBtn;
     this.authorTv = authorTv;
@@ -103,10 +95,8 @@ public final class ActivityBookDetailBinding implements ViewBinding {
     this.main = main;
     this.mainScrollView = mainScrollView;
     this.readBookBtn = readBookBtn;
-    this.rvChapters = rvChapters;
     this.titleTv = titleTv;
     this.toolbarRl = toolbarRl;
-    this.tvNoChapters = tvNoChapters;
     this.viewsTv = viewsTv;
   }
 
@@ -211,12 +201,6 @@ public final class ActivityBookDetailBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.rvChapters;
-      RecyclerView rvChapters = ViewBindings.findChildViewById(rootView, id);
-      if (rvChapters == null) {
-        break missingId;
-      }
-
       id = R.id.titleTv;
       TextView titleTv = ViewBindings.findChildViewById(rootView, id);
       if (titleTv == null) {
@@ -229,12 +213,6 @@ public final class ActivityBookDetailBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.tvNoChapters;
-      TextView tvNoChapters = ViewBindings.findChildViewById(rootView, id);
-      if (tvNoChapters == null) {
-        break missingId;
-      }
-
       id = R.id.viewsTv;
       TextView viewsTv = ViewBindings.findChildViewById(rootView, id);
       if (viewsTv == null) {
@@ -243,8 +221,7 @@ public final class ActivityBookDetailBinding implements ViewBinding {
 
       return new ActivityBookDetailBinding((RelativeLayout) rootView, addCommentBtn, authorTv,
           backBtn, bookOptionsLl, categoryTv, commentsRv, coverCard, coverIv, descriptionTv,
-          favoriteBtn, main, mainScrollView, readBookBtn, rvChapters, titleTv, toolbarRl,
-          tvNoChapters, viewsTv);
+          favoriteBtn, main, mainScrollView, readBookBtn, titleTv, toolbarRl, viewsTv);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

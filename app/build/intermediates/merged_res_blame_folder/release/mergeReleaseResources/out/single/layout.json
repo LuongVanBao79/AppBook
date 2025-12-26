@@ -1,0 +1,102 @@
+[
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/activity_main.xml",
+        "source": "com.example.appbook.app-main-61:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/dialog_loading.xml",
+        "source": "com.example.appbook.app-main-61:/layout/dialog_loading.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/dialog_comment_add.xml",
+        "source": "com.example.appbook.app-main-61:/layout/dialog_comment_add.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/fragment_translate.xml",
+        "source": "com.example.appbook.app-main-61:/layout/fragment_translate.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/activity_splash.xml",
+        "source": "com.example.appbook.app-main-61:/layout/activity_splash.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/activity_reading.xml",
+        "source": "com.example.appbook.app-main-61:/layout/activity_reading.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/row_search_book.xml",
+        "source": "com.example.appbook.app-main-61:/layout/row_search_book.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/row_book_user.xml",
+        "source": "com.example.appbook.app-main-61:/layout/row_book_user.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/activity_forgot_password.xml",
+        "source": "com.example.appbook.app-main-61:/layout/activity_forgot_password.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/activity_dashboard_user.xml",
+        "source": "com.example.appbook.app-main-61:/layout/activity_dashboard_user.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/activity_profile_edit.xml",
+        "source": "com.example.appbook.app-main-61:/layout/activity_profile_edit.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/row_pdf_favorite.xml",
+        "source": "com.example.appbook.app-main-61:/layout/row_pdf_favorite.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/fragment_books_user.xml",
+        "source": "com.example.appbook.app-main-61:/layout/fragment_books_user.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/activity_profile.xml",
+        "source": "com.example.appbook.app-main-61:/layout/activity_profile.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/continue_reading_widget.xml",
+        "source": "com.example.appbook.app-main-61:/layout/continue_reading_widget.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/dialog_toc.xml",
+        "source": "com.example.appbook.app-main-61:/layout/dialog_toc.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/row_chapter_toc.xml",
+        "source": "com.example.appbook.app-main-61:/layout/row_chapter_toc.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/dialog_tools.xml",
+        "source": "com.example.appbook.app-main-61:/layout/dialog_tools.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/activity_model_pdf.xml",
+        "source": "com.example.appbook.app-main-61:/layout/activity_model_pdf.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/activity_book_detail.xml",
+        "source": "com.example.appbook.app-main-61:/layout/activity_book_detail.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/row_comment.xml",
+        "source": "com.example.appbook.app-main-61:/layout/row_comment.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/dialog_appearance.xml",
+        "source": "com.example.appbook.app-main-61:/layout/dialog_appearance.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/dialog_password_prompt.xml",
+        "source": "com.example.appbook.app-main-61:/layout/dialog_password_prompt.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/activity_register.xml",
+        "source": "com.example.appbook.app-main-61:/layout/activity_register.xml"
+    },
+    {
+        "merged": "com.example.appbook.app-mergeReleaseResources-58:/layout/activity_login.xml",
+        "source": "com.example.appbook.app-main-61:/layout/activity_login.xml"
+    }
+]

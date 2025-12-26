@@ -12,9 +12,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appbook.ContinueReadingWidget
 import com.example.appbook.R
+import com.example.appbook.fragment.TranslateFragment
 import com.example.appbook.adapters.ChapterAdapter
 import com.example.appbook.databinding.ActivityReadingBinding
 import com.example.appbook.models.ModelChapter
+import com.example.appbook.utils.EncryptionHelper
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -203,7 +205,20 @@ class ReadingActivity : AppCompatActivity() {
         currentIndex = chapterList.indexOf(chapter)
 
         binding.tvChapterTitle.text = chapter.title
-        binding.tvContent.text = chapter.content
+        try {
+            // Firebase trả về chuỗi mã hóa (Base64 + CipherText)
+            // Ta dùng EncryptionHelper (sử dụng Key C++) để giải mã ra tiếng Việt
+            val decryptedContent = EncryptionHelper.decrypt(chapter.content)
+
+            // Hiển thị nội dung đã giải mã
+            binding.tvContent.text = decryptedContent
+
+        } catch (e: Exception) {
+            // Phòng trường hợp giải mã lỗi (hoặc dữ liệu cũ chưa mã hóa)
+            // Ta hiển thị luôn nội dung gốc (hoặc thông báo lỗi)
+            binding.tvContent.text = chapter.content
+            e.printStackTrace()
+        }
 
         binding.progressBar.visibility = View.GONE
 
@@ -481,7 +496,10 @@ class ReadingActivity : AppCompatActivity() {
 
 
     private fun saveToWidgetPrefs() {
-        val prefs = getSharedPreferences("WidgetPrefs", MODE_PRIVATE)
+        // SỬA: Dùng hàm bảo mật trong SecurityUtils bạn đã tạo ở bước trước
+        // Lưu ý: Import com.example.appbook.utils.SecurityUtils nếu báo đỏ
+        val prefs = com.example.appbook.utils.SecurityUtils.getEncryptedPrefs(this)
+
         val editor = prefs.edit()
 
         // Lưu các thông tin cần thiết để Widget mở lại đúng chỗ

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:background="@color/white"
+    android:layout_marginBottom="5dp">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/profileIv"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_person_gray"
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/styleCircleImage"/>
+
+    <TextView
+        android:id="@+id/nameTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/profileIv"
+        android:layout_marginStart="10dp"
+        android:text="User Name"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/dateTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/nameTv"
+        android:layout_marginStart="10dp"
+        android:text="20 phút trước"
+        android:textSize="12sp"
+        android:textColor="#757575"/>
+
+    <TextView
+        android:id="@+id/commentTv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/nameTv"
+        android:layout_toEndOf="@id/profileIv"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+        android:text="Bình luận mẫu..."
+        android:textColor="@color/black"
+        android:textSize="15sp"/>
+
+    <LinearLayout
+        android:id="@+id/adminReplyLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/commentTv"
+        android:layout_toEndOf="@id/profileIv"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="8dp"
+        android:background="#F5F5F5"
+        android:padding="8dp"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Quản trị viên"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:textColor="#E91E63"/>
+
+            <TextView
+                android:id="@+id/replyDateTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• Vừa xong"
+                android:textSize="12sp"
+                android:textColor="#757575"
+                android:layout_marginStart="5dp"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/replyTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nội dung admin trả lời..."
+            android:textColor="#333333"
+            android:textSize="14sp"
+            android:layout_marginTop="2dp"/>
+    </LinearLayout>
+
+</RelativeLayout>
